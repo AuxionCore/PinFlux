@@ -1,0 +1,29 @@
+{
+  "name": "chatgpt_pinchats",
+  "version": "1.0.0",
+  "description": "pin chats in chatgpt",
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yedidya10/chatgpt_pinChats.git"
+  },
+  "author": {
+    "name": "Yedidya10",
+    "url": "https://github.com/Yedidya10"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Yedidya10/chatgpt_pinChats/issues"
+  },
+  "homepage": "https://github.com/Yedidya10/chatgpt_pinChats#readme",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.308",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1",
+    "vite-plugin-static-copy": "^2.3.0"
+  }
+}

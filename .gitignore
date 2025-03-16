@@ -1,0 +1,8 @@
+node_modules
+.vscode
+
+dist
+whatsNew.js
+welcome.js
+popup.js
+serviceWorker.js

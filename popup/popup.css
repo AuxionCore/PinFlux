@@ -1,0 +1,141 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  direction: __MSG_ @@bidi_dir__;
+  min-width: 400px;
+  width: 100%;
+  max-width: 800px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+ol {
+  list-style-type: decimal;
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+ul {
+  list-style-type: disc;
+  margin: 0;
+  padding: 0 0 0 20px;
+}
+
+a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+button:hover {
+  background-color: #eaeaea;
+}
+
+li {
+  margin: 0 0 10px;
+}
+
+p {
+  margin: 0;
+}
+
+.close-popup {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  inset-block-start: 10px;
+  inset-inline-start: 10px;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  padding: 5px;
+  cursor: pointer;
+}
+.popup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  padding-block-start: 10px;
+  border-block-start: 1px solid #eaeaea;
+}
+
+.author-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.author {
+  display: flex;
+  width: max-content;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+}
+
+.version-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.version {
+  padding-inline-start: 5px;
+}
+
+.feedback-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: #0078d4;
+  cursor: pointer;
+}
+
+.feedback-link:hover {
+  text-decoration: underline;
+}
+
+.feedback-icon {
+  width: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

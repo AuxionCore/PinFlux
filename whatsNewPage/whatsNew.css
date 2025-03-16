@@ -1,0 +1,93 @@
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #2d2d2d;
+  margin: 0;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  color: #f4f4f4;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #3b3a3a;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+p {
+  font-size: 1.2rem;
+}
+
+#feature3Comment {
+  margin-inline-start: 20px;
+  font-size: 0.8rem;
+}
+
+button {
+  width: max-content;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  color: #2d2d2d;
+  background-color: #f4f4f4;
+  text-decoration: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #f4f4f495;
+}
+
+.features {
+  padding-bottom: 10px;
+}
+
+.features-list,
+.improvements-list,
+.coming-soon-list {
+  list-style: none;
+  padding: 0;
+}
+
+.improvements-list li,
+.coming-soon-list li,
+.features-list li {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  padding-inline-start: 20px;
+  position: relative;
+}
+
+.features-list li::before,
+.improvements-list li::before {
+  content: "✔";
+  color: #f4f4f4;
+  position: absolute;
+  inset: 0;
+}

@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "PinFlux - Pin ChatGPT Chats",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Pin. Revisit. Flow on. Pin chats in ChatGPT to your PinFlux board.",
+    "description": "Description of the extension"
+  }
+}

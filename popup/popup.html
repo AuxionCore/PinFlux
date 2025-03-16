@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>PinFlux</title>
+  </head>
+  <body>
+    <button id="closePopup" class="close-popup">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+        fill="#000"
+      >
+        <path
+          d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"
+        />
+      </svg>
+    </button>
+    <div style="display: flex; justify-content: center; align-items: center; margin: 1rem 0">
+      <h1 style="font-size: 1.2rem; margin: 0; padding: 0">PinFlux</h1>
+    </div>
+    <footer id="popupFooter" class="popup-footer">
+      <div class="author-container">
+        <p class="author">
+          Made with
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="18px"
+            viewBox="0 -960 960 960"
+            width="18px"
+            fill="#E6111A"
+          >
+            <path
+              d="m480-214-14-13q-96-87-158.5-147.5t-97.5-105Q175-524 161.5-559T148-629q0-66 46.5-112.5T307-788q50 0 95 27.5t78 80.5q33-53 78-80.5t95-27.5q66 0 112.5 46.5T812-629q0 35-13 69t-48 78q-35 44-97.5 105.5T492-225l-12 11Z"
+            />
+          </svg>
+          by
+          <a id="authorLink" href="https://github.com/Yedidya10">Yedidya</a>
+        </p>
+        <a href="#" id="buyMeACoffee"
+          ><img
+            src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+            alt="Buy Me A Coffee"
+            style="height: 30px !important"
+        /></a>
+      </div>
+      <div class="version-container">
+        <span class="version" id="version"></span>
+        <div id="feedbackLink" class="feedback-link">
+          <div class="feedback-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="18px"
+              viewBox="0 -960 960 960"
+              width="18px"
+              fill="#101010"
+            >
+              <path
+                d="M480-140q-59.61 0-110.11-29.31T289.69-250H180v-60h87.08q-6.08-24.61-6.58-49.81Q260-385 260-410h-80v-60h80q0-25.38.12-50.58.11-25.19 6.96-49.42H180v-60h109.69q14.39-24.54 34-44.73 19.62-20.19 44.93-34.04l-67.85-69.08 41.38-41.38L427.39-734q25.69-7.84 51.99-7.84 26.31 0 52 7.84l87.23-85.23L660-777.85l-69.08 69.08q25.31 13.85 45.16 33.73 19.84 19.89 34.23 45.04H780v60h-87.08q6.85 24.23 6.96 49.42.12 25.2.12 50.58h80v60h-80q0 25-.5 50.19-.5 25.2-6.58 49.81H780v60H670.31q-29.7 51.38-80.2 80.69Q539.61-140 480-140Zm-73.85-190h147.7v-60h-147.7v60Zm0-160h147.7v-60h-147.7v60Z"
+              />
+            </svg>
+          </div>
+          <a href="#"> Feedback & Bug Report </a>
+        </div>
+      </div>
+    </footer>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./",
+    "rootDir": "src-ts",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    // "sourceMap": true,
+    "noEmit": false,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/chrome-types"],
+    "types": ["chrome"]
+  },
+  "include": ["src-ts/**/*.ts", "src-ts/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
