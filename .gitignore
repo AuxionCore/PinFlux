@@ -2,7 +2,6 @@ node_modules
 .vscode
 
 dist
-scripts
 displayPinnedChats.js
 whatsNew.js
 welcome.js
