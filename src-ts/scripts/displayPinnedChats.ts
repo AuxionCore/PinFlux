@@ -105,8 +105,6 @@
     li.style.justifyContent = "space-between";
     li.style.borderRadius = "8px";
     li.style.transition = "background-color 0.3s";
-    console.log("URL:", `https://chatgpt.com${url}`);
-    console.log("Window location:", window.location.href);
     if (`https://chatgpt.com${url}` === window.location.href) {
       li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
     } else {
@@ -264,7 +262,6 @@
           );
 
           if (deleteButton) {
-            console.log("Delete button:", deleteButton);
             document.addEventListener("click", async () => {
               const deleteConversationConfirmButton = document.querySelector(
                 '[data-testid="delete-conversation-confirm-button"]'
