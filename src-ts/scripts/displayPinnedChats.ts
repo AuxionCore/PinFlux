@@ -105,7 +105,13 @@
     li.style.justifyContent = "space-between";
     li.style.borderRadius = "8px";
     li.style.transition = "background-color 0.3s";
-    li.style.backgroundColor = "transparent";
+    console.log("URL:", `https://chatgpt.com${url}`);
+    console.log("Window location:", window.location.href);
+    if (`https://chatgpt.com${url}` === window.location.href) {
+      li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
+    } else {
+      li.style.backgroundColor = "transparent";
+    }
 
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
@@ -129,10 +135,6 @@
       li.style.backgroundColor = isDarkMode ? "#202020" : "#f0f0f0";
     });
 
-    if (`https://chatgpt.com${url}` === window.location.href) {
-      li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
-    }
-
     return li;
   }
 
@@ -155,7 +157,7 @@
           list-style-type: none;
           display: flex;
           flex-direction: column;
-          max-height: 160px;
+          max-height: 150px;
           overflow-y: auto;
           overflow-x: hidden;
         "
@@ -257,6 +259,53 @@
         )[1] as HTMLElement;
 
         if (menuContent) {
+          const deleteButton = menuContent.querySelector(
+            '[data-testid="delete-chat-menu-item"]'
+          );
+
+          if (deleteButton) {
+            console.log("Delete button:", deleteButton);
+            document.addEventListener("click", async () => {
+              const deleteConversationConfirmButton = document.querySelector(
+                '[data-testid="delete-conversation-confirm-button"]'
+              ) as HTMLButtonElement;
+
+              if (deleteConversationConfirmButton) {
+                deleteConversationConfirmButton.addEventListener(
+                  "click",
+                  async () => {
+                    const pinnedChats = document.querySelector(
+                      "#pinnedChats"
+                    ) as HTMLUListElement;
+                    if (chatUrl) {
+                      const pinnedChat = pinnedChats
+                        .querySelector(
+                          `a[href="https://chatgpt.com${chatUrl}"]`
+                        )
+                        ?.closest("li");
+                      if (pinnedChat) {
+                        pinnedChat.remove();
+                      }
+
+                      const profile = await chrome.storage.sync.get([
+                        `${profileId}`,
+                      ]);
+                      const pinnedChatsUrls: string[] =
+                        profile[`${profileId}`] || [];
+                      const index = pinnedChatsUrls.indexOf(chatUrl);
+                      if (index !== -1) {
+                        pinnedChatsUrls.splice(index, 1);
+                        await chrome.storage.sync.set({
+                          [`${profileId}`]: pinnedChatsUrls,
+                        });
+                      }
+                    }
+                  }
+                );
+              }
+            });
+          }
+
           // Get the list of pinned chats
           const profile = await chrome.storage.sync.get([`${profileId}`]);
           const pinnedChatsUrls: string[] = profile[`${profileId}`] || [];
@@ -402,7 +451,7 @@
 
                   const index = pinnedChatsUrls.indexOf(chatUrl);
                   pinnedChatsUrls.splice(index, 1);
-                  chrome.storage.sync.set({
+                  await chrome.storage.sync.set({
                     [`${profileId}`]: pinnedChatsUrls,
                   });
                 }
