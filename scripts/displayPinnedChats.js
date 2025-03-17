@@ -1,5 +1,11 @@
 "use strict";
 (async () => {
+    const getCurrentScheme = () => {
+        return getComputedStyle(document.documentElement)
+            .getPropertyValue("color-scheme")
+            .trim();
+    };
+    const isDarkMode = getCurrentScheme() === "dark";
     // Function to create a pinned chat element
     function createPinnedChatElement(title, url, profileId) {
         const li = document.createElement("li");
@@ -8,7 +14,9 @@
         const unpinChatBtn = document.createElement("button");
         // Define SVG icon for unpinning chat
         const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#dedede70">
+      <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill=` +
+            (isDarkMode ? "#dedede80" : "#00000090") +
+            `>
         <path d="M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z"/>
       </svg>
     `;
@@ -43,8 +51,9 @@
         a.style.overflow = "hidden";
         a.style.textOverflow = "ellipsis";
         a.style.whiteSpace = "nowrap";
-        a.style.maskImage =
-            "linear-gradient(to right, rgba(0, 0, 0, 1) 90%, rgba(0, 0, 0, 0) 100%)";
+        a.style.maskImage = isDarkMode
+            ? "linear-gradient(to right, rgba(0, 0, 0, 1) 90%, rgba(0, 0, 0, 0) 100%)"
+            : "linear-gradient(to right, rgba(255, 255, 255, 1) 90%, rgba(255, 255, 255, 0) 100%)";
         a.style.flex = "1";
         a.style.alignItems = "center";
         a.style.padding = "8px";
@@ -61,13 +70,13 @@
         unpinChatBtn.addEventListener("mouseover", () => {
             const svg = unpinChatBtn.querySelector("svg");
             if (svg) {
-                svg.style.fill = "#dedede";
+                svg.style.fill = isDarkMode ? "#dedede" : "#000000";
             }
         });
         unpinChatBtn.addEventListener("mouseout", () => {
             const svg = unpinChatBtn.querySelector("svg");
             if (svg) {
-                svg.style.fill = "#dedede70";
+                svg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
             }
         });
         // Add the click handler for unpinning
@@ -83,7 +92,7 @@
         li.style.backgroundColor = "transparent";
         // Add hover effect for the list item
         li.addEventListener("mouseover", () => {
-            li.style.backgroundColor = "#212121";
+            li.style.backgroundColor = isDarkMode ? "#212121" : "#ececec";
             unpinChatBtn.style.visibility = "visible";
             unpinChatBtn.style.opacity = "1";
         });
@@ -92,15 +101,15 @@
             unpinChatBtn.style.visibility = "hidden";
             unpinChatBtn.style.opacity = "0";
             if (`https://chatgpt.com${url}` === window.location.href) {
-                li.style.backgroundColor = "#2F2F2F";
+                li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
             }
         });
         li.addEventListener("mousedown", (event) => {
             event.preventDefault();
-            li.style.backgroundColor = "#202020";
+            li.style.backgroundColor = isDarkMode ? "#202020" : "#f0f0f0";
         });
         if (`https://chatgpt.com${url}` === window.location.href) {
-            li.style.backgroundColor = "#2F2F2F";
+            li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
         }
         return li;
     }
@@ -201,13 +210,16 @@
                     if (!menuContent.querySelector(".custom-button")) {
                         // Create the pin button
                         const pinButton = document.createElement("button");
-                        pinButton.innerHTML = `
+                        pinButton.innerHTML =
+                            `
              <svg
               xmlns="http://www.w3.org/2000/svg"
               height="20px"
               viewBox="0 -960 960 960"
               width="20px"
-              fill="#e3e3e3"
+              fill=` +
+                                (isDarkMode ? "#e3e3e3" : "#707070") +
+                                `
               style="margin-right: 10px;"
               >
               <path
@@ -217,13 +229,16 @@
               <span>Pin</span>
             `;
                         pinButton.className = "custom-button";
-                        pinButton.style.cssText = `
+                        pinButton.style.cssText =
+                            `
               display: flex;
               width: calc(100% - 18px);
               align-items: center;
               padding: 12px 10px;
               background: transparent;
-              color: #fff;
+              color: ` +
+                                (isDarkMode ? "fff" : "#000") +
+                                `;
               font-size: 0.9rem;
               border: none;
               border-radius: 5px;
@@ -233,7 +248,9 @@
               margin-inline: auto;
             `;
                         pinButton.addEventListener("mouseover", () => {
-                            pinButton.style.backgroundColor = "#404040";
+                            pinButton.style.backgroundColor = isDarkMode
+                                ? "#404040"
+                                : "#f5f5f5";
                         });
                         pinButton.addEventListener("mouseout", () => {
                             pinButton.style.backgroundColor = "transparent";
@@ -257,20 +274,28 @@
                             }
                         });
                         const unpinButton = document.createElement("button");
-                        unpinButton.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e3e3e3" style="margin-right: 10px;">
+                        unpinButton.innerHTML =
+                            `
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" 
+              fill=` +
+                                (isDarkMode ? "#e3e3e3" : "#707070") +
+                                `
+              style="margin-right: 10px;">
                 <path d="M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z"/>
               </svg>
               <span>Unpin</span>
             `;
                         unpinButton.className = "custom-button";
-                        unpinButton.style.cssText = `
+                        unpinButton.style.cssText =
+                            `
               display: flex;
               width: calc(100% - 18px);
               align-items: center;
               padding: 12px 10px;
               background: transparent;
-              color: #fff;
+              color: ` +
+                                (isDarkMode ? "fff" : "#707070") +
+                                `;
               font-size: 0.9rem;
               border: none;
               border-radius: 5px;
@@ -280,7 +305,9 @@
               margin-inline: auto;
             `;
                         unpinButton.addEventListener("mouseover", () => {
-                            unpinButton.style.backgroundColor = "#404040";
+                            unpinButton.style.backgroundColor = isDarkMode
+                                ? "#404040"
+                                : "#f5f5f5";
                         });
                         unpinButton.addEventListener("mouseout", () => {
                             unpinButton.style.backgroundColor = "transparent";
