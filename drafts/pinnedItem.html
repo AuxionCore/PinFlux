@@ -1,0 +1,106 @@
+<li class="relative" data-testid="history-item">
+  <div
+    draggable="true"
+    class="no-draggable group rounded-lg active:opacity-90 bg-[var(--item-background-color)] h-9 text-sm relative screen-arch:bg-transparent"
+    style="--item-background-color: var(--sidebar-surface-primary)"
+  >
+    <a
+      class="flex items-center gap-2 p-2 screen-arch:motion-safe:group-active:scale-[98%] screen-arch:motion-safe:group-active:transition-transform screen-arch:motion-safe:group-active:duration-100"
+      href="#"
+      data-discover="true"
+      style="mask-image: var(--sidebar-mask)"
+      ><div
+        class="relative grow overflow-hidden whitespace-nowrap"
+        dir="auto"
+        title=""
+      ></div
+    ></a>
+    <div
+      class="absolute bottom-0 top-0 inline-flex items-center gap-1.5 pr-2 ltr:right-0 rtl:left-0 flex"
+    >
+      <button
+        class="flex items-center justify-center text-token-text-secondary transition hover:text-token-text-primary radix-state-open:text-token-text-secondary"
+        data-testid=""
+        aria-label="Open conversation options"
+        type="button"
+        id=""
+        aria-haspopup="menu"
+        aria-expanded="false"
+        data-state="closed"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon-md"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12ZM17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12Z"
+            fill="currentColor"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</li>
+
+<div
+  role="dialog"
+  id="radix-:r2g:"
+  aria-describedby="radix-:r2i:"
+  aria-labelledby="radix-:r2h:"
+  data-state="open"
+  class="popover relative start-1/2 col-auto col-start-2 row-auto row-start-2 h-full w-full bg-token-main-surface-primary text-start ltr:-translate-x-1/2 rtl:translate-x-1/2 rounded-2xl shadow-xl flex flex-col focus:outline-none max-w-md overflow-hidden"
+  tabindex="-1"
+  style="pointer-events: auto"
+>
+  <div
+    class="px-4 pb-4 pt-5 sm:p-6 flex items-center justify-between border-b border-black/10 dark:border-white/10"
+  >
+    <div class="flex max-w-full">
+      <div class="flex min-w-0 max-w-full items-center">
+        <div class="flex min-w-0 max-w-full grow flex-col">
+          <h2
+            id="radix-:r2h:"
+            class="text-lg font-semibold leading-6 text-token-text-primary"
+          >
+            Delete chat?
+          </h2>
+          <p id="radix-:r2i:" class="text-sm text-token-text-tertiary"></p>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-5"></div>
+  </div>
+  <div class="flex-grow overflow-y-auto p-4 sm:p-6">
+    This will delete <strong>מעקב אחרי אירוע קליק</strong>.
+    <div class="mt-2 text-sm text-token-text-tertiary">
+      To clear any memories from this chat, visit your
+      <a
+        class="underline"
+        href="/c/67e2a3c4-79cc-8003-8886-3166691b3c10#settings/Personalization"
+        data-discover="true"
+        >settings</a
+      >.
+    </div>
+    <div class="flex w-full flex-row items-center justify-end">
+      <div class="flex-0">
+        <div class="flex flex-col gap-3 sm:flex-row-reverse mt-5 sm:mt-4">
+          <button
+            class="btn relative btn-danger"
+            as="button"
+            data-testid="delete-conversation-confirm-button"
+          >
+            <div class="flex items-center justify-center">Delete</div></button
+          ><button class="btn relative btn-secondary" as="button">
+            <div class="flex items-center justify-center">Cancel</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
