@@ -153,6 +153,37 @@
 
   const profileId = getUserId();
 
+  function createDraggableDisplay(text: string) {
+    const colorScheme = getCurrentScheme();
+    const draggableDisplay = document.createElement("div");
+    const draggableDisplayText = document.createElement("span");
+    draggableDisplayText.textContent = text;
+    draggableDisplay.appendChild(draggableDisplayText);
+
+    draggableDisplay.setAttribute("id", "draggableDisplay");
+    draggableDisplayText.style.fontWeight = "500";
+    draggableDisplay.style.position = "absolute";
+    draggableDisplay.style.border = "2px dashed #dedede";
+    draggableDisplay.style.borderRadius = "8px";
+    draggableDisplay.style.top = "0";
+    draggableDisplay.style.left = "0";
+    draggableDisplay.style.zIndex = "1000";
+    draggableDisplay.style.backgroundColor =
+      colorScheme === "dark"
+        ? "rgba(40, 40, 40, 95)"
+        : "rgba(230, 230, 230, 95)";
+    draggableDisplay.style.color =
+      colorScheme === "dark" ? "#dedede" : "#000000";
+    draggableDisplay.style.width = "100%";
+    draggableDisplay.style.height = "100%";
+    draggableDisplay.style.display = "flex";
+    draggableDisplay.style.flexDirection = "column";
+    draggableDisplay.style.alignItems = "center";
+    draggableDisplay.style.justifyContent = "center";
+
+    return draggableDisplay;
+  }
+
   function createPinnedContainerElement() {
     // Create the container for pinned chats
     const pinnedContainer: HTMLDivElement = document.createElement("div");
@@ -162,30 +193,45 @@
     pinnedContainer.addEventListener("dragover", (event) => {
       event.preventDefault();
 
-      pinnedContainer.style.backgroundColor = "#f0f0f0";
-      pinnedContainer.style.transition = "all 0.3s";
-      pinnedContainer.style.borderStyle = "dashed";
+      const draggableDisplay = document.querySelector(
+        "#draggableDisplay"
+      ) as HTMLDivElement;
+      if (draggableDisplay) {
+        draggableDisplay.textContent = "Drop to pin";
+      }
     });
 
     pinnedContainer.addEventListener("drop", async (event) => {
+      const pinnedChats = document.querySelector(
+        "#pinnedChats"
+      ) as HTMLUListElement;
       event.preventDefault();
 
       pinnedContainer.style.backgroundColor = "transparent";
       pinnedContainer.style.transition = "all 0.3s";
       pinnedContainer.style.borderStyle = "none";
 
-      const chatLink = event.dataTransfer?.getData("text/html");
-      const chatUrl = chatLink?.match(/href="([^"]+)"/)?.[1];
-      const titleRegex = /title="(.*?)"/;
-      const chatTitle = chatLink?.match(titleRegex)?.[1];
+      const chatElId = event.dataTransfer?.getData("text/plain");
+      // const chatLink = document.querySelector(`#${chatElId} a`)?.getAttribute("href");
+      // const chatUrl = chatLink?.match(/href="([^"]+)"/)?.[1];
+      // const titleRegex = /title="(.*?)"/;
+      // const chatTitle = chatLink?.match(titleRegex)?.[1];
 
-      if (chatUrl) await handlePinChat(chatUrl, chatTitle);
+      const chatToPin = document.getElementById(chatElId!) as HTMLLIElement;
+      pinnedChats.prepend(chatToPin);
+
+      console.log("pinnedChats: ", pinnedChats);
+
+      // if (chatUrl) await handlePinChat(chatUrl, chatTitle);
     });
 
     pinnedContainer.addEventListener("dragleave", () => {
-      pinnedContainer.style.backgroundColor = "transparent";
-      pinnedContainer.style.transition = "all 0.3s";
-      pinnedContainer.style.borderStyle = "none";
+      const draggableDisplay = document.querySelector(
+        "#draggableDisplay"
+      ) as HTMLDivElement;
+      if (draggableDisplay) {
+        draggableDisplay.textContent = "Drag here to pin";
+      }
     });
 
     pinnedContainer.innerHTML = `
@@ -204,6 +250,8 @@
         list-style-type: none;
         display: flex;
         flex-direction: column;
+        border-radius: 8px;
+        position: relative;
         max-height: 150px;
         overflow-y: auto;
         overflow-x: hidden;
@@ -368,7 +416,7 @@
       const thirdChild = sidebarElement.children[2] as HTMLElement;
       if (thirdChild instanceof HTMLDivElement) {
         sidebarElement.insertBefore(pinnedContainer, thirdChild);
-        const pinnedChats: HTMLUListElement = pinnedContainer.querySelector(
+        const pinnedChats = pinnedContainer.querySelector(
           "#pinnedChats"
         ) as HTMLUListElement;
 
@@ -400,8 +448,44 @@
   await initPinnedChats();
 
   sidebarElement.addEventListener("dragstart", (event) => {
+    const pinnedChats = document.querySelector(
+      "#pinnedChats"
+    ) as HTMLUListElement;
+
+    const pinnedChatsHeight = pinnedChats.offsetHeight;
+    if (pinnedChatsHeight < 70) {
+      pinnedChats.style.height = "70px";
+    }
+
+    const draggableDisplay = createDraggableDisplay("Drag here to pin");
+    pinnedChats.appendChild(draggableDisplay);
+    pinnedChats.style.transition = "height 0.3s";
+    pinnedChats.style.borderStyle = "dashed";
+
     const chatLink = event.target as HTMLAnchorElement;
-    event.dataTransfer?.setData("text/html", chatLink.outerHTML);
+    const chatLiElement = chatLink.closest("li") as HTMLLIElement;
+    chatLiElement.setAttribute("id", chatLink.href.split("/")[4]);
+    event.dataTransfer?.setData("text/plain", chatLiElement.id);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+    }
+  });
+
+  sidebarElement.addEventListener("dragend", () => {
+    const pinnedChats = document.querySelector(
+      "#pinnedChats"
+    ) as HTMLUListElement;
+    pinnedChats.style.height = "auto";
+    pinnedChats.style.transition = "height 0.3s";
+    pinnedChats.style.borderStyle = "none";
+    pinnedChats.style.backgroundColor = "transparent";
+
+    const draggableDisplay = document.querySelector(
+      "#draggableDisplay"
+    ) as HTMLDivElement;
+    if (draggableDisplay) {
+      draggableDisplay.remove();
+    }
   });
 
   sidebarElement.addEventListener("click", async (event) => {
