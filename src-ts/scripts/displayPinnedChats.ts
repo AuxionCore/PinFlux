@@ -162,7 +162,21 @@ function getCurrentScheme(): string {
       }
 
       findChatUrl()?.scrollIntoView({ behavior: "smooth", block: "center" });
-      (findChatUrl() as HTMLElement)?.focus();
+
+      // Style the chat link for a few seconds
+      const chatLink = findChatUrl() as HTMLAnchorElement;
+      const chatLinkParent = chatLink.parentElement as HTMLLIElement;
+      chatLinkParent.style.transition = "border 0.3s ease-in-out";
+      chatLinkParent.style.borderColor = isDarkMode ? "#dedede" : "#000000";
+      chatLinkParent.style.borderWidth = "1px";
+      chatLinkParent.style.borderStyle = "solid";
+
+      console.log("Chat link found:", chatLinkParent);
+      setTimeout(() => {
+        chatLinkParent.style.borderColor = "transparent";
+        chatLinkParent.style.borderWidth = "0px";
+        chatLinkParent.style.borderStyle = "none";
+      }, 4000);
     }
 
     // Set up the anchor link for the pinned chat
@@ -497,7 +511,7 @@ function getCurrentScheme(): string {
   ): Promise<void> {
     const storage = await chrome.storage.sync.get([`${profileId}`]);
     const savedChats: { urlId: string; title: string }[] =
-    storage[`${profileId}`] || [];
+      storage[`${profileId}`] || [];
 
     // Check if the chat is already pinned
     if (urlId && !savedChats.some((chat) => chat.urlId === urlId)) {
@@ -524,7 +538,7 @@ function getCurrentScheme(): string {
   async function handleUnpinChat(urlId?: string): Promise<void> {
     const storage = await chrome.storage.sync.get([`${profileId}`]);
     const savedChats: { urlId: string; title: string }[] =
-    storage[`${profileId}`] || [];
+      storage[`${profileId}`] || [];
 
     if (urlId && savedChats.some((chat) => chat.urlId === urlId)) {
       const pinnedChats = document.querySelector(
@@ -573,7 +587,7 @@ function getCurrentScheme(): string {
         // Load pinned chats from storage
         const storage = await chrome.storage.sync.get([`${profileId}`]);
         const savedChats: { urlId: string; title: string }[] =
-        storage[`${profileId}`] || [];
+          storage[`${profileId}`] || [];
         savedChats.forEach((chat) => {
           const pinnedChat = createPinnedChat(
             chat.title,
@@ -682,7 +696,7 @@ function getCurrentScheme(): string {
                       `${profileId}`,
                     ]);
                     const savedChats: { urlId: string; title: string }[] =
-                    storage[`${profileId}`] || [];
+                      storage[`${profileId}`] || [];
                     const index = savedChats.findIndex(
                       (chat) => chat.urlId === urlId
                     );
@@ -702,7 +716,7 @@ function getCurrentScheme(): string {
         // Check pinned status and display the appropriate button
         const storage = await chrome.storage.sync.get([`${profileId}`]);
         const savedChats: { urlId: string; title: string }[] =
-        storage[`${profileId}`] || [];
+          storage[`${profileId}`] || [];
         if (urlId) {
           if (savedChats.some((chat) => chat.urlId === urlId)) {
             chatOptionsMenu.prepend(unpinButton);
