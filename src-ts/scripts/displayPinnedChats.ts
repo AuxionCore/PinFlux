@@ -70,7 +70,6 @@ function getCurrentScheme(): string {
     profileId: string,
     sidebarElement: HTMLElement
   ): HTMLLIElement {
-    console.log("sidebarElement", sidebarElement);
     const li: HTMLLIElement = document.createElement("li");
     const a: HTMLAnchorElement = document.createElement("a");
     const btnsContainer: HTMLDivElement = document.createElement("div");
@@ -333,7 +332,6 @@ function getCurrentScheme(): string {
 
     function handleDragOver(event: DragEvent): void {
       event.preventDefault();
-      console.log("Drag over!");
       const draggableDisplay = document.querySelector(
         "#draggableDisplay"
       ) as HTMLDivElement;
@@ -343,7 +341,6 @@ function getCurrentScheme(): string {
     }
 
     async function handleDrop(event: DragEvent): Promise<void> {
-      console.log("Dropped!");
       event.preventDefault();
 
       pinnedContainer.style.backgroundColor = "transparent";
@@ -617,7 +614,6 @@ function getCurrentScheme(): string {
       const chatLink = (event.target as HTMLElement)?.outerHTML || "";
       event.dataTransfer?.setData("text/plain", chatLink);
     } else {
-      console.log("Drag started on a chat link:", target);
       const chatLink = target.outerHTML || "";
       event.dataTransfer?.setData("text/plain", chatLink);
     }
