@@ -11,8 +11,10 @@ function getSidebarElement(): Promise<HTMLElement> {
   });
 }
 
-async function getChatTitle(urlId: string): Promise<string> {
-  const sidebarElement = await getSidebarElement();
+async function getChatTitle(
+  urlId: string,
+  sidebarElement: HTMLElement
+): Promise<string> {
   const scrollContainer = sidebarElement?.parentElement;
 
   if (!sidebarElement || !scrollContainer) {
@@ -58,7 +60,8 @@ function getUserId(): string {
     const profileId: string = getUserId();
     const storage = await chrome.storage.sync.get([`${profileId}`]);
     const savedChatUrls: string[] = storage[`${profileId}`] || [];
-
+    const sidebarElement = await getSidebarElement();
+    const scrollContainer = sidebarElement?.parentElement as HTMLElement;
     const migratedChats: { urlId: string; title: string }[] = [];
 
     for (const chatUrl of savedChatUrls) {
@@ -67,12 +70,15 @@ function getUserId(): string {
 
       const urlId = match[1];
       try {
-        const title = await getChatTitle(urlId);
+        const title = await getChatTitle(urlId, sidebarElement);
         migratedChats.push({ urlId, title });
       } catch (error) {
         console.warn(`Failed to get title for ${urlId}:`, error);
       }
     }
+
+    // Scroll to the top of the sidebar
+    scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
 
     // Save in the new format
     await chrome.storage.sync.set({ [profileId]: migratedChats });
