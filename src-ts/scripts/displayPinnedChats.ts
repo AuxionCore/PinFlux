@@ -1,57 +1,174 @@
-(async () => {
-  const getCurrentScheme = () => {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue("color-scheme")
-      .trim();
-  };
-  const isDarkMode = getCurrentScheme() === "dark";
+interface SvgOptions {
+  id: string;
+  height?: string;
+  width?: string;
+  viewBox?: string;
+  fill?: string;
+  role?: string;
+  ariaLabel?: string;
+  title?: string;
+  // An array of path data (the value set for d)
+  paths: string[];
+}
 
+function createSvg(options: SvgOptions): SVGElement {
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+
+  // Set attributes for the SVG element
+  svg.setAttribute("id", options.id);
+  svg.setAttribute("xmlns", svgNS);
+  if (options.height) {
+    svg.setAttribute("height", options.height);
+  }
+  if (options.width) {
+    svg.setAttribute("width", options.width);
+  }
+  if (options.viewBox) {
+    svg.setAttribute("viewBox", options.viewBox);
+  }
+  if (options.fill) {
+    svg.setAttribute("fill", options.fill);
+  }
+
+  // Set role and aria-label attributes
+  svg.setAttribute("role", options.role || "img");
+  if (options.ariaLabel) {
+    svg.setAttribute("aria-label", options.ariaLabel);
+  }
+
+  // Add title element if provided
+  if (options.title) {
+    const titleElem = document.createElementNS(svgNS, "title");
+    titleElem.textContent = options.title;
+    svg.appendChild(titleElem);
+  }
+
+  // Create and append path elements
+  options.paths.forEach((pathData) => {
+    const pathElem = document.createElementNS(svgNS, "path");
+    pathElem.setAttribute("d", pathData);
+    svg.appendChild(pathElem);
+  });
+
+  return svg;
+}
+
+function getCurrentScheme(): string {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue("color-scheme")
+    .trim();
+}
+
+(async () => {
   // Function to create a pinned chat element
   function createPinnedChat(
     title: string,
-    url: string,
-    profileId: string
+    urlId: string,
+    profileId: string,
+    sidebarElement: HTMLElement
   ): HTMLLIElement {
+    console.log("sidebarElement", sidebarElement);
     const li: HTMLLIElement = document.createElement("li");
     const a: HTMLAnchorElement = document.createElement("a");
-    const span: HTMLSpanElement = document.createElement("span");
+    const btnsContainer: HTMLDivElement = document.createElement("div");
     const unpinChatBtn: HTMLButtonElement = document.createElement("button");
+    const searchOriginalChatBtn: HTMLButtonElement =
+      document.createElement("button");
 
-    // Define SVG icon for unpinning chat
-    const svg =
-      `
-      <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill=` +
-      (isDarkMode ? "#dedede80" : "#00000090") +
-      `>
-        <path d="M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z"/>
-      </svg>
-    `;
-    unpinChatBtn.innerHTML = svg;
+    const isDarkMode: boolean = getCurrentScheme() === "dark";
+
+    const keepSvg = createSvg({
+      id: "keepSvg",
+      height: "18px",
+      width: "18px",
+      viewBox: "0 -960 960 960",
+      fill: isDarkMode ? "#dedede80" : "#00000090",
+      ariaLabel: "Unpin chat",
+      paths: [
+        "M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z",
+      ],
+    });
+    const docSearchSvg = createSvg({
+      id: "docSearchSvg",
+      height: "20px",
+      width: "20px",
+      viewBox: "0 -960 960 960",
+      fill: isDarkMode ? "#dedede80" : "#00000090",
+      ariaLabel: "Search original chat",
+      paths: [
+        "M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z",
+      ],
+    });
+
+    btnsContainer.setAttribute(
+      "style",
+      "display: flex;  gap: 5px; align-items: center; justify-content: center;"
+    );
+    btnsContainer.setAttribute("draggable", "true");
+    btnsContainer.style.padding = "5px";
+
     unpinChatBtn.setAttribute("title", "Unpin chat");
+    unpinChatBtn.setAttribute("aria-label", "Unpin chat");
+    unpinChatBtn.setAttribute("draggable", "true");
     unpinChatBtn.style.backgroundColor = "transparent";
     unpinChatBtn.style.textDecoration = "none";
     unpinChatBtn.style.border = "none";
     unpinChatBtn.style.cursor = "pointer";
-    unpinChatBtn.style.padding = "5px";
     unpinChatBtn.style.visibility = "hidden"; // Hidden by default
     unpinChatBtn.style.opacity = "0"; // Hidden by default
     unpinChatBtn.style.transition = "opacity 0.3s, visibility 0.3s";
 
-    // Handle unpin chat button click
-    async function handleUnpinChatBtnClick(event: MouseEvent) {
-      li.remove(); // Remove the pinned chat element profileId
-      const profile = await chrome.storage.sync.get([`${profileId}`]);
-      const pinnedChats = profile[`${profileId}`] || [];
+    searchOriginalChatBtn.setAttribute("title", "Search original chat");
+    searchOriginalChatBtn.setAttribute("aria-label", "Search original chat");
+    searchOriginalChatBtn.setAttribute("draggable", "true");
+    searchOriginalChatBtn.style.backgroundColor = "transparent";
+    searchOriginalChatBtn.style.textDecoration = "none";
+    searchOriginalChatBtn.style.border = "none";
+    searchOriginalChatBtn.style.cursor = "pointer";
+    searchOriginalChatBtn.style.visibility = "hidden"; // Hidden by default
+    searchOriginalChatBtn.style.opacity = "0"; // Hidden by default
+    searchOriginalChatBtn.style.transition = "opacity 0.3s, visibility 0.3s";
 
-      const index = pinnedChats.indexOf(url);
+    // Handle unpin chat button click
+    async function handleUnpinChatBtnClick(event: MouseEvent): Promise<void> {
+      li.remove(); // Remove the pinned chat element from the DOM
+      const profile = await chrome.storage.sync.get([`${profileId}`]);
+      const savedChats: { urlId: string; title: string }[] =
+        profile[`${profileId}`] || [];
+
+      const index = savedChats.findIndex((chat) => chat.urlId === urlId);
       if (index !== -1) {
-        pinnedChats.splice(index, 1); // Remove the URL from pinned chats
-        await chrome.storage.sync.set({ [`${profileId}`]: pinnedChats });
+        savedChats.splice(index, 1); // Remove the URL from pinned chats
+        await chrome.storage.sync.set({ [`${profileId}`]: savedChats });
       }
     }
 
+    // Handle search original chat button click
+    async function handleSearchOriginalChatBtnClick(): Promise<void> {
+      const scrollContainer = sidebarElement.parentElement;
+      if (!scrollContainer) return;
+
+      const findChatUrl = () =>
+        sidebarElement.querySelector(`a[href="/c/${urlId}"]`);
+
+      while (!findChatUrl()) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: "smooth",
+        });
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      findChatUrl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+      (findChatUrl() as HTMLElement)?.click();
+    }
+
     // Set up the anchor link for the pinned chat
-    a.href = `https://chatgpt.com${url}`;
+    a.setAttribute("title", title);
+    a.setAttribute("draggable", "true");
+    a.setAttribute("id", urlId);
+    a.href = `https://chatgpt.com/c/${urlId}`;
     a.style.display = "flex";
     a.style.flexWrap = "nowrap";
     a.style.overflow = "hidden";
@@ -65,33 +182,50 @@
     a.style.padding = "8px";
 
     // Set up the span for the chat title
-    span.style.textAlign = "left";
-    span.style.fontSize = "0.9rem";
-    span.title = title;
-    span.textContent = title;
+    a.style.textAlign = "left";
+    a.style.fontSize = "0.9rem";
+    a.textContent = title;
 
-    // Append the elements to the list item
+    // Append the elements
     li.appendChild(a);
-    a.appendChild(span);
-    li.appendChild(unpinChatBtn);
+    btnsContainer.appendChild(unpinChatBtn);
+    btnsContainer.appendChild(searchOriginalChatBtn);
+    li.appendChild(btnsContainer);
+    unpinChatBtn.appendChild(keepSvg);
+    searchOriginalChatBtn.appendChild(docSearchSvg);
 
     // Add hover effect to the unpin button
     unpinChatBtn.addEventListener("mouseover", () => {
-      const svg = unpinChatBtn.querySelector("svg");
-      if (svg) {
-        svg.style.fill = isDarkMode ? "#dedede" : "#000000";
+      const keepSvg = unpinChatBtn.querySelector("svg");
+      if (keepSvg) {
+        keepSvg.style.fill = isDarkMode ? "#dedede" : "#000000";
       }
     });
-
     unpinChatBtn.addEventListener("mouseout", () => {
-      const svg = unpinChatBtn.querySelector("svg");
-      if (svg) {
-        svg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
+      const keepSvg = unpinChatBtn.querySelector("svg");
+      if (keepSvg) {
+        keepSvg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
       }
     });
-
-    // Add the click handler for unpinning
     unpinChatBtn.addEventListener("click", handleUnpinChatBtnClick);
+
+    // Add hover effect to the search original chat button
+    searchOriginalChatBtn.addEventListener("mouseover", () => {
+      const docSearchSvg = searchOriginalChatBtn.querySelector("svg");
+      if (docSearchSvg) {
+        docSearchSvg.style.fill = isDarkMode ? "#dedede" : "#000000";
+      }
+    });
+    searchOriginalChatBtn.addEventListener("mouseout", () => {
+      const docSearchSvg = searchOriginalChatBtn.querySelector("svg");
+      if (docSearchSvg) {
+        docSearchSvg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
+      }
+    });
+    searchOriginalChatBtn.addEventListener(
+      "click",
+      handleSearchOriginalChatBtnClick
+    );
 
     // Style the list item and anchor
     li.style.listStyle = "none";
@@ -101,62 +235,67 @@
     li.style.justifyContent = "space-between";
     li.style.borderRadius = "8px";
     li.style.transition = "background-color 0.3s";
-    if (`https://chatgpt.com${url}` === window.location.href) {
+    if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
       li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
     } else {
       li.style.backgroundColor = "transparent";
     }
+    li.setAttribute("draggable", "true");
 
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
       li.style.backgroundColor = isDarkMode ? "#212121" : "#ececec";
       unpinChatBtn.style.visibility = "visible";
       unpinChatBtn.style.opacity = "1";
+      searchOriginalChatBtn.style.visibility = "visible";
+      searchOriginalChatBtn.style.opacity = "1";
     });
-
     li.addEventListener("mouseout", () => {
       li.style.backgroundColor = "transparent";
       unpinChatBtn.style.visibility = "hidden";
       unpinChatBtn.style.opacity = "0";
-
-      if (`https://chatgpt.com${url}` === window.location.href) {
+      searchOriginalChatBtn.style.visibility = "hidden";
+      searchOriginalChatBtn.style.opacity = "0";
+      if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
         li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
       }
     });
-
     li.addEventListener("mousedown", (event) => {
       event.preventDefault();
       li.style.backgroundColor = isDarkMode ? "#202020" : "#f0f0f0";
     });
 
+    li.addEventListener("dragstart", handleDragStart);
+    li.addEventListener("dragend", handleDragEnd);
+
     return li;
   }
 
-  // Get the user ID from the local storage
+  // Function to get the user ID from localStorage
   function getUserId(): string {
     const prefix = "cache/user";
     const matchingKeys = Object.keys(localStorage).filter((key) =>
       key.startsWith(prefix)
     );
-
     for (const key of matchingKeys) {
       const regex = /cache\/user-([a-zA-Z0-9]+)/;
       const match = key.match(regex);
-
       if (match) {
         return match[1];
       }
     }
-
     return "";
   }
 
-  const profileId = getUserId();
+  const profileId: string = getUserId();
 
-  function createDraggableDisplay(text: string) {
+  // Function to create a draggable display with text
+  function createDraggableDisplay(text: string): HTMLDivElement {
     const colorScheme = getCurrentScheme();
-    const draggableDisplay = document.createElement("div");
-    const draggableDisplayText = document.createElement("span");
+    const draggableDisplay: HTMLDivElement = document.createElement("div");
+    const draggableDisplayText: HTMLSpanElement =
+      document.createElement("span");
+
     draggableDisplayText.textContent = text;
     draggableDisplay.appendChild(draggableDisplayText);
 
@@ -184,86 +323,101 @@
     return draggableDisplay;
   }
 
-  function createPinnedContainerElement() {
-    // Create the container for pinned chats
+  // Function to create the container for pinned chats
+  function createPinnedContainerElement(): HTMLDivElement {
     const pinnedContainer: HTMLDivElement = document.createElement("div");
     pinnedContainer.setAttribute("id", "pinnedContainer");
     pinnedContainer.style.marginTop = "20px";
 
-    pinnedContainer.addEventListener("dragover", (event) => {
+    function handleDragOver(event: DragEvent): void {
       event.preventDefault();
-
+      console.log("Drag over!");
       const draggableDisplay = document.querySelector(
         "#draggableDisplay"
       ) as HTMLDivElement;
       if (draggableDisplay) {
         draggableDisplay.textContent = "Drop to pin";
       }
-    });
+    }
 
-    pinnedContainer.addEventListener("drop", async (event) => {
-      const pinnedChats = document.querySelector(
-        "#pinnedChats"
-      ) as HTMLUListElement;
+    async function handleDrop(event: DragEvent): Promise<void> {
+      console.log("Dropped!");
       event.preventDefault();
 
       pinnedContainer.style.backgroundColor = "transparent";
       pinnedContainer.style.transition = "all 0.3s";
       pinnedContainer.style.borderStyle = "none";
 
-      const chatElId = event.dataTransfer?.getData("text/plain");
-      // const chatLink = document.querySelector(`#${chatElId} a`)?.getAttribute("href");
-      // const chatUrl = chatLink?.match(/href="([^"]+)"/)?.[1];
-      // const titleRegex = /title="(.*?)"/;
-      // const chatTitle = chatLink?.match(titleRegex)?.[1];
+      const chatLinkData = event.dataTransfer?.getData("text/plain");
+      const chatHref = chatLinkData?.match(/href="([^"]+)"/)?.[1];
+      const urlId = chatHref?.split("/").slice(-1)[0];
+      const titleRegex = /title="(.*?)"/;
+      const chatTitle = chatLinkData?.match(titleRegex)?.[1];
 
-      const chatToPin = document.getElementById(chatElId!) as HTMLLIElement;
-      pinnedChats.prepend(chatToPin);
-
-      console.log("pinnedChats: ", pinnedChats);
-
-      // if (chatUrl) await handlePinChat(chatUrl, chatTitle);
-    });
-
-    pinnedContainer.addEventListener("dragleave", () => {
+      // Remove the draggable display element
       const draggableDisplay = document.querySelector(
         "#draggableDisplay"
       ) as HTMLDivElement;
       if (draggableDisplay) {
+        draggableDisplay.remove();
+      }
+
+      pinnedContainer.style.height = "auto";
+      pinnedContainer.style.transition = "height 0.3s";
+      pinnedContainer.style.borderStyle = "none";
+      pinnedContainer.style.backgroundColor = "transparent";
+
+      if (urlId) await handlePinChat(urlId, chatTitle);
+    }
+
+    function handleDragLeave(): void {
+      const draggableDisplay = document.querySelector(
+        "#draggableDisplay"
+      ) as HTMLDivElement;
+
+      if (draggableDisplay) {
         draggableDisplay.textContent = "Drag here to pin";
       }
-    });
+    }
+
+    pinnedContainer.addEventListener("dragover", handleDragOver);
+    pinnedContainer.addEventListener("drop", handleDrop);
+    pinnedContainer.addEventListener("dragleave", handleDragLeave);
 
     pinnedContainer.innerHTML = `
-    <h3
-      class="pinned-title"
-      style="font-size: 0.8rem; font-weight: 500; margin-left: 8px"
-    >
-      Pinned Chats
-    </h3>
-    <ol
-      id="pinnedChats"
-      class="pinned-chats"
-      style="
-        padding: 0;
-        margin: 0;
-        list-style-type: none;
-        display: flex;
-        flex-direction: column;
-        border-radius: 8px;
-        position: relative;
-        max-height: 150px;
-        overflow-y: auto;
-        overflow-x: hidden;
-      "
-    ></ol>
-  `;
+      <h3
+        class="pinned-title"
+        style="font-size: 0.8rem; font-weight: 500; margin-left: 8px"
+      >
+        Pinned Chats
+      </h3>
+      <div 
+        id="chatListContainer"
+          style="
+          position: relative;
+          border-radius: 8px;
+        ">
+        <ol id="pinnedChats" class="pinned-chats" style="
+          position: relative;
+          padding: 0;
+          margin: 0;
+          list-style-type: none;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          overflow-x: hidden;
+          border-radius: 8px;
+          max-height: 150px;
+        "></ol>
+      </div>
+    `;
 
     return pinnedContainer;
   }
 
-  function createPinButton() {
-    const pinButton = document.createElement("div");
+  // Function to create the pin button
+  function createPinButton(): HTMLDivElement {
+    const pinButton: HTMLDivElement = document.createElement("div");
     pinButton.innerHTML = `
       <div
         role="menuitem"
@@ -294,12 +448,12 @@
         Pin
       </div>
     `;
-
     return pinButton;
   }
 
-  function createUnpinButton() {
-    const unpinButton = document.createElement("div");
+  // Function to create the unpin button
+  function createUnpinButton(): HTMLDivElement {
+    const unpinButton: HTMLDivElement = document.createElement("div");
     unpinButton.innerHTML = `
       <div
         role="menuitem"
@@ -330,74 +484,74 @@
         Unpin
       </div>
     `;
-
     return unpinButton;
   }
 
-  const pinButton = createPinButton();
-  const unpinButton = createUnpinButton();
+  const pinButton: HTMLDivElement = createPinButton();
+  const unpinButton: HTMLDivElement = createUnpinButton();
 
+  // Handle pinning a chat
   async function handlePinChat(
-    chatUrl: string,
+    urlId: string,
     chatTitle?: string,
     chatOptionsMenu?: HTMLDivElement
-  ) {
+  ): Promise<void> {
     const profile = await chrome.storage.sync.get([`${profileId}`]);
-    const pinnedChatsUrls: string[] = profile[`${profileId}`] || [];
+    const savedChats: { urlId: string; title: string }[] =
+      profile[`${profileId}`] || [];
 
-    if (chatUrl) {
-      if (!pinnedChatsUrls.includes(chatUrl)) {
-        pinButton.remove();
-        chatOptionsMenu?.prepend(unpinButton);
+    // בדיקה אם הכתובת כבר קיימת במערך
+    if (urlId && !savedChats.some((chat) => chat.urlId === urlId)) {
+      pinButton.remove();
+      chatOptionsMenu?.prepend(unpinButton);
 
-        const pinnedChats = document.querySelector(
-          "#pinnedChats"
-        ) as HTMLUListElement;
-        const pinnedChat = createPinnedChat(
-          chatTitle || "",
-          chatUrl,
-          profileId
-        );
-        pinnedChats.prepend(pinnedChat);
+      const pinnedChatsList = document.querySelector(
+        "#pinnedChats"
+      ) as HTMLOListElement;
+      const newPinnedChat = createPinnedChat(
+        chatTitle || "",
+        urlId,
+        profileId,
+        sidebarElement
+      );
+      pinnedChatsList.prepend(newPinnedChat);
 
-        pinnedChatsUrls.push(chatUrl);
-        await chrome.storage.sync.set({
-          [`${profileId}`]: pinnedChatsUrls,
-        });
+      // הוספת הצ'אט החדש לרשימה
+      savedChats.push({ urlId: urlId, title: chatTitle || "" });
+
+      // שמירת הרשימה המעודכנת באחסון
+      await chrome.storage.sync.set({ [`${profileId}`]: savedChats });
+    }
+  }
+
+  // Handle unpinning a chat when the unpin button is clicked
+  async function handleUnpinChat(urlId?: string): Promise<void> {
+    const profile = await chrome.storage.sync.get([`${profileId}`]);
+    const savedChats: { urlId: string; title: string }[] =
+      profile[`${profileId}`] || [];
+
+    if (urlId && savedChats.some((chat) => chat.urlId === urlId)) {
+      const pinnedChats = document.querySelector(
+        "#pinnedChats"
+      ) as HTMLOListElement;
+      const pinnedChat = pinnedChats
+        .querySelector(`a[href="https://chatgpt.com/c/${urlId}"]`)
+        ?.closest("li");
+      if (pinnedChat) {
+        pinnedChat.remove();
+      }
+      const index = savedChats.findIndex((chat) => chat.urlId === urlId);
+      if (index !== -1) {
+        savedChats.splice(index, 1); // Remove the URL from pinned chats
+        await chrome.storage.sync.set({ [`${profileId}`]: savedChats });
       }
     }
   }
 
-  // Function to handle unpinning a chat when the big unpin button is clicked
-  async function handleUnpinChat(chatUrl?: string) {
-    const profile = await chrome.storage.sync.get([`${profileId}`]);
-    const pinnedChatsUrls: string[] = profile[`${profileId}`] || [];
-
-    if (chatUrl) {
-      if (pinnedChatsUrls.includes(chatUrl)) {
-        const pinnedChats = document.querySelector(
-          "#pinnedChats"
-        ) as HTMLUListElement;
-        const pinnedChat = pinnedChats
-          .querySelector(`a[href="https://chatgpt.com${chatUrl}"]`)
-          ?.closest("li");
-        if (pinnedChat) {
-          pinnedChat.remove();
-        }
-
-        const index = pinnedChatsUrls.indexOf(chatUrl);
-        pinnedChatsUrls.splice(index, 1);
-        await chrome.storage.sync.set({
-          [`${profileId}`]: pinnedChatsUrls,
-        });
-      }
-    }
-  }
-
-  // Function to insert the pinned container into the sidebar
+  // Function to get the sidebar element
   function getSidebarElement(): Promise<HTMLElement> {
     return new Promise<HTMLElement>((resolve) => {
-      const interval = setInterval(async () => {
+      const interval = setInterval(() => {
         const sidebarElement = document.querySelector(".group\\/sidebar");
         if (sidebarElement) {
           clearInterval(interval);
@@ -407,35 +561,31 @@
     });
   }
 
-  // Call the function to set the pinned container
+  // Initialize the sidebar and the pinned chats container
   let sidebarElement = await getSidebarElement();
   const pinnedContainer = createPinnedContainerElement();
 
-  async function initPinnedChats() {
+  async function initPinnedChats(): Promise<void> {
     if (sidebarElement.children.length >= 3) {
       const thirdChild = sidebarElement.children[2] as HTMLElement;
       if (thirdChild instanceof HTMLDivElement) {
         sidebarElement.insertBefore(pinnedContainer, thirdChild);
         const pinnedChats = pinnedContainer.querySelector(
           "#pinnedChats"
-        ) as HTMLUListElement;
+        ) as HTMLOListElement;
 
         // Load pinned chats from storage
         const profile = await chrome.storage.sync.get([`${profileId}`]);
-        const pinnedChatsUrls: string[] = profile[`${profileId}`] || [];
-
-        pinnedChatsUrls.forEach((url) => {
-          const chatLink = document.querySelector(`a[href="${url}"]`);
-          const chatTitle = chatLink?.querySelector("div")?.textContent;
-
-          if (chatLink && chatTitle) {
-            const pinnedChat: HTMLLIElement = createPinnedChat(
-              chatTitle,
-              url,
-              profileId
-            );
-            pinnedChats.prepend(pinnedChat);
-          }
+        const savedChats: { urlId: string; title: string }[] =
+          profile[`${profileId}`] || [];
+        savedChats.forEach((chat) => {
+          const pinnedChat = createPinnedChat(
+            chat.title,
+            chat.urlId,
+            profileId,
+            sidebarElement
+          );
+          pinnedChats.prepend(pinnedChat);
         });
       } else {
         console.warn("Third child is not a div element");
@@ -447,34 +597,38 @@
 
   await initPinnedChats();
 
-  sidebarElement.addEventListener("dragstart", (event) => {
-    const pinnedChats = document.querySelector(
-      "#pinnedChats"
-    ) as HTMLUListElement;
+  function handleDragStart(event: DragEvent): void {
+    const target = event.target as HTMLElement;
 
-    const pinnedChatsHeight = pinnedChats.offsetHeight;
-    if (pinnedChatsHeight < 70) {
-      pinnedChats.style.height = "70px";
+    if (!target.id) {
+      const pinnedChats = document.querySelector(
+        "#chatListContainer"
+      ) as HTMLDivElement;
+      const pinnedChatsHeight = pinnedChats.offsetHeight;
+      requestAnimationFrame(() => {
+        if (pinnedChatsHeight < 70) {
+          pinnedChats.style.height = "70px";
+        }
+      });
+      const draggableDisplay = createDraggableDisplay("Drag here to pin");
+      pinnedChats.appendChild(draggableDisplay);
+      pinnedChats.style.transition = "height 0.3s";
+      pinnedChats.style.borderStyle = "dashed";
+
+      const chatLink = (event.target as HTMLElement)?.outerHTML || "";
+      event.dataTransfer?.setData("text/plain", chatLink);
+    } else {
+      console.log("Drag started on a chat link:", target);
+      const chatLink = target.outerHTML || "";
+      event.dataTransfer?.setData("text/plain", chatLink);
     }
+  }
 
-    const draggableDisplay = createDraggableDisplay("Drag here to pin");
-    pinnedChats.appendChild(draggableDisplay);
-    pinnedChats.style.transition = "height 0.3s";
-    pinnedChats.style.borderStyle = "dashed";
-
-    const chatLink = event.target as HTMLAnchorElement;
-    const chatLiElement = chatLink.closest("li") as HTMLLIElement;
-    chatLiElement.setAttribute("id", chatLink.href.split("/")[4]);
-    event.dataTransfer?.setData("text/plain", chatLiElement.id);
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-    }
-  });
-
-  sidebarElement.addEventListener("dragend", () => {
+  function handleDragEnd(): void {
     const pinnedChats = document.querySelector(
-      "#pinnedChats"
-    ) as HTMLUListElement;
+      "#chatListContainer"
+    ) as HTMLDivElement;
+
     pinnedChats.style.height = "auto";
     pinnedChats.style.transition = "height 0.3s";
     pinnedChats.style.borderStyle = "none";
@@ -486,18 +640,20 @@
     if (draggableDisplay) {
       draggableDisplay.remove();
     }
-  });
+  }
 
-  sidebarElement.addEventListener("click", async (event) => {
-    const target =
-      event.target &&
-      (event.target as HTMLElement).closest(
-        '[data-testid^="history-item-"][data-testid$="-options"]'
-      );
+  sidebarElement.addEventListener("dragstart", handleDragStart);
+  sidebarElement.addEventListener("dragend", handleDragEnd);
 
+  // Handle click events in the sidebar
+  sidebarElement.addEventListener("click", async (event: MouseEvent) => {
+    const target = (event.target as HTMLElement)?.closest(
+      '[data-testid^="history-item-"][data-testid$="-options"]'
+    );
     const chatElement = target?.closest("li") as HTMLLIElement;
     const chatLink = chatElement?.querySelector("a") as HTMLAnchorElement;
     const chatUrl = chatLink?.getAttribute("href") as string;
+    const urlId = chatUrl?.split("/").slice(-1)[0];
     const chatTitle = chatLink?.querySelector("div")?.textContent;
     if (target) {
       const chatOptionsMenu = document
@@ -508,38 +664,37 @@
         const deleteButton = chatOptionsMenu.querySelector(
           '[data-testid="delete-chat-menu-item"]'
         );
-
         if (deleteButton) {
           deleteButton.addEventListener("click", async () => {
             const deleteConversationConfirmButton = document.querySelector(
               '[data-testid="delete-conversation-confirm-button"]'
             ) as HTMLButtonElement;
-
             if (deleteConversationConfirmButton) {
               deleteConversationConfirmButton.addEventListener(
                 "click",
                 async () => {
                   const pinnedChats = document.querySelector(
                     "#pinnedChats"
-                  ) as HTMLUListElement;
-                  if (chatUrl) {
+                  ) as HTMLOListElement;
+                  if (urlId) {
                     const pinnedChat = pinnedChats
-                      .querySelector(`a[href="https://chatgpt.com${chatUrl}"]`)
+                      .querySelector(`a[href="https://chatgpt.com/c/${urlId}"]`)
                       ?.closest("li");
                     if (pinnedChat) {
                       pinnedChat.remove();
                     }
-
                     const profile = await chrome.storage.sync.get([
                       `${profileId}`,
                     ]);
-                    const pinnedChatsUrls: string[] =
+                    const savedChats: { urlId: string; title: string }[] =
                       profile[`${profileId}`] || [];
-                    const index = pinnedChatsUrls.indexOf(chatUrl);
+                    const index = savedChats.findIndex(
+                      (chat) => chat.urlId === urlId
+                    );
                     if (index !== -1) {
-                      pinnedChatsUrls.splice(index, 1);
+                      savedChats.splice(index, 1); // Remove the URL from pinned chats
                       await chrome.storage.sync.set({
-                        [`${profileId}`]: pinnedChatsUrls,
+                        [`${profileId}`]: savedChats,
                       });
                     }
                   }
@@ -549,26 +704,26 @@
           });
         }
 
-        // Get the list of pinned chats
+        // Check pinned status and display the appropriate button
         const profile = await chrome.storage.sync.get([`${profileId}`]);
-        const pinnedChatsUrls: string[] = profile[`${profileId}`] || [];
-
-        if (chatUrl) {
-          if (pinnedChatsUrls.includes(chatUrl)) {
+        const savedChats: { urlId: string; title: string }[] =
+          profile[`${profileId}`] || [];
+        if (urlId) {
+          if (savedChats.some((chat) => chat.urlId === urlId)) {
             chatOptionsMenu.prepend(unpinButton);
           } else {
             chatOptionsMenu.prepend(pinButton);
           }
         }
 
-        // Handle pinning and unpinning chats
-        if (chatUrl && chatTitle) {
+        // Handle pinning and unpinning
+        if (urlId && chatTitle) {
           pinButton.addEventListener("click", async () => {
-            await handlePinChat(chatUrl, chatTitle, chatOptionsMenu);
+            await handlePinChat(urlId, chatTitle, chatOptionsMenu);
           });
         }
         unpinButton.addEventListener("click", async () => {
-          await handleUnpinChat(chatUrl);
+          await handleUnpinChat(urlId);
         });
       }
     }
