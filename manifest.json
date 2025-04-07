@@ -6,7 +6,7 @@
   "author": "Yedidya Aberjel",
   "version_name": "1.0.0",
   "default_locale": "en",
-  "permissions": ["storage"],
+  "permissions": ["storage", "scripting", "activeTab"],
   "host_permissions": ["https://chatgpt.com/*"],
   "background": {
     "service_worker": "serviceWorker.js",
