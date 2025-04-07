@@ -170,13 +170,11 @@ function getCurrentScheme(): string {
       chatLinkParent.style.borderColor = isDarkMode ? "#dedede" : "#000000";
       chatLinkParent.style.borderWidth = "1px";
       chatLinkParent.style.borderStyle = "solid";
-
-      console.log("Chat link found:", chatLinkParent);
       setTimeout(() => {
         chatLinkParent.style.borderColor = "transparent";
         chatLinkParent.style.borderWidth = "0px";
         chatLinkParent.style.borderStyle = "none";
-      }, 4000);
+      }, 3000);
     }
 
     // Set up the anchor link for the pinned chat
@@ -560,18 +558,33 @@ function getCurrentScheme(): string {
 
   // Function to get the sidebar element
   function getSidebarElement(): Promise<HTMLElement> {
-    return new Promise<HTMLElement>((resolve) => {
+    return new Promise<HTMLElement>((resolve, reject) => {
+      const maxRetries = 20;
+      let attempts = 0;
+
       const interval = setInterval(() => {
-        const sidebarElement = document.querySelector(".group\\/sidebar");
-        if (sidebarElement) {
+        const sidebarElement = document.querySelector(
+          ".group\\/sidebar"
+        ) as HTMLElement | null;
+        if (
+          sidebarElement &&
+          sidebarElement.children.length >= 3 &&
+          sidebarElement.children[2] instanceof HTMLDivElement
+        ) {
           clearInterval(interval);
-          resolve(sidebarElement as HTMLElement);
+          resolve(sidebarElement);
+        }
+
+        attempts++;
+        if (attempts >= maxRetries) {
+          clearInterval(interval);
+          reject(new Error("Sidebar element not fully ready"));
         }
       }, 500);
     });
   }
 
-  // Initialize the sidebar and the pinned chats container
+  // Initialize the pinned chats container
   let sidebarElement = await getSidebarElement();
   const pinnedContainer = createPinnedContainerElement();
 
