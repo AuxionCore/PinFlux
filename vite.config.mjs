@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => ({
         popup: "popup/popup.html",
         serviceWorker: "src-ts/serviceWorker.ts",
         "scripts/displayPinnedChats": "src-ts/scripts/displayPinnedChats.ts",
+        "scripts/helpers/migrateSavedChats":
+          "src-ts/scripts/helpers/migrateSavedChats.ts",
       },
       output: {
         entryFileNames: "[name].js",
