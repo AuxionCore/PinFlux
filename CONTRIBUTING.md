@@ -31,7 +31,7 @@ Changes that are cosmetic in nature and do not add anything substantial to the s
 
 #### **Do you have questions about the source code?**
 
-- Ask any question about how to use Ruby on PinFlux in the [support page](https://chromewebstore.google.com/detail/molpfdakehebpkaecfdpndakphebjjpp/support).
+- Ask any question about how to use PinFlux in the [support page](https://chromewebstore.google.com/detail/molpfdakehebpkaecfdpndakphebjjpp/support).
 
 Thanks! :heart: :heart: :heart:
 
