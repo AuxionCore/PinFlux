@@ -400,7 +400,7 @@ function getCurrentScheme(): string {
         class="pinned-title"
         style="font-size: 0.8rem; font-weight: 500; margin-left: 8px"
       >
-        Pinned Chats
+        PinFlux board
       </h3>
       <div 
         id="chatListContainer"
@@ -589,32 +589,30 @@ function getCurrentScheme(): string {
   const pinnedContainer = createPinnedContainerElement();
 
   async function initPinnedChats(): Promise<void> {
-    if (sidebarElement.children.length >= 3) {
-      const thirdChild = sidebarElement.children[2] as HTMLElement;
-      if (thirdChild instanceof HTMLDivElement) {
-        sidebarElement.insertBefore(pinnedContainer, thirdChild);
-        const pinnedChats = pinnedContainer.querySelector(
-          "#pinnedChats"
-        ) as HTMLOListElement;
+    const historyElement = document.getElementById("history") as HTMLDivElement;
+    if (historyElement) {
+      sidebarElement.insertBefore(pinnedContainer, historyElement);
+      const pinnedChats = pinnedContainer.querySelector(
+        "#pinnedChats"
+      ) as HTMLOListElement;
 
-        // Load pinned chats from storage
-        const storage = await chrome.storage.sync.get([`${profileId}`]);
-        const savedChats: { urlId: string; title: string }[] =
-          storage[`${profileId}`] || [];
-        savedChats.forEach((chat) => {
-          const pinnedChat = createPinnedChat(
-            chat.title,
-            chat.urlId,
-            profileId,
-            sidebarElement
-          );
-          pinnedChats.prepend(pinnedChat);
-        });
-      } else {
-        console.warn("Third child is not a div element");
-      }
+      // Load pinned chats from storage
+      const storage = await chrome.storage.sync.get([`${profileId}`]);
+      const savedChats: { urlId: string; title: string }[] =
+        storage[`${profileId}`] || [];
+      savedChats.forEach((chat) => {
+        const pinnedChat = createPinnedChat(
+          chat.title,
+          chat.urlId,
+          profileId,
+          sidebarElement
+        );
+        pinnedChats.prepend(pinnedChat);
+      });
     } else {
-      console.warn("Sidebar does not have 3 children yet");
+      console.error(
+        "History element not found. Pinned chats will not be displayed."
+      );
     }
   }
 
