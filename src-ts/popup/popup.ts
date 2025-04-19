@@ -21,7 +21,7 @@ function setClosePopupButton() {
 function setEventListeners() {
   const links = [
     { id: elements.authorLink, url: "https://github.com/Yedidya10" },
-    { id: elements.buyMeACoffee, url: "https://www.buymeacoffee.com/yedidya" },
+    { id: elements.buyMeACoffee, url: "https://www.ko-fi.com/yedidyadev" },
     {
       id: elements.feedbackLink,
       url: "https://chromewebstore.google.com/detail/molpfdakehebpkaecfdpndakphebjjpp/support",
