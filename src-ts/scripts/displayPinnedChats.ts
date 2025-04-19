@@ -284,12 +284,13 @@ function getCurrentScheme(): string {
     return li;
   }
 
-  // Function to get the user ID from localStorage
-  function getUserId(): string {
+  // Get the user ID from localStorage
+  const profileId = () => {
     const prefix = "cache/user";
     const matchingKeys = Object.keys(localStorage).filter((key) =>
       key.startsWith(prefix)
     );
+
     for (const key of matchingKeys) {
       const regex = /cache\/user-([a-zA-Z0-9]+)/;
       const match = key.match(regex);
@@ -297,10 +298,9 @@ function getCurrentScheme(): string {
         return match[1];
       }
     }
-    return "";
-  }
 
-  const profileId: string = getUserId();
+    return "";
+  };
 
   // Function to create a draggable display with text
   function createDraggableDisplay(text: string): HTMLDivElement {
@@ -522,7 +522,7 @@ function getCurrentScheme(): string {
       const newPinnedChat = createPinnedChat(
         chatTitle || "",
         urlId,
-        profileId,
+        profileId(),
         sidebarElement
       );
       pinnedChatsList.prepend(newPinnedChat);
@@ -597,6 +597,12 @@ function getCurrentScheme(): string {
       ) as HTMLOListElement;
 
       // Load pinned chats from storage
+      if (!profileId) {
+        console.error(
+          "Profile ID not found. Pinned chats will not be displayed."
+        );
+        return;
+      }
       const storage = await chrome.storage.sync.get([`${profileId}`]);
       const savedChats: { urlId: string; title: string }[] =
         storage[`${profileId}`] || [];
@@ -604,7 +610,7 @@ function getCurrentScheme(): string {
         const pinnedChat = createPinnedChat(
           chat.title,
           chat.urlId,
-          profileId,
+          profileId(),
           sidebarElement
         );
         pinnedChats.prepend(pinnedChat);
