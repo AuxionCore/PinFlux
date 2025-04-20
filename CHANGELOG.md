@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed issue with displacement of pinned chats in the side menu
+- Fixed issue when the PinFlux board shown even though not found the profile id
 - Changed the title of the pinned chat to "PinFlux" in the side menu
 
 ## [1.1.0] - 2025-04-8
