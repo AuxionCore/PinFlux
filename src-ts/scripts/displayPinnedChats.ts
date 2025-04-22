@@ -60,7 +60,37 @@ function getCurrentScheme(): string {
     .trim();
 }
 
+// Get the user ID from localStorage
+async function getProfileId(): Promise<string> {
+  try {
+    return new Promise<string>((resolve, reject) => {
+      const interval = setInterval(() => {
+        const prefix = "cache/user";
+        const matchingKeys = Object.keys(localStorage).filter((key) =>
+          key.startsWith(prefix)
+        );
+
+        for (const key of matchingKeys) {
+          const regex = /cache\/user-([a-zA-Z0-9]+)/;
+          const match = key.match(regex);
+          if (match) {
+            clearInterval(interval);
+            resolve(match[1] as string);
+          }
+        }
+
+        reject(new Error("Profile ID not found"));
+      }, 100);
+    });
+  } catch (error) {
+    console.error(error);
+    return "";
+  }
+}
+
 (async () => {
+  // Check if the user is logged in
+  const profileId = await getProfileId();
   const isDarkMode: boolean = getCurrentScheme() === "dark";
 
   // Function to create a pinned chat element
@@ -284,24 +314,6 @@ function getCurrentScheme(): string {
     return li;
   }
 
-  // Get the user ID from localStorage
-  const profileId = () => {
-    const prefix = "cache/user";
-    const matchingKeys = Object.keys(localStorage).filter((key) =>
-      key.startsWith(prefix)
-    );
-
-    for (const key of matchingKeys) {
-      const regex = /cache\/user-([a-zA-Z0-9]+)/;
-      const match = key.match(regex);
-      if (match) {
-        return match[1];
-      }
-    }
-
-    return "";
-  };
-
   // Function to create a draggable display with text
   function createDraggableDisplay(text: string): HTMLDivElement {
     const colorScheme = getCurrentScheme();
@@ -522,7 +534,7 @@ function getCurrentScheme(): string {
       const newPinnedChat = createPinnedChat(
         chatTitle || "",
         urlId,
-        profileId(),
+        profileId,
         sidebarElement
       );
       pinnedChatsList.prepend(newPinnedChat);
@@ -610,7 +622,7 @@ function getCurrentScheme(): string {
         const pinnedChat = createPinnedChat(
           chat.title,
           chat.urlId,
-          profileId(),
+          profileId,
           sidebarElement
         );
         pinnedChats.prepend(pinnedChat);
