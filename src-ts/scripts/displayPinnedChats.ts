@@ -63,7 +63,7 @@ function getCurrentScheme(): string {
 // Get the user ID from localStorage
 async function getProfileId(): Promise<string> {
   try {
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string>((resolve) => {
       const interval = setInterval(() => {
         const prefix = "cache/user";
         const matchingKeys = Object.keys(localStorage).filter((key) =>
@@ -78,8 +78,6 @@ async function getProfileId(): Promise<string> {
             resolve(match[1] as string);
           }
         }
-
-        reject(new Error("Profile ID not found"));
       }, 100);
     });
   } catch (error) {
@@ -600,10 +598,27 @@ async function getProfileId(): Promise<string> {
   let sidebarElement = await getSidebarElement();
   const pinnedContainer = createPinnedContainerElement();
 
+  async function getHistoryElement() {
+    return new Promise<HTMLDivElement>((resolve) => {
+      const interval = setInterval(() => {
+        const historyElement = document.getElementById(
+          "history"
+        ) as HTMLDivElement;
+
+        if (historyElement) {
+          clearInterval(interval);
+          resolve(historyElement);
+        }
+      }, 100);
+    });
+  }
+
+  const historyElement = await getHistoryElement();
+
   async function initPinnedChats(): Promise<void> {
-    const historyElement = document.getElementById("history") as HTMLDivElement;
     if (historyElement) {
-      sidebarElement.insertBefore(pinnedContainer, historyElement);
+      const parentElement = historyElement.parentElement as HTMLDivElement;
+      parentElement.insertBefore(pinnedContainer, historyElement);
       const pinnedChats = pinnedContainer.querySelector(
         "#pinnedChats"
       ) as HTMLOListElement;
