@@ -15,8 +15,9 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
-      "16": "images/icons/PinFlux_Logo_64.png",
-      "32": "images/icons/PinFlux_Logo_64.png",
+      "16": "images/icons/PinFlux_Logo_16.png",
+      "32": "images/icons/PinFlux_Logo_32.png",
+      "48": "images/icons/PinFlux_Logo_48.png",
       "64": "images/icons/PinFlux_Logo_64.png",
       "128": "images/icons/PinFlux_Logo_128.png"
     },
@@ -30,8 +31,9 @@
     }
   },
   "icons": {
-    "16": "images/icons/PinFlux_Logo_64.png",
-    "32": "images/icons/PinFlux_Logo_64.png",
+    "16": "images/icons/PinFlux_Logo_16.png",
+    "32": "images/icons/PinFlux_Logo_32.png",
+    "48": "images/icons/PinFlux_Logo_48.png",
     "64": "images/icons/PinFlux_Logo_64.png",
     "128": "images/icons/PinFlux_Logo_128.png"
   },
