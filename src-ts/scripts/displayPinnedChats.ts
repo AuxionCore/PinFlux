@@ -1,59 +1,3 @@
-interface SvgOptions {
-  id: string;
-  height?: string;
-  width?: string;
-  viewBox?: string;
-  fill?: string;
-  role?: string;
-  ariaLabel?: string;
-  title?: string;
-  // An array of path data (the value set for d)
-  paths: string[];
-}
-
-function createSvg(options: SvgOptions): SVGElement {
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-
-  // Set attributes for the SVG element
-  svg.setAttribute("id", options.id);
-  svg.setAttribute("xmlns", svgNS);
-  if (options.height) {
-    svg.setAttribute("height", options.height);
-  }
-  if (options.width) {
-    svg.setAttribute("width", options.width);
-  }
-  if (options.viewBox) {
-    svg.setAttribute("viewBox", options.viewBox);
-  }
-  if (options.fill) {
-    svg.setAttribute("fill", options.fill);
-  }
-
-  // Set role and aria-label attributes
-  svg.setAttribute("role", options.role || "img");
-  if (options.ariaLabel) {
-    svg.setAttribute("aria-label", options.ariaLabel);
-  }
-
-  // Add title element if provided
-  if (options.title) {
-    const titleElem = document.createElementNS(svgNS, "title");
-    titleElem.textContent = options.title;
-    svg.appendChild(titleElem);
-  }
-
-  // Create and append path elements
-  options.paths.forEach((pathData) => {
-    const pathElem = document.createElementNS(svgNS, "path");
-    pathElem.setAttribute("d", pathData);
-    svg.appendChild(pathElem);
-  });
-
-  return svg;
-}
-
 function getCurrentScheme(): string {
   return getComputedStyle(document.documentElement)
     .getPropertyValue("color-scheme")
@@ -99,68 +43,14 @@ async function getProfileId(): Promise<string> {
     sidebarElement: HTMLElement
   ): HTMLLIElement {
     const li: HTMLLIElement = document.createElement("li");
+    const anchorRaper: HTMLDivElement = document.createElement("div");
     const a: HTMLAnchorElement = document.createElement("a");
-    const btnsContainer: HTMLDivElement = document.createElement("div");
-    const unpinChatBtn: HTMLButtonElement = document.createElement("button");
-    const searchOriginalChatBtn: HTMLButtonElement =
-      document.createElement("button");
-
-    const keepSvg = createSvg({
-      id: "keepSvg",
-      height: "18px",
-      width: "18px",
-      viewBox: "0 -960 960 960",
-      fill: isDarkMode ? "#dedede80" : "#00000090",
-      ariaLabel: "Unpin chat",
-      paths: [
-        "M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z",
-      ],
-    });
-
-    const docSearchSvg = createSvg({
-      id: "docSearchSvg",
-      height: "20px",
-      width: "20px",
-      viewBox: "0 -960 960 960",
-      fill: isDarkMode ? "#dedede80" : "#00000090",
-      ariaLabel: "Search original chat",
-      paths: [
-        "M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z",
-      ],
-    });
-
-    btnsContainer.setAttribute(
-      "style",
-      "display: flex;  gap: 5px; align-items: center; justify-content: center;"
-    );
-
-    btnsContainer.setAttribute("draggable", "true");
-    btnsContainer.style.padding = "5px";
-
-    unpinChatBtn.setAttribute("title", "Unpin chat");
-    unpinChatBtn.setAttribute("aria-label", "Unpin chat");
-    unpinChatBtn.setAttribute("draggable", "true");
-    unpinChatBtn.style.backgroundColor = "transparent";
-    unpinChatBtn.style.textDecoration = "none";
-    unpinChatBtn.style.border = "none";
-    unpinChatBtn.style.cursor = "pointer";
-    unpinChatBtn.style.visibility = "hidden"; // Hidden by default
-    unpinChatBtn.style.opacity = "0"; // Hidden by default
-    unpinChatBtn.style.transition = "opacity 0.3s, visibility 0.3s";
-
-    searchOriginalChatBtn.setAttribute("title", "Search original chat");
-    searchOriginalChatBtn.setAttribute("aria-label", "Search original chat");
-    searchOriginalChatBtn.setAttribute("draggable", "true");
-    searchOriginalChatBtn.style.backgroundColor = "transparent";
-    searchOriginalChatBtn.style.textDecoration = "none";
-    searchOriginalChatBtn.style.border = "none";
-    searchOriginalChatBtn.style.cursor = "pointer";
-    searchOriginalChatBtn.style.visibility = "hidden"; // Hidden by default
-    searchOriginalChatBtn.style.opacity = "0"; // Hidden by default
-    searchOriginalChatBtn.style.transition = "opacity 0.3s, visibility 0.3s";
+    const titleDiv: HTMLDivElement = document.createElement("div");
+    const chatOptionsBtnRaper: HTMLDivElement = document.createElement("div");
+    const chatOptionsBtn: HTMLButtonElement = document.createElement("button");
 
     // Handle unpin chat button click
-    async function handleUnpinChatBtnClick(event: MouseEvent): Promise<void> {
+    async function handleUnpinChatBtnClick(): Promise<void> {
       li.remove(); // Remove the pinned chat element from the DOM
       const storage = await chrome.storage.sync.get([`${profileId}`]);
       const savedChats: { urlId: string; title: string }[] =
@@ -205,68 +95,243 @@ async function getProfileId(): Promise<string> {
       }, 3000);
     }
 
+    li.className = "relative";
+
+    anchorRaper.className =
+      "no-draggable group rounded-lg active:opacity-90 bg-[var(--item-background-color)] h-9 text-sm screen-arch:bg-transparent relative";
+
     // Set up the anchor link for the pinned chat
-    a.setAttribute("title", title);
-    a.setAttribute("draggable", "true");
     a.setAttribute("id", urlId);
     a.href = `https://chatgpt.com/c/${urlId}`;
-    a.style.display = "flex";
-    a.style.flexWrap = "nowrap";
-    a.style.overflow = "hidden";
-    a.style.textOverflow = "ellipsis";
-    a.style.whiteSpace = "nowrap";
-    a.style.maskImage = isDarkMode
-      ? "linear-gradient(to right, rgba(0, 0, 0, 1) 90%, rgba(0, 0, 0, 0) 100%)"
-      : "linear-gradient(to right, rgba(255, 255, 255, 1) 90%, rgba(255, 255, 255, 0) 100%)";
-    a.style.flex = "1";
-    a.style.alignItems = "center";
-    a.style.padding = "8px";
+    a.className =
+      "motion-safe:group-active:screen-arch:scale-[98%] motion-safe:group-active:screen-arch:transition-transform motion-safe:group-active:screen-arch:duration-100 flex items-center gap-2 p-2";
 
-    // Set up the span for the chat title
-    a.style.textAlign = "left";
-    a.style.fontSize = "0.9rem";
-    a.textContent = title;
+    chatOptionsBtnRaper.className =
+      "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
+    titleDiv.textContent = title;
+    titleDiv.setAttribute("title", title);
+    titleDiv.setAttribute("dir", "auto");
+    titleDiv.setAttribute("aria-label", title);
+    titleDiv.className = "relative grow overflow-hidden whitespace-nowrap";
+
+    chatOptionsBtn.setAttribute("aria-expanded", "false");
+    chatOptionsBtn.setAttribute("aria-haspopup", "menu");
+    chatOptionsBtn.setAttribute("aria-label", "Open pin conversation options");
+    chatOptionsBtn.className =
+      "text-token-text-secondary hover:text-token-text-primary radix-state-open:text-token-text-secondary flex items-center justify-center transition";
+    chatOptionsBtn.innerHTML = `
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-md"
+    >
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12ZM10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12ZM17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+  `;
 
     // Append the elements
-    li.appendChild(a);
-    btnsContainer.appendChild(unpinChatBtn);
-    btnsContainer.appendChild(searchOriginalChatBtn);
-    li.appendChild(btnsContainer);
-    unpinChatBtn.appendChild(keepSvg);
-    searchOriginalChatBtn.appendChild(docSearchSvg);
+    li.appendChild(anchorRaper);
+    li.appendChild(chatOptionsBtnRaper);
+    chatOptionsBtnRaper.appendChild(chatOptionsBtn);
+    anchorRaper.appendChild(a);
+    a.appendChild(titleDiv);
 
-    // Add hover effect to the unpin button
-    unpinChatBtn.addEventListener("mouseover", () => {
-      const keepSvg = unpinChatBtn.querySelector("svg");
-      if (keepSvg) {
-        keepSvg.style.fill = isDarkMode ? "#dedede" : "#000000";
-      }
-    });
-    unpinChatBtn.addEventListener("mouseout", () => {
-      const keepSvg = unpinChatBtn.querySelector("svg");
-      if (keepSvg) {
-        keepSvg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
-      }
-    });
-    unpinChatBtn.addEventListener("click", handleUnpinChatBtnClick);
+    const pinnedChatsList = document.querySelector(
+      "#pinnedChats"
+    ) as HTMLOListElement;
 
-    // Add hover effect to the search original chat button
-    searchOriginalChatBtn.addEventListener("mouseover", () => {
-      const docSearchSvg = searchOriginalChatBtn.querySelector("svg");
-      if (docSearchSvg) {
-        docSearchSvg.style.fill = isDarkMode ? "#dedede" : "#000000";
+    let currentOpenMenu: HTMLDivElement | null = null;
+    let currentTargetButton: HTMLButtonElement | null = null;
+
+    function closeMenu() {
+      if (currentOpenMenu) {
+        currentOpenMenu.remove();
+        currentOpenMenu = null;
+        currentTargetButton = null;
+        document.removeEventListener("click", onDocumentClick, true);
+        window.removeEventListener("scroll", onScrollCapture, true);
+        pinnedChatsList.removeEventListener(
+          "scroll",
+          onPinnedChatsScroll,
+          true
+        );
       }
-    });
-    searchOriginalChatBtn.addEventListener("mouseout", () => {
-      const docSearchSvg = searchOriginalChatBtn.querySelector("svg");
-      if (docSearchSvg) {
-        docSearchSvg.style.fill = isDarkMode ? "#dedede70" : "#00000070";
+    }
+
+    function onDocumentClick(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        currentOpenMenu &&
+        !currentOpenMenu.contains(target) &&
+        !currentTargetButton?.contains(target)
+      ) {
+        closeMenu();
       }
+    }
+
+    function onScrollCapture(event: Event) {
+      const scrolledElement = event.target as HTMLElement;
+
+      // Check if the scrolled element is the pinned chats list
+      if (!pinnedChatsList.contains(scrolledElement)) {
+        closeMenu();
+      }
+    }
+
+    function onPinnedChatsScroll() {
+      positionMenu();
+    }
+
+    function positionMenu() {
+      if (!currentOpenMenu || !currentTargetButton) return;
+
+      const rect = currentTargetButton.getBoundingClientRect();
+
+      currentOpenMenu.style.top = `${rect.bottom + window.scrollY}px`;
+      currentOpenMenu.style.left = `${rect.left + window.scrollX}px`;
+    }
+
+    chatOptionsBtn.style.visibility = "hidden";
+    chatOptionsBtn.style.opacity = "0";
+
+    chatOptionsBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const button = event.currentTarget as HTMLButtonElement;
+
+      if (currentTargetButton === button && currentOpenMenu) {
+        closeMenu();
+        return;
+      }
+
+      closeMenu(); // Close any existing menu before opening a new one
+
+      currentTargetButton = button;
+
+      const pinChatMenu = document.createElement("div");
+      pinChatMenu.setAttribute("id", "pinChatMenu");
+      pinChatMenu.style.position = "absolute";
+      pinChatMenu.style.zIndex = "9999";
+
+      pinChatMenu.className =
+        "z-50 max-w-xs rounded-2xl popover bg-token-main-surface-primary shadow-lg border overflow-hidden py-0";
+
+      pinChatMenu.innerHTML = `
+          <div class='max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto min-w-fit py-2'>
+            <div
+              role='menuitem'
+              data-action="unpin"
+              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+              tabindex='-1'
+            >
+              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 -960 960 960'
+                  fill='none'
+                  class='h-5 w-5 shrink-0'
+                >
+                  <path
+                    d='M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z'
+                    fill='currentColor'
+                    fill-rule='evenodd'
+                    clip-rule='evenodd'
+                  ></path>
+                </svg>
+              </div>
+              Unpin
+            </div>
+            <div
+              role='menuitem'
+              data-action="rename"
+              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+            >
+              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+                <svg
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  xmlns='http://www.w3.org/2000/svg'
+                  class='h-5 w-5 shrink-0'
+                >
+                  <path
+                    fill-rule='evenodd'
+                    clip-rule='evenodd'
+                    d='M13.2929 4.29291C15.0641 2.52167 17.9359 2.52167 19.7071 4.2929C21.4784 6.06414 21.4784 8.93588 19.7071 10.7071L18.7073 11.7069L11.6135 18.8007C10.8766 19.5376 9.92793 20.0258 8.89999 20.1971L4.16441 20.9864C3.84585 21.0395 3.52127 20.9355 3.29291 20.7071C3.06454 20.4788 2.96053 20.1542 3.01362 19.8356L3.80288 15.1C3.9742 14.0721 4.46243 13.1234 5.19932 12.3865L13.2929 4.29291ZM13 7.41422L6.61353 13.8007C6.1714 14.2428 5.87846 14.8121 5.77567 15.4288L5.21656 18.7835L8.57119 18.2244C9.18795 18.1216 9.75719 17.8286 10.1993 17.3865L16.5858 11L13 7.41422ZM18 9.5858L14.4142 6.00001L14.7071 5.70712C15.6973 4.71693 17.3027 4.71693 18.2929 5.70712C19.2831 6.69731 19.2831 8.30272 18.2929 9.29291L18 9.5858Z'
+                    fill='currentColor'
+                  ></path>
+                </svg>
+              </div>
+              Rename
+            </div>
+            <div
+              role='menuitem'
+              data-action="originalChat"
+              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+            >
+              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+                <svg
+                  width='24'
+                  height='24'
+                  viewBox='0 -960 960 960'
+                  fill='none'
+                  xmlns='http://www.w3.org/2000/svg'
+                  class='h-5 w-5 shrink-0'
+                >
+                  <path
+                    fill-rule='evenodd'
+                    clip-rule='evenodd'
+                    d='M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z'
+                    fill='currentColor'
+                  ></path>
+                </svg>
+              </div>
+              Original Chat
+            </div>
+          </div>
+        `;
+
+      document.body.appendChild(pinChatMenu);
+      currentOpenMenu = pinChatMenu;
+
+      // Position the menu
+      positionMenu();
+
+      // Add event listeners to the menu items
+      pinChatMenu.querySelectorAll("[role='menuitem']").forEach((item) => {
+        item.addEventListener("click", async (e) => {
+          e.stopPropagation();
+
+          const action = (e.currentTarget as HTMLElement).dataset.action;
+          switch (action) {
+            case "unpin":
+              await handleUnpinChatBtnClick();
+              break;
+            case "rename":
+              // Handle rename action here
+              break;
+            case "originalChat":
+              await handleSearchOriginalChatBtnClick();
+              break;
+          }
+          closeMenu();
+        });
+      });
+
+      document.addEventListener("click", onDocumentClick, true);
+      window.addEventListener("scroll", onScrollCapture, true);
+      pinnedChatsList.addEventListener("scroll", onPinnedChatsScroll, true);
     });
-    searchOriginalChatBtn.addEventListener(
-      "click",
-      handleSearchOriginalChatBtnClick
-    );
 
     // Style the list item and anchor
     li.style.listStyle = "none";
@@ -286,17 +351,18 @@ async function getProfileId(): Promise<string> {
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
       li.style.backgroundColor = isDarkMode ? "#212121" : "#ececec";
-      unpinChatBtn.style.visibility = "visible";
-      unpinChatBtn.style.opacity = "1";
-      searchOriginalChatBtn.style.visibility = "visible";
-      searchOriginalChatBtn.style.opacity = "1";
+      chatOptionsBtn.style.visibility = "visible";
+      chatOptionsBtn.style.opacity = "1";
+      chatOptionsBtn.style.transition = "opacity 0.3s";
+      if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+        li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
+      }
     });
     li.addEventListener("mouseout", () => {
       li.style.backgroundColor = "transparent";
-      unpinChatBtn.style.visibility = "hidden";
-      unpinChatBtn.style.opacity = "0";
-      searchOriginalChatBtn.style.visibility = "hidden";
-      searchOriginalChatBtn.style.opacity = "0";
+      chatOptionsBtn.style.visibility = "hidden";
+      chatOptionsBtn.style.opacity = "0";
+      chatOptionsBtn.style.transition = "opacity 0.3s";
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
         li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
       }
@@ -350,7 +416,60 @@ async function getProfileId(): Promise<string> {
   function createPinnedContainerElement(): HTMLDivElement {
     const pinnedContainer: HTMLDivElement = document.createElement("div");
     pinnedContainer.setAttribute("id", "pinnedContainer");
-    pinnedContainer.style.marginTop = "20px";
+    pinnedContainer.className = "relative mt-5 first:mt-0 last:mb-5";
+
+    const style = document.createElement("style");
+    // Style the scrollbar for pinned chats: color, width, etc.
+    style.textContent = `
+          #pinnedChats {
+          scrollbar-width: thin; /* Firefox */
+          --scroll-thumb: #e0e0e0; 
+          --scroll-thumb-hover: #c0c0c0; 
+          --scroll-thumb-active: #a0a0a0; 
+          scrollbar-color: var(--scroll-thumb) transparent;
+        }
+
+        ${
+          isDarkMode &&
+          `
+          #pinnedChats {
+            --scroll-thumb: #303030;
+            --scroll-thumb-hover: #505050;
+            --scroll-thumb-active: #707070;
+            scrollbar-color: var(--scroll-thumb) transparent;
+          }
+        `
+        }
+
+        #pinnedChats::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+
+        #pinnedChats::-webkit-scrollbar-thumb {
+          background-color: var(--scroll-thumb);
+          border-radius: 10px;
+          border: 2px solid transparent;
+          background-clip: content-box;
+          transition: background-color 0.2s ease;
+        }
+
+        #pinnedChats:hover {
+          --scroll-thumb: var(--scroll-thumb-hover);
+        }
+
+        #pinnedChats::-webkit-scrollbar-thumb:hover {
+          background-color: var(--scroll-thumb-active);
+        }
+
+        #pinnedChats::-webkit-scrollbar-track,
+        #pinnedChats::-webkit-scrollbar-corner,
+        #pinnedChats::-webkit-scrollbar-button {
+          background-color: transparent;
+        }
+      
+    `;
+    document.head.appendChild(style);
 
     function handleDragOver(event: DragEvent): void {
       event.preventDefault();
@@ -406,30 +525,22 @@ async function getProfileId(): Promise<string> {
     pinnedContainer.addEventListener("dragleave", handleDragLeave);
 
     pinnedContainer.innerHTML = `
+    <div class="bg-token-sidebar-surface-primary sticky top-0 z-20">
+      <span class="flex h-9 items-center">
       <h3
-        class="pinned-title"
-        style="font-size: 0.8rem; font-weight: 500; margin-left: 8px"
+        class="px-2 text-xs font-semibold text-ellipsis overflow-hidden break-all pt-3 pb-2 text-token-text-primary"
       >
         PinFlux board
       </h3>
+      </span>
+      </div>
       <div 
         id="chatListContainer"
-          style="
-          position: relative;
-          border-radius: 8px;
-        ">
-        <ol id="pinnedChats" class="pinned-chats" style="
-          position: relative;
-          padding: 0;
-          margin: 0;
-          list-style-type: none;
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          overflow-x: hidden;
-          border-radius: 8px;
-          max-height: 150px;
-        "></ol>
+          >
+        <ol id="pinnedChats" class="pinned-chats" 
+          style="max-height: 150px; overflow-y: auto; overflow-x: hidden;"
+            
+        ></ol>
       </div>
     `;
 
@@ -700,6 +811,7 @@ async function getProfileId(): Promise<string> {
 
   // Handle click events in the sidebar
   sidebarElement.addEventListener("click", async (event: MouseEvent) => {
+    event.stopPropagation();
     const target = (event.target as HTMLElement)?.closest(
       '[data-testid^="history-item-"][data-testid$="-options"]'
     );
