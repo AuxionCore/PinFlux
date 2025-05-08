@@ -63,6 +63,79 @@ async function getProfileId(): Promise<string> {
       }
     }
 
+    // Handle rename chat button click
+    function handleRenameChat(li: HTMLLIElement): void {
+      const a = li.querySelector("a");
+      if (!a) return;
+
+      const titleDiv = a.querySelector("div");
+      if (!titleDiv) return;
+
+      const originalTitle = titleDiv.textContent?.trim() || "";
+
+      // יצירת עטיפה עם absolute שמופיעה מעל ה־a
+      const inputWrapper = document.createElement("div");
+      inputWrapper.className =
+        "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
+
+      const input = document.createElement("input");
+      input.className =
+        "border-token-border-default w-full border bg-transparent p-0 text-sm";
+      input.type = "text";
+      input.value = originalTitle;
+
+      inputWrapper.appendChild(input);
+      li.appendChild(inputWrapper);
+
+      input.focus();
+
+      const cleanup = () => {
+        inputWrapper.remove();
+      };
+
+      const finishEditing = async () => {
+        const newValue = input.value.trim();
+
+        if (!newValue) {
+          titleDiv.textContent = originalTitle;
+        } else if (newValue !== originalTitle) {
+          titleDiv.textContent = newValue;
+
+          // Save the new title to storage
+          const urlId = a?.getAttribute("id");
+          const storage = await chrome.storage.sync.get([`${profileId}`]);
+          const savedChats: { urlId: string; title: string }[] =
+            storage[`${profileId}`] || [];
+          const chatIndex = savedChats.findIndex(
+            (chat) => chat.urlId === urlId
+          );
+          if (chatIndex !== -1) {
+            savedChats[chatIndex].title = newValue;
+            chrome.storage.sync.set({ [`${profileId}`]: savedChats });
+          }
+        }
+
+        cleanup();
+      };
+
+      const cancelEditing = () => {
+        titleDiv.textContent = originalTitle;
+        cleanup();
+      };
+
+      input.addEventListener("blur", finishEditing, { once: true });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          input.blur();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          cancelEditing();
+        }
+      });
+    }
+
     // Handle search original chat button click
     async function handleSearchOriginalChatBtnClick(): Promise<void> {
       const scrollContainer = sidebarElement.parentElement;
@@ -99,12 +172,17 @@ async function getProfileId(): Promise<string> {
 
     anchorRaper.className =
       "no-draggable group rounded-lg active:opacity-90 bg-[var(--item-background-color)] h-9 text-sm screen-arch:bg-transparent relative";
+    anchorRaper.setAttribute(
+      "style",
+      "--item-background-color: var(--sidebar-surface-primary);"
+    );
 
     // Set up the anchor link for the pinned chat
     a.setAttribute("id", urlId);
     a.href = `https://chatgpt.com/c/${urlId}`;
     a.className =
       "motion-safe:group-active:screen-arch:scale-[98%] motion-safe:group-active:screen-arch:transition-transform motion-safe:group-active:screen-arch:duration-100 flex items-center gap-2 p-2";
+    a.setAttribute("style", "mask-image: var(--sidebar-mask);");
 
     chatOptionsBtnRaper.className =
       "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
@@ -319,6 +397,7 @@ async function getProfileId(): Promise<string> {
               break;
             case "rename":
               // Handle rename action here
+              await handleRenameChat(li);
               break;
             case "originalChat":
               await handleSearchOriginalChatBtnClick();
@@ -333,43 +412,52 @@ async function getProfileId(): Promise<string> {
       pinnedChatsList.addEventListener("scroll", onPinnedChatsScroll, true);
     });
 
-    // Style the list item and anchor
-    li.style.listStyle = "none";
-    li.style.width = "100%";
-    li.style.display = "flex";
-    li.style.alignItems = "center";
-    li.style.justifyContent = "space-between";
-    li.style.borderRadius = "8px";
-    li.style.transition = "background-color 0.3s";
     if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-      li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
+      li.style.setProperty(
+        "--item-background-color",
+        "var(--sidebar-surface-tertiary)"
+      );
     } else {
-      li.style.backgroundColor = "transparent";
+      li.style.setProperty(
+        "--item-background-color",
+        "var(--sidebar-surface-primary)"
+      );
     }
     li.setAttribute("draggable", "true");
 
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
-      li.style.backgroundColor = isDarkMode ? "#212121" : "#ececec";
+      anchorRaper.style.setProperty(
+        "--item-background-color",
+        "var(--sidebar-surface-secondary)"
+      );
       chatOptionsBtn.style.visibility = "visible";
       chatOptionsBtn.style.opacity = "1";
       chatOptionsBtn.style.transition = "opacity 0.3s";
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-        li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
+        li.style.setProperty(
+          "--item-background-color",
+          "var(--sidebar-surface-tertiary)"
+        );
       }
     });
     li.addEventListener("mouseout", () => {
-      li.style.backgroundColor = "transparent";
+      anchorRaper.style.setProperty(
+        "--item-background-color",
+        "var(--sidebar-surface-primary)"
+      );
       chatOptionsBtn.style.visibility = "hidden";
       chatOptionsBtn.style.opacity = "0";
       chatOptionsBtn.style.transition = "opacity 0.3s";
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-        li.style.backgroundColor = isDarkMode ? "#2F2F2F" : "#e3e3e3";
+        li.style.setProperty(
+          "--item-background-color",
+          "var(--sidebar-surface-tertiary)"
+        );
       }
     });
     li.addEventListener("mousedown", (event) => {
       event.preventDefault();
-      li.style.backgroundColor = isDarkMode ? "#202020" : "#f0f0f0";
     });
 
     li.addEventListener("dragstart", handleDragStart);
@@ -530,7 +618,7 @@ async function getProfileId(): Promise<string> {
       <h3
         class="px-2 text-xs font-semibold text-ellipsis overflow-hidden break-all pt-3 pb-2 text-token-text-primary"
       >
-        PinFlux board
+        PinFlux Board
       </h3>
       </span>
       </div>
