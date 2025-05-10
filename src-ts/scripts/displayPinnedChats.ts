@@ -503,12 +503,19 @@ function handleRenameChat(li: HTMLLIElement, profileId: string): void {
     //   "style",
     //   "--item-background-color: var(--sidebar-surface-primary);"
     // );
+    liInsideRaper.setAttribute("draggable", "false");
 
     // Set up the anchor link for the pinned chat
     a.setAttribute("id", urlId);
     a.href = `https://chatgpt.com/c/${urlId}`;
     a.className =
       "motion-safe:group-active:screen-arch:scale-[98%] motion-safe:group-active:screen-arch:transition-transform motion-safe:group-active:screen-arch:duration-100 flex items-center gap-2 p-2";
+
+    a.addEventListener("click", (event) => {
+      event.preventDefault();
+      window.history.pushState(null, "", `https://chatgpt.com/c/${urlId}`);
+      window.dispatchEvent(new Event("popstate"));
+    });
 
     chatOptionsBtnRaper.className =
       "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
@@ -536,6 +543,7 @@ function handleRenameChat(li: HTMLLIElement, profileId: string): void {
     li.appendChild(liInsideRaper);
 
     if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+      clearActiveChatStyles();
       styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
     } else {
       chatOptionsBtnRaper.className =
@@ -543,11 +551,11 @@ function handleRenameChat(li: HTMLLIElement, profileId: string): void {
       liInsideRaper.className =
         "no-draggable group rounded-lg active:opacity-90 hover:bg-[var(--sidebar-surface-secondary)] group-hover:bg-[var(--sidebar-surface-secondary)] h-9 text-sm screen-arch:bg-transparent relative";
     }
-    liInsideRaper.setAttribute("draggable", "false");
 
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+        clearActiveChatStyles();
         styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
       }
     });
@@ -563,6 +571,7 @@ function handleRenameChat(li: HTMLLIElement, profileId: string): void {
           "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
       }
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+        clearActiveChatStyles();
         styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
       }
     });
@@ -574,6 +583,25 @@ function handleRenameChat(li: HTMLLIElement, profileId: string): void {
     li.addEventListener("dragend", handleDragEnd);
 
     return li;
+  }
+
+  function clearActiveChatStyles() {
+    const allLis = document
+      .querySelector("ol#pinnedChats")
+      ?.querySelectorAll("li");
+    for (const li of allLis || []) {
+      const liInsideRaper = li.querySelector("div");
+      if (!liInsideRaper) continue;
+      liInsideRaper.className =
+        "no-draggable group rounded-lg active:opacity-90 hover:bg-[var(--sidebar-surface-secondary)] group-hover:bg-[var(--sidebar-surface-secondary)] h-9 text-sm screen-arch:bg-transparent relative";
+
+      const btn = li.querySelector("button") as HTMLButtonElement;
+      const chatOptionsBtnRaper = btn.parentElement as HTMLDivElement;
+      if (chatOptionsBtnRaper) {
+        chatOptionsBtnRaper.className =
+          "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
+      }
+    }
   }
 
   function styleActiveChat(
