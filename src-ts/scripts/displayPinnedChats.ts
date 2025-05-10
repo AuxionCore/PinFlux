@@ -30,174 +30,200 @@ async function getProfileId(): Promise<string> {
   }
 }
 
-(async () => {
-  // Check if the user is logged in
-  const profileId = await getProfileId();
-  const isDarkMode: boolean = getCurrentScheme() === "dark";
+// Handle unpin chat button click
+async function handleUnpinChatBtnClick(
+  li: HTMLLIElement,
+  profileId: string
+): Promise<void> {
+  const urlId = li.querySelector("a")?.getAttribute("id");
+  li.remove(); // Remove the pinned chat element from the DOM
+  const storage = await chrome.storage.sync.get([`${profileId}`]);
+  const savedChats: { urlId: string; title: string }[] =
+    storage[`${profileId}`] || [];
 
-  // Function to create a pinned chat element
-  function createPinnedChat(
-    title: string,
-    urlId: string,
-    profileId: string,
-    sidebarElement: HTMLElement
-  ): HTMLLIElement {
-    const li: HTMLLIElement = document.createElement("li");
-    const anchorRaper: HTMLDivElement = document.createElement("div");
-    const a: HTMLAnchorElement = document.createElement("a");
-    const titleDiv: HTMLDivElement = document.createElement("div");
-    const chatOptionsBtnRaper: HTMLDivElement = document.createElement("div");
-    const chatOptionsBtn: HTMLButtonElement = document.createElement("button");
+  const index = savedChats.findIndex((chat) => chat.urlId === urlId);
+  if (index !== -1) {
+    savedChats.splice(index, 1); // Remove the URL from pinned chats
+    await chrome.storage.sync.set({ [`${profileId}`]: savedChats });
+  }
+}
 
-    // Handle unpin chat button click
-    async function handleUnpinChatBtnClick(): Promise<void> {
-      li.remove(); // Remove the pinned chat element from the DOM
-      const storage = await chrome.storage.sync.get([`${profileId}`]);
-      const savedChats: { urlId: string; title: string }[] =
-        storage[`${profileId}`] || [];
+function createChatOptionsMenu(
+  li: HTMLLIElement,
+  sidebarElement: HTMLElement,
+  isDarkMode: boolean,
+  profileId: string,
+  closeMenu: () => void = () => {}
+): HTMLDivElement {
+  const chatOptionsMenu = document.createElement("div");
+  chatOptionsMenu.setAttribute("id", "chatOptionsMenu");
+  chatOptionsMenu.style.position = "absolute";
+  chatOptionsMenu.style.zIndex = "9999";
 
-      const index = savedChats.findIndex((chat) => chat.urlId === urlId);
-      if (index !== -1) {
-        savedChats.splice(index, 1); // Remove the URL from pinned chats
-        await chrome.storage.sync.set({ [`${profileId}`]: savedChats });
-      }
-    }
+  chatOptionsMenu.className =
+    "z-50 max-w-xs rounded-2xl popover bg-token-main-surface-primary shadow-lg border overflow-hidden py-0";
 
-    // Handle rename chat button click
-    function handleRenameChat(li: HTMLLIElement): void {
-      const a = li.querySelector("a");
-      if (!a) return;
+  chatOptionsMenu.innerHTML = `
+    <div class='max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto min-w-fit py-2'>
+      <div
+        role='menuitem'
+        data-action="unpin"
+        class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+        tabindex='-1'
+      >
+        <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width='24'
+            height='24'
+            viewBox='0 -960 960 960'
+            fill='none'
+            class='h-5 w-5 shrink-0'
+          >
+            <path
+              d='M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z'
+              fill='currentColor'
+              fill-rule='evenodd'
+              clip-rule='evenodd'
+            ></path>
+          </svg>
+        </div>
+        Unpin
+      </div>
+      <div
+        role='menuitem'
+        data-action="rename"
+        class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+      >
+        <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+          <svg
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            class='h-5 w-5 shrink-0'
+          >
+            <path
+              fill-rule='evenodd'
+              clip-rule='evenodd'
+              d='M13.2929 4.29291C15.0641 2.52167 17.9359 2.52167 19.7071 4.2929C21.4784 6.06414 21.4784 8.93588 19.7071 10.7071L18.7073 11.7069L11.6135 18.8007C10.8766 19.5376 9.92793 20.0258 8.89999 20.1971L4.16441 20.9864C3.84585 21.0395 3.52127 20.9355 3.29291 20.7071C3.06454 20.4788 2.96053 20.1542 3.01362 19.8356L3.80288 15.1C3.9742 14.0721 4.46243 13.1234 5.19932 12.3865L13.2929 4.29291ZM13 7.41422L6.61353 13.8007C6.1714 14.2428 5.87846 14.8121 5.77567 15.4288L5.21656 18.7835L8.57119 18.2244C9.18795 18.1216 9.75719 17.8286 10.1993 17.3865L16.5858 11L13 7.41422ZM18 9.5858L14.4142 6.00001L14.7071 5.70712C15.6973 4.71693 17.3027 4.71693 18.2929 5.70712C19.2831 6.69731 19.2831 8.30272 18.2929 9.29291L18 9.5858Z'
+              fill='currentColor'
+            ></path>
+          </svg>
+        </div>
+        Rename
+      </div>
+      <div
+        role='menuitem'
+        data-action="originalChat"
+        class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
+      >
+        <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
+          <svg
+            width='24'
+            height='24'
+            viewBox='0 -960 960 960'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            class='h-5 w-5 shrink-0'
+          >
+            <path
+              fill-rule='evenodd'
+              clip-rule='evenodd'
+              d='M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z'
+              fill='currentColor'
+            ></path>
+          </svg>
+        </div>
+        Original Chat
+      </div>
+    </div>
+  `;
 
-      const titleDiv = a.querySelector("div");
-      if (!titleDiv) return;
+  // Add event listeners to the menu items
+  chatOptionsMenu.querySelectorAll("[role='menuitem']").forEach((item) => {
+    item.addEventListener("click", async (e) => {
+      e.stopPropagation();
 
-      const originalTitle = titleDiv.textContent?.trim() || "";
-
-      // יצירת עטיפה עם absolute שמופיעה מעל ה־a
-      const inputWrapper = document.createElement("div");
-      inputWrapper.className =
-        "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
-
-      const input = document.createElement("input");
-      input.className =
-        "border-token-border-default w-full border bg-transparent p-0 text-sm";
-      input.type = "text";
-      input.value = originalTitle;
-
-      inputWrapper.appendChild(input);
-      li.appendChild(inputWrapper);
-
-      input.focus();
-
-      const cleanup = () => {
-        inputWrapper.remove();
-      };
-
-      const finishEditing = async () => {
-        const newValue = input.value.trim();
-
-        if (!newValue) {
-          titleDiv.textContent = originalTitle;
-        } else if (newValue !== originalTitle) {
-          titleDiv.textContent = newValue;
-
-          // Save the new title to storage
-          const urlId = a?.getAttribute("id");
-          const storage = await chrome.storage.sync.get([`${profileId}`]);
-          const savedChats: { urlId: string; title: string }[] =
-            storage[`${profileId}`] || [];
-          const chatIndex = savedChats.findIndex(
-            (chat) => chat.urlId === urlId
+      const action = (e.currentTarget as HTMLElement).dataset.action;
+      switch (action) {
+        case "unpin":
+          await handleUnpinChatBtnClick(li, profileId);
+          break;
+        case "rename":
+          // Handle rename action here
+           handleRenameChat(li, profileId);
+          break;
+        case "originalChat":
+          await handleSearchOriginalChatBtnClick(
+            sidebarElement,
+            li.querySelector("a")?.getAttribute("id") || "",
+            isDarkMode
           );
-          if (chatIndex !== -1) {
-            savedChats[chatIndex].title = newValue;
-            chrome.storage.sync.set({ [`${profileId}`]: savedChats });
-          }
-        }
-
-        cleanup();
-      };
-
-      const cancelEditing = () => {
-        titleDiv.textContent = originalTitle;
-        cleanup();
-      };
-
-      input.addEventListener("blur", finishEditing, { once: true });
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          input.blur();
-        } else if (e.key === "Escape") {
-          e.preventDefault();
-          cancelEditing();
-        }
-      });
-    }
-
-    // Handle search original chat button click
-    async function handleSearchOriginalChatBtnClick(): Promise<void> {
-      const scrollContainer = sidebarElement.parentElement;
-      if (!scrollContainer) return;
-
-      const findChatUrl = () =>
-        sidebarElement.querySelector(`a[href="/c/${urlId}"]`);
-
-      while (!findChatUrl()) {
-        scrollContainer.scrollTo({
-          top: scrollContainer.scrollHeight,
-          behavior: "smooth",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 500));
+          break;
       }
+      closeMenu();
+    });
+  });
+  return chatOptionsMenu;
+}
 
-      findChatUrl()?.scrollIntoView({ behavior: "smooth", block: "center" });
+// Handle search original chat button click
+async function handleSearchOriginalChatBtnClick(
+  sidebarElement: HTMLElement,
+  urlId: string,
+  isDarkMode: boolean
+): Promise<void> {
+  const scrollContainer = sidebarElement.parentElement;
+  if (!scrollContainer) return;
 
-      // Style the chat link for a few seconds
-      const chatLink = findChatUrl() as HTMLAnchorElement;
-      const chatLinkParent = chatLink.parentElement as HTMLLIElement;
-      chatLinkParent.style.transition = "border 0.3s ease-in-out";
-      chatLinkParent.style.borderColor = isDarkMode ? "#dedede" : "#000000";
-      chatLinkParent.style.borderWidth = "1px";
-      chatLinkParent.style.borderStyle = "solid";
-      setTimeout(() => {
-        chatLinkParent.style.borderColor = "transparent";
-        chatLinkParent.style.borderWidth = "0px";
-        chatLinkParent.style.borderStyle = "none";
-      }, 3000);
-    }
+  const findChatUrl = () =>
+    sidebarElement.querySelector(`a[href="/c/${urlId}"]`);
 
-    li.className = "relative";
+  while (!findChatUrl()) {
+    scrollContainer.scrollTo({
+      top: scrollContainer.scrollHeight,
+      behavior: "smooth",
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
 
-    anchorRaper.className =
-      "no-draggable group rounded-lg active:opacity-90 bg-[var(--item-background-color)] h-9 text-sm screen-arch:bg-transparent relative";
-    anchorRaper.setAttribute(
-      "style",
-      "--item-background-color: var(--sidebar-surface-primary);"
-    );
+  findChatUrl()?.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    // Set up the anchor link for the pinned chat
-    a.setAttribute("id", urlId);
-    a.href = `https://chatgpt.com/c/${urlId}`;
-    a.className =
-      "motion-safe:group-active:screen-arch:scale-[98%] motion-safe:group-active:screen-arch:transition-transform motion-safe:group-active:screen-arch:duration-100 flex items-center gap-2 p-2";
-    a.setAttribute("style", "mask-image: var(--sidebar-mask);");
+  // Style the chat link for a few seconds
+  const chatLink = findChatUrl() as HTMLAnchorElement;
+  const chatLinkParent = chatLink.parentElement as HTMLLIElement;
+  chatLinkParent.style.transition = "border 0.3s ease-in-out";
+  chatLinkParent.style.borderColor = isDarkMode ? "#dedede" : "#000000";
+  chatLinkParent.style.borderWidth = "1px";
+  chatLinkParent.style.borderStyle = "solid";
+  setTimeout(() => {
+    chatLinkParent.style.borderColor = "transparent";
+    chatLinkParent.style.borderWidth = "0px";
+    chatLinkParent.style.borderStyle = "none";
+  }, 3000);
+}
 
-    chatOptionsBtnRaper.className =
-      "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
-    titleDiv.textContent = title;
-    titleDiv.setAttribute("title", title);
-    titleDiv.setAttribute("dir", "auto");
-    titleDiv.setAttribute("aria-label", title);
-    titleDiv.className = "relative grow overflow-hidden whitespace-nowrap";
+function createChatOptionsBtn(
+  li: HTMLLIElement,
+  sidebarElement: HTMLElement,
+  isDarkMode: boolean,
+  profileId: string
+): HTMLButtonElement {
+  let currentTargetButton: HTMLButtonElement | null = null;
+  let currentOpenMenu: HTMLDivElement | null = null;
 
-    chatOptionsBtn.setAttribute("aria-expanded", "false");
-    chatOptionsBtn.setAttribute("aria-haspopup", "menu");
-    chatOptionsBtn.setAttribute("aria-label", "Open pin conversation options");
-    chatOptionsBtn.className =
-      "text-token-text-secondary hover:text-token-text-primary radix-state-open:text-token-text-secondary flex items-center justify-center transition";
-    chatOptionsBtn.innerHTML = `
+  const chatOptionsBtn: HTMLButtonElement = document.createElement("button");
+  chatOptionsBtn.setAttribute("type", "button");
+  chatOptionsBtn.setAttribute("aria-expanded", "false");
+  chatOptionsBtn.setAttribute("aria-haspopup", "menu");
+  chatOptionsBtn.setAttribute("aria-label", "Open pin conversation options");
+
+  chatOptionsBtn.className =
+    "text-token-text-secondary hover:text-token-text-primary radix-state-open:text-token-text-secondary flex items-center justify-center transition";
+
+  chatOptionsBtn.innerHTML = `
     <svg
       width="24"
       height="24"
@@ -215,245 +241,316 @@ async function getProfileId(): Promise<string> {
     </svg>
   `;
 
+  const pinnedChatsList = document.querySelector(
+    "#pinnedChats"
+  ) as HTMLOListElement;
+
+  function closeMenu() {
+    if (currentOpenMenu) {
+      currentOpenMenu.remove();
+      currentOpenMenu = null;
+      currentTargetButton = null;
+      document.removeEventListener("click", onDocumentClick, true);
+      window.removeEventListener("scroll", onScrollCapture, true);
+      pinnedChatsList.removeEventListener("scroll", onPinnedChatsScroll, true);
+    }
+  }
+
+  function onDocumentClick(event: MouseEvent) {
+    const target = event.target as Node;
+    if (
+      currentOpenMenu &&
+      !currentOpenMenu.contains(target) &&
+      !currentTargetButton?.contains(target)
+    ) {
+      closeMenu();
+    }
+  }
+
+  function onScrollCapture(event: Event) {
+    const scrolledElement = event.target as HTMLElement;
+
+    // Check if the scrolled element is the pinned chats list
+    if (!pinnedChatsList.contains(scrolledElement)) {
+      closeMenu();
+    }
+  }
+
+  function onPinnedChatsScroll() {
+    positionMenu();
+  }
+
+  function positionMenu() {
+    if (!currentOpenMenu || !currentTargetButton) return;
+
+    const rect = currentTargetButton.getBoundingClientRect();
+
+    currentOpenMenu.style.top = `${rect.bottom + window.scrollY}px`;
+    currentOpenMenu.style.left = `${rect.left + window.scrollX}px`;
+  }
+
+  chatOptionsBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const button = event.currentTarget as HTMLButtonElement;
+
+    if (currentTargetButton === button && currentOpenMenu) {
+      closeMenu();
+      return;
+    }
+
+    closeMenu(); // Close any existing menu before opening a new one
+
+    currentTargetButton = button;
+
+    const chatOptionsMenu = createChatOptionsMenu(
+      li,
+      sidebarElement,
+      isDarkMode,
+      profileId,
+      closeMenu
+    );
+
+    document.body.appendChild(chatOptionsMenu);
+    currentOpenMenu = chatOptionsMenu;
+
+    // Position the menu
+    positionMenu();
+
+    document.addEventListener("click", onDocumentClick, true);
+    window.addEventListener("scroll", onScrollCapture, true);
+    pinnedChatsList.addEventListener("scroll", onPinnedChatsScroll, true);
+  });
+
+  return chatOptionsBtn;
+}
+
+// Handle rename chat button click
+// function handleRenameChat(li: HTMLLIElement, profileId: string): void {
+//   const a = li.querySelector("a");
+//   if (!a) return;
+
+//   const titleDiv = li.querySelector("a")?.querySelector("div");
+//   if (!titleDiv) return;
+
+//   const originalTitle = titleDiv.textContent?.trim() || "";
+//   const input = document.createElement("input");
+//   input.className =
+//     "border-token-border-default w-full border bg-transparent p-0 text-sm z-100";
+//   input.type = "text";
+//   input.value = originalTitle;
+
+//   const chatOptionsBtnRaper = li.querySelector(".absolute") as HTMLDivElement;
+//   const chatOptionsBtn = li.querySelector("button");
+//   if (chatOptionsBtn) {
+//     chatOptionsBtnRaper.className =
+//       "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
+//     chatOptionsBtn.remove();
+//     chatOptionsBtnRaper.appendChild(input);
+//     chatOptionsBtnRaper.style.pointerEvents = "auto";
+//   }
+
+//   input.focus();
+
+//   const cleanup = () => {
+//     input.remove();
+//     chatOptionsBtnRaper.className =
+//       "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
+//     chatOptionsBtnRaper.appendChild(chatOptionsBtn as HTMLButtonElement);
+//   };
+
+//   const finishEditing = async () => {
+//     const newValue = input.value.trim();
+
+//     if (!newValue) {
+//       titleDiv.textContent = originalTitle;
+//     } else if (newValue !== originalTitle) {
+//       titleDiv.textContent = newValue;
+
+//       // Save the new title to storage
+//       const urlId = a?.getAttribute("id");
+//       const storage = await chrome.storage.sync.get([`${profileId}`]);
+//       const savedChats: { urlId: string; title: string }[] =
+//         storage[`${profileId}`] || [];
+//       const chatIndex = savedChats.findIndex((chat) => chat.urlId === urlId);
+//       if (chatIndex !== -1) {
+//         savedChats[chatIndex].title = newValue;
+//         chrome.storage.sync.set({ [`${profileId}`]: savedChats });
+//       }
+//     }
+
+//     cleanup();
+//   };
+
+//   const cancelEditing = () => {
+//     titleDiv.textContent = originalTitle;
+//     cleanup();
+//   };
+
+//   input.addEventListener("blur", finishEditing, { once: true });
+
+//   input.addEventListener("keydown", (e) => {
+//     if (e.key === "Enter") {
+//       e.preventDefault();
+//       input.blur();
+//     } else if (e.key === "Escape") {
+//       e.preventDefault();
+//       cancelEditing();
+//     }
+//   });
+// }
+
+// Handle rename chat button click
+function handleRenameChat(li: HTMLLIElement, profileId: string): void {
+  const a = li.querySelector("a");
+  if (!a) return;
+
+  const titleDiv = a.querySelector("div");
+  if (!titleDiv) return;
+
+  const originalTitle = titleDiv.textContent?.trim() || "";
+  const inputWrapper = document.createElement("div");
+  inputWrapper.className =
+    "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
+
+  const input = document.createElement("input");
+  input.className =
+    "border-token-border-default w-full border bg-transparent p-0 text-sm";
+  input.type = "text";
+  input.value = originalTitle;
+
+  inputWrapper.appendChild(input);
+  li.appendChild(inputWrapper);
+
+  input.focus();
+
+  const cleanup = () => {
+    inputWrapper.remove();
+  };
+
+  const finishEditing = async () => {
+    const newValue = input.value.trim();
+
+    if (!newValue) {
+      titleDiv.textContent = originalTitle;
+    } else if (newValue !== originalTitle) {
+      titleDiv.textContent = newValue;
+
+      // Save the new title to storage
+      const urlId = a?.getAttribute("id");
+      const storage = await chrome.storage.sync.get([`${profileId}`]);
+      const savedChats: { urlId: string; title: string }[] =
+        storage[`${profileId}`] || [];
+      const chatIndex = savedChats.findIndex((chat) => chat.urlId === urlId);
+      if (chatIndex !== -1) {
+        savedChats[chatIndex].title = newValue;
+        chrome.storage.sync.set({ [`${profileId}`]: savedChats });
+      }
+    }
+
+    cleanup();
+  };
+
+  const cancelEditing = () => {
+    titleDiv.textContent = originalTitle;
+    cleanup();
+  };
+
+  input.addEventListener("blur", finishEditing, { once: true });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      input.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      cancelEditing();
+    }
+  });
+}
+
+(async () => {
+  // Check if the user is logged in
+  const profileId = await getProfileId();
+  const isDarkMode: boolean = getCurrentScheme() === "dark";
+
+  // Function to create a pinned chat element
+  function createPinnedChat(
+    title: string,
+    urlId: string,
+    profileId: string,
+    sidebarElement: HTMLElement
+  ): HTMLLIElement {
+    const li: HTMLLIElement = document.createElement("li");
+    const liInsideRaper: HTMLDivElement = document.createElement("div");
+    const a: HTMLAnchorElement = document.createElement("a");
+    const titleDiv: HTMLDivElement = document.createElement("div");
+    const chatOptionsBtnRaper: HTMLDivElement = document.createElement("div");
+
+    li.className = "relative";
+
+    liInsideRaper.className =
+      "no-draggable group rounded-lg active:opacity-90 hover:bg-[var(--sidebar-surface-secondary)] group-hover:bg-[var(--sidebar-surface-secondary)] h-9 text-sm screen-arch:bg-transparent relative";
+    // anchorRaper.setAttribute(
+    //   "style",
+    //   "--item-background-color: var(--sidebar-surface-primary);"
+    // );
+
+    // Set up the anchor link for the pinned chat
+    a.setAttribute("id", urlId);
+    a.href = `https://chatgpt.com/c/${urlId}`;
+    a.className =
+      "motion-safe:group-active:screen-arch:scale-[98%] motion-safe:group-active:screen-arch:transition-transform motion-safe:group-active:screen-arch:duration-100 flex items-center gap-2 p-2";
+
+    chatOptionsBtnRaper.className =
+      "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
+
+    titleDiv.textContent = title;
+    titleDiv.setAttribute("title", title);
+    titleDiv.setAttribute("dir", "auto");
+    titleDiv.setAttribute("aria-label", title);
+    titleDiv.className = "relative grow overflow-hidden whitespace-nowrap";
+    titleDiv.style.setProperty("mask-image", "var(--sidebar-mask)");
+
+    const chatOptionsBtn = createChatOptionsBtn(
+      li,
+      sidebarElement,
+      isDarkMode,
+      profileId
+    );
+
     // Append the elements
-    li.appendChild(anchorRaper);
-    li.appendChild(chatOptionsBtnRaper);
-    chatOptionsBtnRaper.appendChild(chatOptionsBtn);
-    anchorRaper.appendChild(a);
     a.appendChild(titleDiv);
-
-    const pinnedChatsList = document.querySelector(
-      "#pinnedChats"
-    ) as HTMLOListElement;
-
-    let currentOpenMenu: HTMLDivElement | null = null;
-    let currentTargetButton: HTMLButtonElement | null = null;
-
-    function closeMenu() {
-      if (currentOpenMenu) {
-        currentOpenMenu.remove();
-        currentOpenMenu = null;
-        currentTargetButton = null;
-        document.removeEventListener("click", onDocumentClick, true);
-        window.removeEventListener("scroll", onScrollCapture, true);
-        pinnedChatsList.removeEventListener(
-          "scroll",
-          onPinnedChatsScroll,
-          true
-        );
-      }
-    }
-
-    function onDocumentClick(event: MouseEvent) {
-      const target = event.target as Node;
-      if (
-        currentOpenMenu &&
-        !currentOpenMenu.contains(target) &&
-        !currentTargetButton?.contains(target)
-      ) {
-        closeMenu();
-      }
-    }
-
-    function onScrollCapture(event: Event) {
-      const scrolledElement = event.target as HTMLElement;
-
-      // Check if the scrolled element is the pinned chats list
-      if (!pinnedChatsList.contains(scrolledElement)) {
-        closeMenu();
-      }
-    }
-
-    function onPinnedChatsScroll() {
-      positionMenu();
-    }
-
-    function positionMenu() {
-      if (!currentOpenMenu || !currentTargetButton) return;
-
-      const rect = currentTargetButton.getBoundingClientRect();
-
-      currentOpenMenu.style.top = `${rect.bottom + window.scrollY}px`;
-      currentOpenMenu.style.left = `${rect.left + window.scrollX}px`;
-    }
-
-    chatOptionsBtn.style.visibility = "hidden";
-    chatOptionsBtn.style.opacity = "0";
-
-    chatOptionsBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const button = event.currentTarget as HTMLButtonElement;
-
-      if (currentTargetButton === button && currentOpenMenu) {
-        closeMenu();
-        return;
-      }
-
-      closeMenu(); // Close any existing menu before opening a new one
-
-      currentTargetButton = button;
-
-      const pinChatMenu = document.createElement("div");
-      pinChatMenu.setAttribute("id", "pinChatMenu");
-      pinChatMenu.style.position = "absolute";
-      pinChatMenu.style.zIndex = "9999";
-
-      pinChatMenu.className =
-        "z-50 max-w-xs rounded-2xl popover bg-token-main-surface-primary shadow-lg border overflow-hidden py-0";
-
-      pinChatMenu.innerHTML = `
-          <div class='max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto min-w-fit py-2'>
-            <div
-              role='menuitem'
-              data-action="unpin"
-              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
-              tabindex='-1'
-            >
-              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='24'
-                  height='24'
-                  viewBox='0 -960 960 960'
-                  fill='none'
-                  class='h-5 w-5 shrink-0'
-                >
-                  <path
-                    d='M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z'
-                    fill='currentColor'
-                    fill-rule='evenodd'
-                    clip-rule='evenodd'
-                  ></path>
-                </svg>
-              </div>
-              Unpin
-            </div>
-            <div
-              role='menuitem'
-              data-action="rename"
-              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
-            >
-              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
-                <svg
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  xmlns='http://www.w3.org/2000/svg'
-                  class='h-5 w-5 shrink-0'
-                >
-                  <path
-                    fill-rule='evenodd'
-                    clip-rule='evenodd'
-                    d='M13.2929 4.29291C15.0641 2.52167 17.9359 2.52167 19.7071 4.2929C21.4784 6.06414 21.4784 8.93588 19.7071 10.7071L18.7073 11.7069L11.6135 18.8007C10.8766 19.5376 9.92793 20.0258 8.89999 20.1971L4.16441 20.9864C3.84585 21.0395 3.52127 20.9355 3.29291 20.7071C3.06454 20.4788 2.96053 20.1542 3.01362 19.8356L3.80288 15.1C3.9742 14.0721 4.46243 13.1234 5.19932 12.3865L13.2929 4.29291ZM13 7.41422L6.61353 13.8007C6.1714 14.2428 5.87846 14.8121 5.77567 15.4288L5.21656 18.7835L8.57119 18.2244C9.18795 18.1216 9.75719 17.8286 10.1993 17.3865L16.5858 11L13 7.41422ZM18 9.5858L14.4142 6.00001L14.7071 5.70712C15.6973 4.71693 17.3027 4.71693 18.2929 5.70712C19.2831 6.69731 19.2831 8.30272 18.2929 9.29291L18 9.5858Z'
-                    fill='currentColor'
-                  ></path>
-                </svg>
-              </div>
-              Rename
-            </div>
-            <div
-              role='menuitem'
-              data-action="originalChat"
-              class='flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3'
-            >
-              <div class='flex items-center justify-center text-token-text-secondary h-5 w-5'>
-                <svg
-                  width='24'
-                  height='24'
-                  viewBox='0 -960 960 960'
-                  fill='none'
-                  xmlns='http://www.w3.org/2000/svg'
-                  class='h-5 w-5 shrink-0'
-                >
-                  <path
-                    fill-rule='evenodd'
-                    clip-rule='evenodd'
-                    d='M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z'
-                    fill='currentColor'
-                  ></path>
-                </svg>
-              </div>
-              Original Chat
-            </div>
-          </div>
-        `;
-
-      document.body.appendChild(pinChatMenu);
-      currentOpenMenu = pinChatMenu;
-
-      // Position the menu
-      positionMenu();
-
-      // Add event listeners to the menu items
-      pinChatMenu.querySelectorAll("[role='menuitem']").forEach((item) => {
-        item.addEventListener("click", async (e) => {
-          e.stopPropagation();
-
-          const action = (e.currentTarget as HTMLElement).dataset.action;
-          switch (action) {
-            case "unpin":
-              await handleUnpinChatBtnClick();
-              break;
-            case "rename":
-              // Handle rename action here
-              await handleRenameChat(li);
-              break;
-            case "originalChat":
-              await handleSearchOriginalChatBtnClick();
-              break;
-          }
-          closeMenu();
-        });
-      });
-
-      document.addEventListener("click", onDocumentClick, true);
-      window.addEventListener("scroll", onScrollCapture, true);
-      pinnedChatsList.addEventListener("scroll", onPinnedChatsScroll, true);
-    });
+    chatOptionsBtnRaper.appendChild(chatOptionsBtn);
+    liInsideRaper.appendChild(a);
+    liInsideRaper.appendChild(chatOptionsBtnRaper);
+    li.appendChild(liInsideRaper);
 
     if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-      li.style.setProperty(
-        "--item-background-color",
-        "var(--sidebar-surface-tertiary)"
-      );
+      styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
     } else {
-      li.style.setProperty(
-        "--item-background-color",
-        "var(--sidebar-surface-primary)"
-      );
+      chatOptionsBtnRaper.className =
+        "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
+      liInsideRaper.className =
+        "no-draggable group rounded-lg active:opacity-90 hover:bg-[var(--sidebar-surface-secondary)] group-hover:bg-[var(--sidebar-surface-secondary)] h-9 text-sm screen-arch:bg-transparent relative";
     }
-    li.setAttribute("draggable", "true");
+    liInsideRaper.setAttribute("draggable", "false");
 
     // Add hover effect for the list item
     li.addEventListener("mouseover", () => {
-      anchorRaper.style.setProperty(
-        "--item-background-color",
-        "var(--sidebar-surface-secondary)"
-      );
-      chatOptionsBtn.style.visibility = "visible";
-      chatOptionsBtn.style.opacity = "1";
-      chatOptionsBtn.style.transition = "opacity 0.3s";
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-        li.style.setProperty(
-          "--item-background-color",
-          "var(--sidebar-surface-tertiary)"
-        );
+        styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
       }
     });
     li.addEventListener("mouseout", () => {
-      anchorRaper.style.setProperty(
-        "--item-background-color",
-        "var(--sidebar-surface-primary)"
-      );
-      chatOptionsBtn.style.visibility = "hidden";
-      chatOptionsBtn.style.opacity = "0";
-      chatOptionsBtn.style.transition = "opacity 0.3s";
+      liInsideRaper.className =
+        "no-draggable group rounded-lg active:opacity-90 hover:bg-[var(--sidebar-surface-secondary)] group-hover:bg-[var(--sidebar-surface-secondary)] h-9 text-sm screen-arch:bg-transparent relative";
+
+      chatOptionsBtnRaper.className =
+        "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
+
       if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
-        li.style.setProperty(
-          "--item-background-color",
-          "var(--sidebar-surface-tertiary)"
-        );
+        styleActiveChat(liInsideRaper, chatOptionsBtnRaper);
       }
     });
     li.addEventListener("mousedown", (event) => {
@@ -464,6 +561,16 @@ async function getProfileId(): Promise<string> {
     li.addEventListener("dragend", handleDragEnd);
 
     return li;
+  }
+
+  function styleActiveChat(
+    anchorRaper: HTMLDivElement,
+    chatOptionsBtnRaper: HTMLDivElement
+  ) {
+    anchorRaper.className =
+      "no-draggable group rounded-lg active:opacity-90 bg-[var(--sidebar-surface-tertiary)] h-9 text-sm screen-arch:bg-transparent relative";
+    chatOptionsBtnRaper.className =
+      "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
   }
 
   // Function to create a draggable display with text
