@@ -728,43 +728,55 @@ async function getProfileId(): Promise<string> {
         const deleteButton = chatOptionsMenu.querySelector(
           '[data-testid="delete-chat-menu-item"]'
         );
+        console.log("Delete button found:", deleteButton);
         if (deleteButton) {
           deleteButton.addEventListener("click", async () => {
-            const deleteConversationConfirmButton = document.querySelector(
-              '[data-testid="delete-conversation-confirm-button"]'
-            ) as HTMLButtonElement;
-            if (deleteConversationConfirmButton) {
-              deleteConversationConfirmButton.addEventListener(
-                "click",
-                async () => {
-                  const pinnedChats = document.querySelector(
-                    "#pinnedChats"
-                  ) as HTMLOListElement;
-                  if (urlId) {
-                    const pinnedChat = pinnedChats
-                      .querySelector(`a[href="https://chatgpt.com/c/${urlId}"]`)
-                      ?.closest("li");
-                    if (pinnedChat) {
-                      pinnedChat.remove();
-                    }
-                    const storage = await chrome.storage.sync.get([
-                      `${profileId}`,
-                    ]);
-                    const savedChats: { urlId: string; title: string }[] =
-                      storage[`${profileId}`] || [];
-                    const index = savedChats.findIndex(
-                      (chat) => chat.urlId === urlId
-                    );
-                    if (index !== -1) {
-                      savedChats.splice(index, 1); // Remove the URL from pinned chats
-                      await chrome.storage.sync.set({
-                        [`${profileId}`]: savedChats,
-                      });
+            setTimeout(() => {
+              const deleteConversationConfirmButton = document.querySelector(
+                '[data-testid="delete-conversation-confirm-button"]'
+              ) as HTMLButtonElement;
+
+              console.log(
+                "Delete conversation confirm button found:",
+                deleteConversationConfirmButton
+              );
+
+              if (deleteConversationConfirmButton) {
+                deleteConversationConfirmButton.addEventListener(
+                  "click",
+                  async () => {
+                    console.log("Delete button clicked");
+                    const pinnedChats = document.querySelector(
+                      "#pinnedChats"
+                    ) as HTMLOListElement;
+                    if (urlId) {
+                      const pinnedChat = pinnedChats
+                        .querySelector(
+                          `a[href="https://chatgpt.com/c/${urlId}"]`
+                        )
+                        ?.closest("li");
+                      if (pinnedChat) {
+                        pinnedChat.remove();
+                      }
+                      const storage = await chrome.storage.sync.get([
+                        `${profileId}`,
+                      ]);
+                      const savedChats: { urlId: string; title: string }[] =
+                        storage[`${profileId}`] || [];
+                      const index = savedChats.findIndex(
+                        (chat) => chat.urlId === urlId
+                      );
+                      if (index !== -1) {
+                        savedChats.splice(index, 1); // Remove the URL from pinned chats
+                        await chrome.storage.sync.set({
+                          [`${profileId}`]: savedChats,
+                        });
+                      }
                     }
                   }
-                }
-              );
-            }
+                );
+              }
+            }, 100);
           });
         }
 
