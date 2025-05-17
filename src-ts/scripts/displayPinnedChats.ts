@@ -228,6 +228,7 @@ async function getProfileId(): Promise<string> {
     a.style.textAlign = "left";
     a.style.fontSize = "0.9rem";
     a.textContent = title;
+    a.style.unicodeBidi = "plaintext";
 
     // Append the elements
     li.appendChild(a);
