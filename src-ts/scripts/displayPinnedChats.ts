@@ -87,6 +87,8 @@ async function getProfileId(): Promise<string> {
 }
 
 (async () => {
+  let pinChatHandler: (() => void) | null = null;
+  let unpinChatHandler: (() => void) | null = null;
   // Check if the user is logged in
   const profileId = await getProfileId();
   const isDarkMode: boolean = getCurrentScheme() === "dark";
@@ -442,21 +444,20 @@ async function getProfileId(): Promise<string> {
     pinButton.innerHTML = `
       <div
         role="menuitem"
-        class="flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3"
+        class="touch:min-h-10 group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&amp;:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
         tabindex="-1"
         data-orientation="vertical"
         data-radix-collection-item=""
       >
-        <div
-          class="flex items-center justify-center text-token-text-secondary h-5 w-5"
-        >
+        <div class="flex items-center justify-center h-[18px] w-[18px]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
             viewBox="0 -960 960 960"
             fill="none"
-            class="h-5 w-5 shrink-0"
+            class="icon-md"
+            aria-hidden="true"
           >
             <path
               d="m624-480 96 96v72H516v228l-36 36-36-36v-228H240v-72l96-96v-264h-48v-72h384v72h-48v264Zm-282 96h276l-66-66v-294H408v294l-66 66Zm138 0Z"
@@ -478,21 +479,20 @@ async function getProfileId(): Promise<string> {
     unpinButton.innerHTML = `
       <div
         role="menuitem"
-        class="flex items-center m-1.5 p-2.5 text-sm cursor-pointer focus-visible:outline-0 radix-disabled:pointer-events-none radix-disabled:opacity-50 group relative hover:bg-[#f5f5f5] focus-visible:bg-[#f5f5f5] radix-state-open:bg-[#f5f5f5] dark:hover:bg-token-main-surface-secondary dark:focus-visible:bg-token-main-surface-secondary rounded-md my-0 px-3 mx-2 dark:radix-state-open:bg-token-main-surface-secondary gap-2.5 py-3"
+        class="touch:min-h-10 group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&amp;:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
         tabindex="-1"
         data-orientation="vertical"
         data-radix-collection-item=""
       >
-        <div
-          class="flex items-center justify-center text-token-text-secondary h-5 w-5"
-        >
+        <div class="flex items-center justify-center h-[18px] w-[18px]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
             viewBox="0 -960 960 960"
             fill="none"
-            class="h-5 w-5 shrink-0"
+            class="icon-md"
+            aria-hidden="true"
           >
             <path
               d="M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z"
@@ -510,6 +510,12 @@ async function getProfileId(): Promise<string> {
 
   const pinButton: HTMLDivElement = createPinButton();
   const unpinButton: HTMLDivElement = createUnpinButton();
+
+  async function addPinChat(
+    urlId: string,
+    chatTitle: string,
+    profileId: string
+  ): Promise<void> {}
 
   // Handle pinning a chat
   async function handlePinChat(
@@ -543,12 +549,16 @@ async function getProfileId(): Promise<string> {
   }
 
   // Handle unpinning a chat when the unpin button is clicked
-  async function handleUnpinChat(urlId?: string): Promise<void> {
+  async function handleUnpinChat(
+    urlId: string,
+    chatOptionsMenu: HTMLDivElement
+  ): Promise<void> {
     const storage = await chrome.storage.sync.get([`${profileId}`]);
     const savedChats: { urlId: string; title: string }[] =
       storage[`${profileId}`] || [];
 
     if (urlId && savedChats.some((chat) => chat.urlId === urlId)) {
+      unpinButton.remove();
       const pinnedChats = document.querySelector(
         "#pinnedChats"
       ) as HTMLOListElement;
@@ -709,11 +719,12 @@ async function getProfileId(): Promise<string> {
     const urlId = chatUrl?.split("/").slice(-1)[0];
     const chatTitle = chatLink?.querySelector("div")?.textContent;
     if (target) {
-      const chatOptionsMenu = document
-        .querySelectorAll('[role="menu"], [role="dialog"]')[1]
-        .querySelector("div.overflow-y-auto") as HTMLDivElement;
+      const chatOptionsMenu = document.querySelector(
+        'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
+      ) as HTMLDivElement;
 
       if (chatOptionsMenu) {
+        console.log("Chat options menu found:", chatOptionsMenu);
         const deleteButton = chatOptionsMenu.querySelector(
           '[data-testid="delete-chat-menu-item"]'
         );
@@ -771,14 +782,41 @@ async function getProfileId(): Promise<string> {
 
         // Handle pinning and unpinning
         if (urlId && chatTitle) {
-          pinButton.addEventListener("click", async () => {
-            await handlePinChat(urlId, chatTitle, chatOptionsMenu);
-          });
+          setupPinChatListener(urlId, chatTitle, chatOptionsMenu);
         }
-        unpinButton.addEventListener("click", async () => {
-          await handleUnpinChat(urlId);
-        });
+        setupUnpinChatListener(urlId, chatOptionsMenu);
       }
     }
   });
+
+  function setupUnpinChatListener(
+    urlId: string,
+    chatOptionsMenu: HTMLDivElement
+  ) {
+    if (unpinChatHandler) {
+      unpinButton.removeEventListener("click", unpinChatHandler);
+    }
+
+    unpinChatHandler = () => {
+      handleUnpinChat(urlId, chatOptionsMenu);
+    };
+
+    unpinButton.addEventListener("click", unpinChatHandler);
+  }
+
+  function setupPinChatListener(
+    urlId: string,
+    chatTitle: string,
+    chatOptionsMenu: HTMLDivElement
+  ) {
+    if (pinChatHandler) {
+      pinButton.removeEventListener("click", pinChatHandler);
+    }
+
+    pinChatHandler = () => {
+      handlePinChat(urlId, chatTitle, chatOptionsMenu);
+    };
+
+    pinButton.addEventListener("click", pinChatHandler);
+  }
 })();
