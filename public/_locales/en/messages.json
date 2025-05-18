@@ -1,0 +1,54 @@
+{
+  "extensionName": {
+    "message": "PinFlux - Pin ChatGPT Chats",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Pin. Revisit. Flow on. Pin chats in ChatGPT to your PinFlux board.",
+    "description": "Description of the extension"
+  },
+  "popupCloseButton": {
+    "message": "Close",
+    "description": "Close button text"
+  },
+  "newReleaseTitle": {
+    "message": "New Release Came Out!",
+    "description": "Title for new release notification"
+  },
+  "extensionWasUpdated": {
+    "message": "Extension was updated to version $VERSION_NUMBER$ $ICON$",
+    "description": "Extension was updated to version $VERSION_NUMBER$",
+    "placeholders": {
+      "VERSION_NUMBER": {
+        "content": "$1",
+        "description": "Version number placeholder"
+      },
+      "ICON": {
+        "content": "$2",
+        "description": "Icon placeholder"
+      }
+    }
+  },
+  "errorToastTitle": {
+    "message": "Error",
+    "description": "Title for error toast"
+  },
+  "feedbackTitle": {
+    "message": "Feedback",
+    "description": "Title for feedback section"
+  },
+  "bugReportTitle": {
+    "message": "Report a Bug",
+    "description": "Title for bug report section"
+  },
+  "rateUsTitle": {
+    "message": "Please rate us on the $BROWSER_NAME$ store",
+    "description": "Rate us title",
+    "placeholders": {
+      "BROWSER_NAME": {
+        "content": "$1",
+        "description": "Browser name placeholder"
+      }
+    }
+  }
+}
