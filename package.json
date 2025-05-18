@@ -5,7 +5,7 @@
   "main": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yedidya10/chatgpt_pinChats.git"
+    "url": "git+https://github.com/AuxionCore/PinFlux.git"
   },
   "author": {
     "name": "Yedidya10",
@@ -13,9 +13,9 @@
   },
   "license": "GNU GENERAL PUBLIC LICENSE V3",
   "bugs": {
-    "url": "https://github.com/Yedidya10/chatgpt_pinChats/issues"
+    "url": "https://github.com/AuxionCore/PinFlux/issues"
   },
-  "homepage": "https://github.com/Yedidya10/chatgpt_pinChats#readme",
+  "homepage": "https://github.com/AuxionCore/PinFlux#readme",
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc && vite build"
