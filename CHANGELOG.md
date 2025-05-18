@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-05-17
+
+- fix: adjusting the style of pin/unpin buttons to the new style on the site because they were removed from the site due to old style
+- fix: remove registration of duplicate click events
+- fix: improved functionality for removing a pinned conversation by deleting the original conversation from the site
+- fix: add unicodeBidi style to chat title for improved text rendering
+
 ## [1.1.3] - 2025-04-29
 
 ### Fixed
