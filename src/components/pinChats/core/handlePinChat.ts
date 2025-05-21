@@ -1,13 +1,12 @@
 import getProfileId from "@/components/utils/getProfileId";
 import createPinnedChat from "@/components/pinChats/core/createPinnedChat";
-import createPinButton from "@/components/pinChats/pinButton/PinButton";
-import createUnpinButton from "@/components/pinChats/pinButton/UnpinButton";
 import getSidebarElement from "@/components/pinChats/core/getSidebarElement";
 
 // Handle pinning a chat
 export default async function handlePinChat(
   urlId: string,
   chatTitle: string,
+  pinButton: HTMLDivElement,
   chatOptionsMenu?: HTMLDivElement
 ): Promise<void> {
   const profileId = await getProfileId();
@@ -22,9 +21,6 @@ export default async function handlePinChat(
     return;
   }
 
-  const pinButton: HTMLDivElement = createPinButton();
-  const unpinButton: HTMLDivElement = createUnpinButton();
-
   const storage = await browser.storage.sync.get([`${profileId}`]);
   const savedChats: { urlId: string; title: string }[] =
     storage[`${profileId}`] || [];
@@ -32,7 +28,6 @@ export default async function handlePinChat(
   // Check if the chat is already pinned
   if (urlId && !savedChats.some((chat) => chat.urlId === urlId)) {
     pinButton.remove();
-    chatOptionsMenu?.prepend(unpinButton);
 
     const pinnedChatsList = document.querySelector(
       "#pinnedChats"

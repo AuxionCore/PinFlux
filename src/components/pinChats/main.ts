@@ -159,12 +159,8 @@ export default async function initContentScript(): Promise<void> {
 
         // Check pinned status and display the appropriate button
         const savedPinChats = await getPinChatsFromStorage(profileId);
-        if (savedPinChats.length > 0) {
-          if (urlId && savedPinChats.some((chat) => chat.urlId === urlId)) {
-            chatOptionsMenu.prepend(unpinButton);
-          } else {
-            chatOptionsMenu.prepend(pinButton);
-          }
+        if (urlId && savedPinChats.some((chat) => chat.urlId === urlId)) {
+          chatOptionsMenu.prepend(unpinButton);
         } else {
           chatOptionsMenu.prepend(pinButton);
         }

@@ -12,7 +12,7 @@ export default function setupPinChatListener(
   }
 
   pinChatHandler = () => {
-    handlePinChat(urlId, chatTitle, chatOptionsMenu);
+    handlePinChat(urlId, chatTitle, pinButton, chatOptionsMenu);
   };
 
   pinButton.addEventListener("click", pinChatHandler);
