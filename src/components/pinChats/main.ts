@@ -183,4 +183,57 @@ export default async function initContentScript(): Promise<void> {
       }
     }
   });
+
+  const conversationOptionsButton = document.querySelector(
+    '[data-testid="conversation-options-button"]'
+  ) as HTMLButtonElement;
+  if (conversationOptionsButton) {
+    conversationOptionsButton.addEventListener("click", async () => {
+      const chatOptionsMenu = document.querySelector(
+        'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
+      ) as HTMLDivElement;
+
+      if (chatOptionsMenu) {
+        const deleteButton = chatOptionsMenu.querySelector(
+          '[data-testid="delete-chat-menu-item"]'
+        );
+        if (deleteButton) {
+          deleteButton.addEventListener("click", async () => {
+            setTimeout(() => {
+              const deleteConversationConfirmButton = document.querySelector(
+                '[data-testid="delete-conversation-confirm-button"]'
+              ) as HTMLButtonElement;
+
+              if (deleteConversationConfirmButton) {
+                deleteConversationConfirmButton.addEventListener(
+                  "click",
+                  async () => {
+                    const pinnedChats = document.querySelector(
+                      "#pinnedChats"
+                    ) as HTMLOListElement;
+                    if (profileId) {
+                      const savedPinChats = await getPinChatsFromStorage(
+                        profileId
+                      );
+                      savedPinChats.forEach(async (chat) => {
+                        const pinnedChat = pinnedChats
+                          .querySelector(
+                            `a[href="https://chatgpt.com/c/${chat.urlId}"]`
+                          )
+                          ?.closest("li");
+                        if (pinnedChat) {
+                          pinnedChat.remove();
+                        }
+                        await removePinChatFromStorage(profileId, chat.urlId);
+                      });
+                    }
+                  }
+                );
+              }
+            }, 100);
+          });
+        }
+      }
+    });
+  }
 }
