@@ -1,6 +1,7 @@
 import handleUnpinChatBottomClick from "../pinButton/handleUnpinChatBottomClick";
 import handleSearchOriginalChatButtonClick from "./handleSearchOriginalChat";
 import handleRenamePinChat from "./handleRenamePinChat";
+import pinChatOptionsMenu from "./pinChatOptionsMenu.html?raw";
 
 export default function createChatOptionsMenu(
   li: HTMLLIElement,
@@ -16,92 +17,7 @@ export default function createChatOptionsMenu(
 
   chatOptionsMenu.className =
     "z-50 max-w-xs rounded-2xl popover bg-clip-padding bg-token-main-surface-primary shadow-lg will-change-[opacity,transform] radix-side-bottom:animate-slideUpAndFade radix-side-left:animate-slideRightAndFade radix-side-right:animate-slideLeftAndFade radix-side-top:animate-slideDownAndFade border hires:border-token-border-heavy py-1.5 border-thin max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto select-none";
-
-  chatOptionsMenu.innerHTML = `
-    <div class='max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto min-w-fit py-2'>
-      <div
-        role="menuitem"
-        class="touch:min-h-10 group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&amp;:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-        tabindex="-1"
-        data-action="unpin"
-        data-orientation="vertical"
-        data-radix-collection-item=""
-      >
-         <div class="flex items-center justify-center h-[18px] w-[18px]">
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            width='24'
-            height='24'
-            viewBox='0 -960 960 960'
-            fill='none'
-            class="icon-md"
-          >
-            <path
-              d='M672-816v72h-48v307l-72-72v-235H408v91l-90-90-30-31v-42h384ZM480-48l-36-36v-228H240v-72l96-96v-42.46L90-768l51-51 678 679-51 51-222-223h-30v228l-36 36ZM342-384h132l-66-66-66 66Zm137-192Zm-71 126Z'
-              fill='currentColor'
-              fill-rule='evenodd'
-              clip-rule='evenodd'
-            ></path>
-          </svg>
-        </div>
-        Unpin
-      </div>
-      <div
-        role='menuitem'
-        data-action="rename"
-        class="touch:min-h-10 group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&amp;:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-        tabindex="-1"
-        data-orientation="vertical"
-        data-radix-collection-item=""
-      >
-         <div class="flex items-center justify-center h-[18px] w-[18px]">
-          <svg
-            width='24'
-            height='24'
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            class="icon-md"
-          >
-            <path
-              fill-rule='evenodd'
-              clip-rule='evenodd'
-              d='M13.2929 4.29291C15.0641 2.52167 17.9359 2.52167 19.7071 4.2929C21.4784 6.06414 21.4784 8.93588 19.7071 10.7071L18.7073 11.7069L11.6135 18.8007C10.8766 19.5376 9.92793 20.0258 8.89999 20.1971L4.16441 20.9864C3.84585 21.0395 3.52127 20.9355 3.29291 20.7071C3.06454 20.4788 2.96053 20.1542 3.01362 19.8356L3.80288 15.1C3.9742 14.0721 4.46243 13.1234 5.19932 12.3865L13.2929 4.29291ZM13 7.41422L6.61353 13.8007C6.1714 14.2428 5.87846 14.8121 5.77567 15.4288L5.21656 18.7835L8.57119 18.2244C9.18795 18.1216 9.75719 17.8286 10.1993 17.3865L16.5858 11L13 7.41422ZM18 9.5858L14.4142 6.00001L14.7071 5.70712C15.6973 4.71693 17.3027 4.71693 18.2929 5.70712C19.2831 6.69731 19.2831 8.30272 18.2929 9.29291L18 9.5858Z'
-              fill='currentColor'
-            ></path>
-          </svg>
-        </div>
-        Rename
-      </div>
-      <div
-        role='menuitem'
-        data-action="originalChat"
-        class="touch:min-h-10 group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&amp;:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-        tabindex="-1"
-        data-orientation="vertical"
-        data-radix-collection-item=""
-      >
-         <div class="flex items-center justify-center h-[18px] w-[18px]">
-          <svg
-            width='24'
-            height='24'
-            viewBox='0 -960 960 960'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            class="icon-md"
-          >
-            <path
-              fill-rule='evenodd'
-              clip-rule='evenodd'
-              d='M200-800v241-1 400-640 200-200Zm0 720q-33 0-56.5-23.5T120-160v-640q0-33 23.5-56.5T200-880h320l240 240v100q-19-8-39-12.5t-41-6.5v-41H480v-200H200v640h241q16 24 36 44.5T521-80H200Zm460-120q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29ZM864-40 756-148q-21 14-45.5 21t-50.5 7q-75 0-127.5-52.5T480-300q0-75 52.5-127.5T660-480q75 0 127.5 52.5T840-300q0 26-7 50.5T812-204L920-96l-56 56Z'
-              fill='currentColor'
-            ></path>
-          </svg>
-        </div>
-        Original Chat
-      </div>
-    </div>
-  `;
+  chatOptionsMenu.innerHTML = pinChatOptionsMenu;
 
   // Add event listeners to the menu items
   chatOptionsMenu.querySelectorAll("[role='menuitem']").forEach((item) => {
