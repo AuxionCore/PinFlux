@@ -89,7 +89,6 @@ import {
 // }
 
 export default async function initContentScript(): Promise<void> {
-  console.log("Initializing content script for pinned chats...");
   let pinChatHandler: (() => void) | null = null;
   let unpinChatHandler: (() => void) | null = null;
 
@@ -123,11 +122,9 @@ export default async function initContentScript(): Promise<void> {
       ) as HTMLDivElement;
 
       if (chatOptionsMenu) {
-        console.log("Chat options menu found:", chatOptionsMenu);
         const deleteButton = chatOptionsMenu.querySelector(
           '[data-testid="delete-chat-menu-item"]'
         );
-        console.log("Delete button found:", deleteButton);
         if (deleteButton) {
           deleteButton.addEventListener("click", async () => {
             setTimeout(() => {
@@ -135,16 +132,10 @@ export default async function initContentScript(): Promise<void> {
                 '[data-testid="delete-conversation-confirm-button"]'
               ) as HTMLButtonElement;
 
-              console.log(
-                "Delete conversation confirm button found:",
-                deleteConversationConfirmButton
-              );
-
               if (deleteConversationConfirmButton) {
                 deleteConversationConfirmButton.addEventListener(
                   "click",
                   async () => {
-                    console.log("Delete button clicked");
                     const pinnedChats = document.querySelector(
                       "#pinnedChats"
                     ) as HTMLOListElement;
