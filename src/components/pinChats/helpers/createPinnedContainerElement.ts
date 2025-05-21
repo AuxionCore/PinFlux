@@ -1,5 +1,6 @@
 import { isDarkMode } from "@/components/utils/styleScheme";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
+import pinnedContainerElm from "./pinnedContainer.html?raw";
 
 // Function to create the container for pinned chats
 export default function createPinnedContainerElement(): HTMLDivElement {
@@ -113,25 +114,7 @@ export default function createPinnedContainerElement(): HTMLDivElement {
   pinnedContainer.addEventListener("drop", handleDrop);
   pinnedContainer.addEventListener("dragleave", handleDragLeave);
 
-  pinnedContainer.innerHTML = `
-    <div class="bg-token-sidebar-surface-primary sticky top-0 z-20">
-      <span class="flex h-9 items-center">
-      <h3
-        class="px-2 text-xs font-semibold text-ellipsis overflow-hidden break-all pt-3 pb-2 text-token-text-primary"
-      >
-        PinFlux Board
-      </h3>
-      </span>
-      </div>
-      <div 
-        id="chatListContainer"
-          >
-        <ol id="pinnedChats" class="pinned-chats" 
-          style="max-height: 150px; overflow-y: auto; overflow-x: hidden;"
-            
-        ></ol>
-      </div>
-    `;
+  pinnedContainer.innerHTML = pinnedContainerElm;
 
   return pinnedContainer;
 }
