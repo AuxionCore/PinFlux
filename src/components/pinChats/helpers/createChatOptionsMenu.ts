@@ -12,11 +12,15 @@ export default function createChatOptionsMenu(
 ): HTMLDivElement {
   const chatOptionsMenu = document.createElement("div");
   chatOptionsMenu.setAttribute("id", "chatOptionsMenu");
-  chatOptionsMenu.style.position = "absolute";
-  chatOptionsMenu.style.zIndex = "9999";
+  chatOptionsMenu.setAttribute("dir", "ltr");
+  chatOptionsMenu.style.cssText = `
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    min-width: max-content;
+    z-index: 50;
+    `;
 
-  chatOptionsMenu.className =
-    "z-50 max-w-xs rounded-2xl popover bg-clip-padding bg-token-main-surface-primary shadow-lg will-change-[opacity,transform] radix-side-bottom:animate-slideUpAndFade radix-side-left:animate-slideRightAndFade radix-side-right:animate-slideLeftAndFade radix-side-top:animate-slideDownAndFade border hires:border-token-border-heavy py-1.5 border-thin max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto select-none";
   chatOptionsMenu.innerHTML = pinChatOptionsMenu;
 
   // Add event listeners to the menu items
