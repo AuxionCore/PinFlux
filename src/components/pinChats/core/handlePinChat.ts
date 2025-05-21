@@ -1,7 +1,7 @@
 import getProfileId from "@/components/utils/getProfileId";
 import createPinnedChat from "@/components/pinChats/core/createPinnedChat";
-import createPinButton from "@/components/pinChats/pinButton/createPinButton";
-import createUnpinButton from "@/components/pinChats/pinButton/createUnpinButton";
+import createPinButton from "@/components/pinChats/pinButton/PinButton";
+import createUnpinButton from "@/components/pinChats/pinButton/UnpinButton";
 import getSidebarElement from "@/components/pinChats/core/getSidebarElement";
 
 // Handle pinning a chat
