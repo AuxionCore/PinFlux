@@ -37,13 +37,13 @@ export default function createChatOptionsMenu(
           // Handle rename action here
           handleRenamePinChat(li, profileId);
           break;
-        case "originalChat":
-          await handleSearchOriginalChatButtonClick(
-            sidebarElement,
-            li.querySelector("a")?.getAttribute("id") || "",
-            isDarkMode
-          );
-          break;
+        // case "originalChat":
+        //   await handleSearchOriginalChatButtonClick(
+        //     sidebarElement,
+        //     li.querySelector("a")?.getAttribute("id") || "",
+        //     isDarkMode
+        //   );
+        //   break;
       }
       closeMenu();
     });
