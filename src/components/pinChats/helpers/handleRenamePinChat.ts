@@ -2,16 +2,13 @@ import { renamePinChatInStorage } from "@/components/utils/storage";
 
 // Handle rename chat button click
 export default function handleRenamePinChat(
-  li: HTMLLIElement,
+  anchor: HTMLAnchorElement,
   profileId: string
 ): void {
-  const a = li.querySelector("a");
-  if (!a) return;
+  const title = anchor.querySelector("span");
+  if (!title) return;
 
-  const titleDiv = a.querySelector("div");
-  if (!titleDiv) return;
-
-  const originalTitle = titleDiv.textContent?.trim() || "";
+  const originalTitle = title.textContent?.trim() || "";
   const inputWrapper = document.createElement("div");
   inputWrapper.className =
     "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
@@ -23,7 +20,7 @@ export default function handleRenamePinChat(
   input.value = originalTitle;
 
   inputWrapper.appendChild(input);
-  li.appendChild(inputWrapper);
+  anchor.appendChild(inputWrapper);
 
   input.focus();
 
@@ -35,12 +32,12 @@ export default function handleRenamePinChat(
     const newValue = input.value.trim();
 
     if (!newValue) {
-      titleDiv.textContent = originalTitle;
+      title.textContent = originalTitle;
     } else if (newValue !== originalTitle) {
-      titleDiv.textContent = newValue;
+      title.textContent = newValue;
 
       // Save the new title to storage
-      const urlId = a?.getAttribute("id");
+      const urlId = anchor.getAttribute("id");
       if (!urlId) {
         throw new Error("URL ID not found, cannot rename chat.");
       }
@@ -51,7 +48,7 @@ export default function handleRenamePinChat(
   };
 
   const cancelEditing = () => {
-    titleDiv.textContent = originalTitle;
+    title.textContent = originalTitle;
     cleanup();
   };
 
