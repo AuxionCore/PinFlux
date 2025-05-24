@@ -3,10 +3,10 @@ import handlePinChat from "@/components/pinChats/core/handlePinChat";
 import pinnedContainerElm from "./pinnedContainer.html?raw";
 
 // Function to create the container for pinned chats
-export default function createPinnedContainerElement(): HTMLDivElement {
-  const pinnedContainer: HTMLDivElement = document.createElement("div");
+export default function createPinnedContainerElement(pinButton: HTMLDivElement): HTMLElement {
+  const pinnedContainer: HTMLElement = document.createElement("aside");
   pinnedContainer.setAttribute("id", "pinnedContainer");
-  pinnedContainer.className = "relative mt-5 first:mt-0 last:mb-5";
+  pinnedContainer.className = "mx-[3px] last:mb-5 mt-5";
 
   const style = document.createElement("style");
   // Style the scrollbar for pinned chats: color, width, etc.
@@ -97,7 +97,7 @@ export default function createPinnedContainerElement(): HTMLDivElement {
     pinnedContainer.style.borderStyle = "none";
     pinnedContainer.style.backgroundColor = "transparent";
 
-    if (typeof urlId === "string") await handlePinChat(urlId, chatTitle ?? "");
+    if (typeof urlId === "string") await handlePinChat(urlId, chatTitle ?? "", pinButton);
   }
 
   function handleDragLeave(): void {
