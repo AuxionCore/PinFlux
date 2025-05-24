@@ -97,17 +97,18 @@ export default async function initContentScript(): Promise<void> {
     const sidebarElement = await getSidebarElement();
     const historyElement = await getHistoryElement();
 
-    await initPinnedChats({ profileId, sidebarElement, historyElement });
+        // Create pin and unpin buttons
+    const pinButton: HTMLDivElement = createPinButton();
+    const unpinButton: HTMLDivElement = createUnpinButton();
+
+    await initPinnedChats({ profileId, sidebarElement, historyElement, pinButton });
 
     sidebarElement.addEventListener("dragstart", handleDragStart);
     sidebarElement.addEventListener("dragend", handleDragEnd);
 
-    // Create pin and unpin buttons
-    const pinButton: HTMLDivElement = createPinButton();
-    const unpinButton: HTMLDivElement = createUnpinButton();
-
     // Handle click events in the sidebar
     sidebarElement.addEventListener("click", async (event: MouseEvent) => {
+      event.preventDefault();
       event.stopPropagation();
       const target = (event.target as HTMLElement)?.closest(
         '[data-testid^="history-item-"][data-testid$="-options"]'

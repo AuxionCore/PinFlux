@@ -1,16 +1,19 @@
 import createPinnedContainerElement from "@/components/pinChats/helpers/createPinnedContainerElement";
 import createPinnedChat from "@/components/pinChats/core/createPinnedChat";
 import { getPinChatsFromStorage } from "@/components/utils/storage";
+
 export default async function initPinnedChats({
   profileId,
   sidebarElement,
   historyElement,
+  pinButton,
 }: {
   profileId: string;
   sidebarElement: HTMLElement;
   historyElement: HTMLElement;
+  pinButton: HTMLDivElement;
 }): Promise<void> {
-  const pinnedContainer = createPinnedContainerElement();
+  const pinnedContainer = createPinnedContainerElement(pinButton);
 
   const parentElement = historyElement.parentElement as HTMLDivElement;
   parentElement.insertBefore(pinnedContainer, historyElement);

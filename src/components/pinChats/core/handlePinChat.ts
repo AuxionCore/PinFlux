@@ -7,7 +7,6 @@ export default async function handlePinChat(
   urlId: string,
   chatTitle: string,
   pinButton: HTMLDivElement,
-  chatOptionsMenu?: HTMLDivElement
 ): Promise<void> {
   const profileId = await getProfileId();
   if (!profileId) {
