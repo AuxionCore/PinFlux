@@ -4,7 +4,7 @@ import handleRenamePinChat from "./handleRenamePinChat";
 import pinChatOptionsMenu from "./pinChatOptionsMenu.html?raw";
 
 export default function createChatOptionsMenu(
-  li: HTMLLIElement,
+  anchor: HTMLAnchorElement,
   sidebarElement: HTMLElement,
   isDarkMode: boolean,
   profileId: string,
@@ -31,11 +31,11 @@ export default function createChatOptionsMenu(
       const action = (e.currentTarget as HTMLElement).dataset.action;
       switch (action) {
         case "unpin":
-          await handleUnpinChatBottomClick(li, profileId);
+          await handleUnpinChatBottomClick(anchor, profileId);
           break;
         case "rename":
           // Handle rename action here
-          handleRenamePinChat(li, profileId);
+          handleRenamePinChat(anchor, profileId);
           break;
         // case "originalChat":
         //   await handleSearchOriginalChatButtonClick(
