@@ -6,13 +6,9 @@ export default function getSidebarElement(): Promise<HTMLElement> {
 
     const interval = setInterval(() => {
       const sidebarElement = document.querySelector(
-        ".group\\/sidebar"
+        ".bg-token-sidebar-surface-primary"
       ) as HTMLElement | null;
-      if (
-        sidebarElement &&
-        sidebarElement.children.length >= 3 &&
-        sidebarElement.children[2] instanceof HTMLDivElement
-      ) {
+      if (sidebarElement) {
         clearInterval(interval);
         resolve(sidebarElement);
       }
