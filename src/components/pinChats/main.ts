@@ -8,6 +8,8 @@ import setupUnpinChatListener from "@/components/pinChats/core/setupUnpinChatLis
 import handleDragStart from "@/components/pinChats/dragAndDrop/handleDragStart";
 import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
 import setupPinChatListener from "./core/setupPinChatListener";
+import handlePinChat from "@/components/pinChats/core/handlePinChat";
+
 import {
   getPinChatsFromStorage,
   removePinChatFromStorage,
@@ -89,35 +91,34 @@ import {
 // }
 
 export default async function initContentScript(): Promise<void> {
-  let pinChatHandler: (() => void) | null = null;
-  let unpinChatHandler: (() => void) | null = null;
+  let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null;
 
   try {
     const profileId = await getProfileId();
     const sidebarElement = await getSidebarElement();
     const historyElement = await getHistoryElement();
 
-        // Create pin and unpin buttons
-    const pinButton: HTMLDivElement = createPinButton();
+    // Create pin and unpin buttons
     const unpinButton: HTMLDivElement = createUnpinButton();
 
-    await initPinnedChats({ profileId, sidebarElement, historyElement, pinButton });
+    await initPinnedChats({
+      profileId,
+      historyElement,
+    });
 
-    sidebarElement.addEventListener("dragstart", handleDragStart);
-    sidebarElement.addEventListener("dragend", handleDragEnd);
+    // TODO: Implement drag and drop functionality
+    historyElement.addEventListener("dragstart", handleDragStart);
+    historyElement.addEventListener("dragend", handleDragEnd);
 
     // Handle click events in the sidebar
-    sidebarElement.addEventListener("click", async (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
+    historyElement.addEventListener("click", async (event: MouseEvent) => {
       const target = (event.target as HTMLElement)?.closest(
         '[data-testid^="history-item-"][data-testid$="-options"]'
       );
-      const chatElement = target?.closest("li") as HTMLLIElement;
-      const chatLink = chatElement?.querySelector("a") as HTMLAnchorElement;
+      const chatLink = target?.closest("a") as HTMLAnchorElement | null;
       const chatUrl = chatLink?.getAttribute("href") as string;
       const urlId = chatUrl?.split("/").slice(-1)[0];
-      const chatTitle = chatLink?.querySelector("div")?.textContent;
+      const chatTitle = chatLink?.querySelector("span")?.textContent;
       if (target) {
         const chatOptionsMenu = document.querySelector(
           'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
@@ -127,6 +128,7 @@ export default async function initContentScript(): Promise<void> {
           const deleteButton = chatOptionsMenu.querySelector(
             '[data-testid="delete-chat-menu-item"]'
           );
+
           if (deleteButton) {
             deleteButton.addEventListener("click", async () => {
               setTimeout(() => {
@@ -138,15 +140,14 @@ export default async function initContentScript(): Promise<void> {
                   deleteConversationConfirmButton.addEventListener(
                     "click",
                     async () => {
-                      const pinnedChats = document.querySelector(
-                        "#pinnedChats"
-                      ) as HTMLOListElement;
+                      const pinnedContainer = document.querySelector(
+                        "#pinnedContainer"
+                      ) as HTMLElement;
                       if (urlId) {
-                        const pinnedChat = pinnedChats
-                          .querySelector(
-                            `a[href="https://chatgpt.com/c/${urlId}"]`
-                          )
-                          ?.closest("li");
+                        const pinnedChat = pinnedContainer.querySelector(
+                          `a[href="https://chatgpt.com/c/${urlId}"]`
+                        );
+
                         if (pinnedChat) {
                           pinnedChat.remove();
                         }
@@ -164,19 +165,25 @@ export default async function initContentScript(): Promise<void> {
           if (urlId && savedPinChats.some((chat) => chat.urlId === urlId)) {
             chatOptionsMenu.prepend(unpinButton);
           } else {
+            const pinButton: HTMLDivElement = createPinButton();
             chatOptionsMenu.prepend(pinButton);
+            if (urlId && chatTitle) {
+              async function pinChatHandler(event: MouseEvent) {
+                event.stopPropagation();
+                await handlePinChat(
+                  urlId,
+                  chatTitle!,
+                  pinButton,
+                  chatOptionsMenu
+                );
+              }
+              pinButton.addEventListener("click", pinChatHandler);
+              // setupPinChatListener(urlId, pinButton, pinChatHandler, chatTitle);
+            }
           }
 
           // Handle pinning and unpinning
-          if (urlId && chatTitle) {
-            setupPinChatListener(
-              urlId,
-              pinButton,
-              pinChatHandler,
-              chatTitle,
-              chatOptionsMenu
-            );
-          }
+
           setupUnpinChatListener(
             profileId,
             urlId,
@@ -211,19 +218,18 @@ export default async function initContentScript(): Promise<void> {
                   deleteConversationConfirmButton.addEventListener(
                     "click",
                     async () => {
-                      const pinnedChats = document.querySelector(
-                        "#pinnedChats"
-                      ) as HTMLOListElement;
+                      const pinnedContainer = document.querySelector(
+                        "#pinnedContainer"
+                      ) as HTMLElement;
                       if (profileId) {
                         const savedPinChats = await getPinChatsFromStorage(
                           profileId
                         );
                         savedPinChats.forEach(async (chat) => {
-                          const pinnedChat = pinnedChats
-                            .querySelector(
-                              `a[href="https://chatgpt.com/c/${chat.urlId}"]`
-                            )
-                            ?.closest("li");
+                          const pinnedChat = pinnedContainer.querySelector(
+                            `a[href="https://chatgpt.com/c/${chat.urlId}"]`
+                          );
+
                           if (pinnedChat) {
                             pinnedChat.remove();
                           }

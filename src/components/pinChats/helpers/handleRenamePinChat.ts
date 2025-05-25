@@ -5,38 +5,58 @@ export default function handleRenamePinChat(
   anchor: HTMLAnchorElement,
   profileId: string
 ): void {
-  const title = anchor.querySelector("span");
-  if (!title) return;
+  const titleSpan = anchor.querySelector("span");
+  if (!titleSpan) return;
 
-  const originalTitle = title.textContent?.trim() || "";
-  const inputWrapper = document.createElement("div");
-  inputWrapper.className =
-    "bg-token-sidebar-surface-secondary absolute start-[7px] end-2 top-0 bottom-0 flex items-center z-10";
+  const wrapperDiv = titleSpan.closest(".truncate");
+  if (!wrapperDiv) return;
+
+  const buttonWrapper = anchor.querySelector("button")?.parentElement
+    ?.parentElement as HTMLDivElement;
+  if (!buttonWrapper) return;
+
+  const originalTitle = titleSpan.textContent?.trim() || "";
+
+  // הסתרת הטקסט המקורי
+  (wrapperDiv as HTMLElement).style.display = "none";
+  buttonWrapper.style.display = "none";
 
   const input = document.createElement("input");
   input.className =
-    "border-token-border-default w-full border bg-transparent p-0 text-sm";
+    "w-full border-none bg-transparent p-0 text-sm focus:ring-0";
   input.type = "text";
   input.value = originalTitle;
 
+  const inputWrapper = document.createElement("div");
+  inputWrapper.className = "flex min-w-0 grow items-center gap-2";
   inputWrapper.appendChild(input);
-  anchor.appendChild(inputWrapper);
+
+  // הוספת input לעריכה
+  anchor.querySelector(".flex.min-w-0")?.appendChild(inputWrapper);
 
   input.focus();
 
+  // השבתת פעולת הקישור
+  const preventClick = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  anchor.addEventListener("click", preventClick, true); // useCapture true כדי לתפוס מוקדם
+
   const cleanup = () => {
     inputWrapper.remove();
+    (wrapperDiv as HTMLElement).style.display = "";
+    buttonWrapper.style.display = "";
+    anchor.removeEventListener("click", preventClick, true);
   };
 
   const finishEditing = async () => {
     const newValue = input.value.trim();
 
     if (!newValue) {
-      title.textContent = originalTitle;
+      titleSpan.textContent = originalTitle;
     } else if (newValue !== originalTitle) {
-      title.textContent = newValue;
-
-      // Save the new title to storage
+      titleSpan.textContent = newValue;
       const urlId = anchor.getAttribute("id");
       if (!urlId) {
         throw new Error("URL ID not found, cannot rename chat.");
@@ -48,7 +68,7 @@ export default function handleRenamePinChat(
   };
 
   const cancelEditing = () => {
-    title.textContent = originalTitle;
+    titleSpan.textContent = originalTitle;
     cleanup();
   };
 

@@ -10,11 +10,11 @@ export default async function handleUnpinChat(
     if (urlId) {
       unpinButton.remove();
       const pinnedChats = document.querySelector(
-        "#pinnedChats"
+        "#chatListContainer"
       ) as HTMLOListElement;
-      const pinnedChat = pinnedChats
-        .querySelector(`a[href="https://chatgpt.com/c/${urlId}"]`)
-        ?.closest("li");
+      const pinnedChat = pinnedChats.querySelector(
+        `a[href="https://chatgpt.com/c/${urlId}"]`
+      ) as HTMLAnchorElement;
       if (pinnedChat) {
         pinnedChat.remove();
       }

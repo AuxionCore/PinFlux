@@ -1,7 +1,7 @@
 import createDraggableDisplay from "./createDraggableDisplay";
 
 export default function handleDragStart(event: DragEvent): void {
-  const target = event.target as HTMLElement;
+  const target = event.target as HTMLAnchorElement;
 
   if (!target.id) {
     const pinnedChats = document.querySelector(

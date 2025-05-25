@@ -2,9 +2,9 @@ import createChatOptionsMenu from "./createChatOptionsMenu";
 import pinChatOptionsButton from "./pinChatOptionsButton.html?raw";
 
 export default function createChatOptionsButton(
-  li: HTMLLIElement,
+  anchor: HTMLAnchorElement,
   buttonWrapper: HTMLDivElement,
-  sidebarElement: HTMLElement,
+  historyElement: HTMLElement,
   isDarkMode: boolean,
   profileId: string
 ): HTMLButtonElement {
@@ -13,23 +13,25 @@ export default function createChatOptionsButton(
 
   const chatOptionsBtn: HTMLButtonElement = document.createElement("button");
   chatOptionsBtn.setAttribute("type", "button");
+  chatOptionsBtn.setAttribute("tabindex", "0");
+  chatOptionsBtn.setAttribute("data-trailing-button", "");
   chatOptionsBtn.setAttribute("aria-expanded", "false");
+  chatOptionsBtn.setAttribute("data-state", "closed");
   chatOptionsBtn.setAttribute("aria-haspopup", "menu");
   chatOptionsBtn.setAttribute("aria-label", "Open pin conversation options");
 
-  chatOptionsBtn.className =
-    "text-token-text-secondary hover:text-token-text-primary radix-state-open:text-token-text-secondary flex items-center justify-center transition";
+  chatOptionsBtn.className = "__menu-item-trailing-btn";
   chatOptionsBtn.innerHTML = pinChatOptionsButton;
 
   const pinnedChatsList = document.querySelector(
-    "#pinnedChats"
-  ) as HTMLOListElement;
+    "#chatListContainer"
+  ) as HTMLDivElement;
 
   function closeMenu() {
     if (currentOpenMenu) {
       currentOpenMenu.remove();
-      buttonWrapper.className =
-        "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 can-hover:not-group-hover:opacity-0 group-focus-within:opacity-100! group-hover:opacity-100! group-focus:opacity-100! focus-within:opacity-100! focus:opacity-100!";
+      chatOptionsBtn.setAttribute("aria-expanded", "false");
+      chatOptionsBtn.setAttribute("data-state", "closed");
 
       currentOpenMenu = null;
       currentTargetButton = null;
@@ -76,6 +78,8 @@ export default function createChatOptionsButton(
     event.preventDefault();
     event.stopPropagation();
     const button = event.currentTarget as HTMLButtonElement;
+    button.setAttribute("aria-expanded", "true");
+    button.setAttribute("data-state", "open");
 
     // Check if the menu is already open for the current button
     if (currentTargetButton === button && currentOpenMenu) {
@@ -83,16 +87,13 @@ export default function createChatOptionsButton(
       return;
     }
 
-    buttonWrapper.className =
-      "absolute top-0 bottom-0 inline-flex items-center gap-1.5 pe-2 ltr:end-0 rtl:start-0 flex";
-
     closeMenu(); // Close any existing menu before opening a new one
 
     currentTargetButton = button;
 
     const chatOptionsMenu = createChatOptionsMenu(
-      li,
-      sidebarElement,
+      anchor,
+      historyElement,
       isDarkMode,
       profileId,
       closeMenu

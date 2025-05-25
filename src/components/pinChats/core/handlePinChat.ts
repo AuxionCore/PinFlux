@@ -1,12 +1,13 @@
 import getProfileId from "@/components/utils/getProfileId";
 import createPinnedChat from "@/components/pinChats/core/createPinnedChat";
-import getSidebarElement from "@/components/pinChats/core/getSidebarElement";
+import getHistoryElement from "@/components/pinChats/core/getHistoryElement";
 
 // Handle pinning a chat
 export default async function handlePinChat(
   urlId: string,
   chatTitle: string,
-  pinButton: HTMLDivElement,
+  pinButton?: HTMLDivElement,
+  chatOptionsMenu?: HTMLDivElement
 ): Promise<void> {
   const profileId = await getProfileId();
   if (!profileId) {
@@ -14,9 +15,9 @@ export default async function handlePinChat(
     return;
   }
 
-  const sidebarElement = await getSidebarElement();
-  if (!sidebarElement) {
-    console.error("Sidebar element not found. Cannot pin chat.");
+  const historyElement = await getHistoryElement();
+  if (!historyElement) {
+    console.error("History element not found. Cannot pin chat.");
     return;
   }
 
@@ -26,16 +27,17 @@ export default async function handlePinChat(
 
   // Check if the chat is already pinned
   if (urlId && !savedChats.some((chat) => chat.urlId === urlId)) {
-    pinButton.remove();
+    pinButton?.remove();
+    chatOptionsMenu?.remove();
 
     const pinnedChatsList = document.querySelector(
-      "#pinnedChats"
-    ) as HTMLOListElement;
+      "#chatListContainer"
+    ) as HTMLDivElement;
     const newPinnedChat = createPinnedChat(
       chatTitle || "",
       urlId,
       profileId,
-      sidebarElement
+      historyElement
     );
     pinnedChatsList.prepend(newPinnedChat);
 

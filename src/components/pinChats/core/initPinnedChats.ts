@@ -4,22 +4,18 @@ import { getPinChatsFromStorage } from "@/components/utils/storage";
 
 export default async function initPinnedChats({
   profileId,
-  sidebarElement,
   historyElement,
-  pinButton,
 }: {
   profileId: string;
-  sidebarElement: HTMLElement;
   historyElement: HTMLElement;
-  pinButton: HTMLDivElement;
 }): Promise<void> {
-  const pinnedContainer = createPinnedContainerElement(pinButton);
+  const pinnedContainer = createPinnedContainerElement();
 
   const parentElement = historyElement.parentElement as HTMLDivElement;
   parentElement.insertBefore(pinnedContainer, historyElement);
   const pinnedChats = pinnedContainer.querySelector(
-    "#pinnedChats"
-  ) as HTMLOListElement;
+    "#chatListContainer"
+  ) as HTMLDivElement;
 
   // Load pinned chats from storage
   if (!profileId) {
@@ -32,7 +28,7 @@ export default async function initPinnedChats({
       chat.title,
       chat.urlId,
       profileId,
-      sidebarElement
+      historyElement
     );
     pinnedChats.prepend(pinnedChat);
   });

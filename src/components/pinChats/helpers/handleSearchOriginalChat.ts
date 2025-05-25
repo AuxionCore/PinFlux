@@ -1,14 +1,16 @@
 // Handle search original chat button click
 export default async function handleSearchOriginalChatButtonClick(
-  sidebarElement: HTMLElement,
+  historyElement: HTMLElement,
   urlId: string,
   isDarkMode: boolean
 ): Promise<void> {
-  const scrollContainer = sidebarElement.parentElement;
+  const scrollContainer = historyElement.closest(
+    "nav"
+  ) as HTMLElement | null;
   if (!scrollContainer) return;
 
   const findChatUrl = () =>
-    sidebarElement.querySelector(`a[href="/c/${urlId}"]`);
+    historyElement.querySelector(`a[href="/c/${urlId}"]`);
 
   while (!findChatUrl()) {
     scrollContainer.scrollTo({

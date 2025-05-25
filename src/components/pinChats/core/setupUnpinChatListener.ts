@@ -4,14 +4,15 @@ export default function setupUnpinChatListener(
   profileId: string,
   urlId: string,
   unpinButton: HTMLDivElement,
-  unpinChatHandler: (() => void) | null = null
+  unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null
 ) {
   if (unpinChatHandler) {
     unpinButton.removeEventListener("click", unpinChatHandler);
   }
 
-  unpinChatHandler = () => {
-    handleUnpinChat(profileId, urlId, unpinButton);
+  unpinChatHandler = async (event: MouseEvent) => {
+    event.stopPropagation();
+    await handleUnpinChat(profileId, urlId, unpinButton);
   };
 
   unpinButton.addEventListener("click", unpinChatHandler);

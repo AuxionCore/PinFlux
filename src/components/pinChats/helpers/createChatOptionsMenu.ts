@@ -5,7 +5,7 @@ import pinChatOptionsMenu from "./pinChatOptionsMenu.html?raw";
 
 export default function createChatOptionsMenu(
   anchor: HTMLAnchorElement,
-  sidebarElement: HTMLElement,
+  historyElement: HTMLElement,
   isDarkMode: boolean,
   profileId: string,
   closeMenu: () => void = () => {}
@@ -39,7 +39,7 @@ export default function createChatOptionsMenu(
           break;
         // case "originalChat":
         //   await handleSearchOriginalChatButtonClick(
-        //     sidebarElement,
+        //     historyElement,
         //     li.querySelector("a")?.getAttribute("id") || "",
         //     isDarkMode
         //   );
