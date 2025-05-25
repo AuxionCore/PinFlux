@@ -1,17 +1,28 @@
 import { isDarkMode } from "@/components/utils/styleScheme";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
-import pinnedContainerElm from "./pinnedContainer.html?raw";
 
 // Function to create the container for pinned chats
-export default function createPinnedContainerElement(pinButton: HTMLDivElement): HTMLElement {
+export default function createPinnedContainerElement(): HTMLElement {
   const pinnedContainer: HTMLElement = document.createElement("aside");
+  const pinnedContainerTitle: HTMLHeadingElement = document.createElement("h2");
+  const chatListContainer: HTMLDivElement = document.createElement("div");
+  chatListContainer.setAttribute("id", "chatListContainer");
+  pinnedContainerTitle.textContent = "PinFlux Board";
+  pinnedContainerTitle.className = "__menu-label";
+  chatListContainer.style.position = "relative";
   pinnedContainer.setAttribute("id", "pinnedContainer");
   pinnedContainer.className = "mx-[3px] last:mb-5 mt-5";
+
+  pinnedContainer.appendChild(pinnedContainerTitle);
+  pinnedContainer.appendChild(chatListContainer);
 
   const style = document.createElement("style");
   // Style the scrollbar for pinned chats: color, width, etc.
   style.textContent = `
-          #pinnedChats {
+          #chatListContainer {
+          max-height: 150px;
+          overflow-y: auto;
+          overflow-x: hidden;
           scrollbar-width: thin; /* Firefox */
           --scroll-thumb: #e0e0e0; 
           --scroll-thumb-hover: #c0c0c0; 
@@ -22,7 +33,7 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
         ${
           isDarkMode &&
           `
-          #pinnedChats {
+          #chatListContainer {
             --scroll-thumb: #303030;
             --scroll-thumb-hover: #505050;
             --scroll-thumb-active: #707070;
@@ -31,12 +42,12 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
         `
         }
 
-        #pinnedChats::-webkit-scrollbar {
+        #chatListContainer::-webkit-scrollbar {
           width: 6px;
           height: 6px;
         }
 
-        #pinnedChats::-webkit-scrollbar-thumb {
+        #chatListContainer::-webkit-scrollbar-thumb {
           background-color: var(--scroll-thumb);
           border-radius: 10px;
           border: 2px solid transparent;
@@ -44,17 +55,17 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
           transition: background-color 0.2s ease;
         }
 
-        #pinnedChats:hover {
+        #chatListContainer:hover {
           --scroll-thumb: var(--scroll-thumb-hover);
         }
 
-        #pinnedChats::-webkit-scrollbar-thumb:hover {
+        #chatListContainer::-webkit-scrollbar-thumb:hover {
           background-color: var(--scroll-thumb-active);
         }
 
-        #pinnedChats::-webkit-scrollbar-track,
-        #pinnedChats::-webkit-scrollbar-corner,
-        #pinnedChats::-webkit-scrollbar-button {
+        #chatListContainer::-webkit-scrollbar-track,
+        #chatListContainer::-webkit-scrollbar-corner,
+        #chatListContainer::-webkit-scrollbar-button {
           background-color: transparent;
         }
       
@@ -81,8 +92,8 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
     const chatLinkData = event.dataTransfer?.getData("text/plain");
     const chatHref = chatLinkData?.match(/href="([^"]+)"/)?.[1];
     const urlId = chatHref?.split("/").slice(-1)[0];
-    const titleRegex = /title="(.*?)"/;
-    const chatTitle = chatLinkData?.match(titleRegex)?.[1];
+    const spanTextRegex = /<span[^>]*>(.*?)<\/span>/;
+    const chatTitle = chatLinkData?.match(spanTextRegex)?.[1];
 
     // Remove the draggable display element
     const draggableDisplay = document.querySelector(
@@ -92,12 +103,14 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
       draggableDisplay.remove();
     }
 
-    pinnedContainer.style.height = "auto";
-    pinnedContainer.style.transition = "height 0.3s";
-    pinnedContainer.style.borderStyle = "none";
-    pinnedContainer.style.backgroundColor = "transparent";
+    chatListContainer.style.height = "auto";
+    chatListContainer.style.transition = "height 0.3s";
+    chatListContainer.style.borderStyle = "none";
+    chatListContainer.style.backgroundColor = "transparent";
 
-    if (typeof urlId === "string") await handlePinChat(urlId, chatTitle ?? "", pinButton);
+    if (typeof urlId === "string" && chatTitle) {
+      await handlePinChat(urlId, chatTitle);
+    }
   }
 
   function handleDragLeave(): void {
@@ -110,11 +123,9 @@ export default function createPinnedContainerElement(pinButton: HTMLDivElement):
     }
   }
 
-  pinnedContainer.addEventListener("dragover", handleDragOver);
-  pinnedContainer.addEventListener("drop", handleDrop);
-  pinnedContainer.addEventListener("dragleave", handleDragLeave);
-
-  pinnedContainer.innerHTML = pinnedContainerElm;
+  chatListContainer.addEventListener("dragover", handleDragOver);
+  chatListContainer.addEventListener("drop", handleDrop);
+  chatListContainer.addEventListener("dragleave", handleDragLeave);
 
   return pinnedContainer;
 }
