@@ -1,13 +1,9 @@
 <div
-  data-side="top"
-  data-align="start"
   role="menu"
   aria-orientation="vertical"
-  data-state="open"
   data-radix-menu-content=""
   dir="ltr"
   class="z-50 max-w-xs rounded-2xl popover bg-clip-padding bg-token-main-surface-primary shadow-lg will-change-[opacity,transform] radix-side-bottom:animate-slideUpAndFade radix-side-left:animate-slideRightAndFade radix-side-right:animate-slideLeftAndFade radix-side-top:animate-slideDownAndFade border hires:border-token-border-heavy py-1.5 border-thin max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto select-none"
-  tabindex="-1"
   data-orientation="vertical"
   style="
     outline: none;
@@ -26,12 +22,11 @@
 >
   <div
     role="menuitem"
-    class="group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-    tabindex="-1"
     data-action="unpin"
     data-orientation="vertical"
+    class="group __menu-item pe-8 gap-1.5"
   >
-    <div class="flex items-center justify-center h-[18px] w-[18px]">
+    <div class="flex shrink-0 items-center justify-center h-[18px] w-[18px]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -53,11 +48,10 @@
   <div
     role="menuitem"
     data-action="rename"
-    class="group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-    tabindex="-1"
     data-orientation="vertical"
+    class="group __menu-item pe-8 gap-1.5"
   >
-    <div class="flex items-center justify-center h-[18px] w-[18px]">
+    <div class="flex shrink-0 items-center justify-center h-[18px] w-[18px]">
       <svg
         width="24"
         height="24"
@@ -79,11 +73,10 @@
   <!-- <div
     role="menuitem"
     data-action="originalChat"
-    class="group relative mx-1.5 my-0 flex can-hover:cursor-pointer items-center rounded-[10px] py-2 px-2.5 text-sm select-none radix-disabled:pointer-events-none radix-disabled:opacity-50 focus-visible:outline-0 [--menu-item-highlighted:#f5f5f5] dark:[--menu-item-highlighted:var(--interactive-bg-secondary-hover)] [--menu-item-active:#f0f0f0] dark:[--menu-item-active:var(--interactive-bg-secondary-press)] [&:where([data-state=open])]:bg-[color-mix(in_srgb,var(--menu-item-highlighted)50%,transparent)] data-highlighted:bg-(--menu-item-highlighted) can-hover:hover:bg-(--menu-item-highlighted) focus-visible:bg-(--menu-item-highlighted) active:bg-(--menu-item-active) pe-8 gap-1.5"
-    tabindex="-1"
-    data-orientation="vertical"
+     data-orientation="vertical"
+    class="group __menu-item pe-8 gap-1.5"
   >
-    <div class="flex items-center justify-center h-[18px] w-[18px]">
+     <div class="flex shrink-0 items-center justify-center h-[18px] w-[18px]">
       <svg
         width="24"
         height="24"
