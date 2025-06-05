@@ -7,6 +7,22 @@
     "message": "Pin. Revisit. Flow on. Pin chats in ChatGPT to your PinFlux board.",
     "description": "Description of the extension"
   },
+  "optionsTitle": {
+    "message": "Options",
+    "description": "Title for options page"
+  },
+  "optionsDescription": {
+    "message": "Customize your PinFlux experience",
+    "description": "Description for options page"
+  },
+  "shortcutSettingsParagraphText": {
+    "message": "To customize your shortcuts, visit the ",
+    "description": "Text for link to shortcut settings"
+  },
+  "shortcutSettingsLinkText": {
+    "message": "Shortcut Settings",
+    "description": "Text for link to shortcut settings"
+  },
   "pinCurrentChatCommand": {
     "message": "Pin Current Chat",
     "description": "Command to pin the current chat"
