@@ -7,6 +7,10 @@
     "message": "Pin. Revisit. Flow on. Pin chats in ChatGPT to your PinFlux board.",
     "description": "Description of the extension"
   },
+  "pinCurrentChatCommand": {
+    "message": "Pin Current Chat",
+    "description": "Command to pin the current chat"
+  },
   "popupCloseButton": {
     "message": "Close",
     "description": "Close button text"

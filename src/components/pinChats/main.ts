@@ -9,6 +9,7 @@ import handleDragStart from "@/components/pinChats/dragAndDrop/handleDragStart";
 import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
 import setupPinChatListener from "./core/setupPinChatListener";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
+import pinCurrentConversation from "@/components/pinChats/core/pinCurrentConversation";
 
 import {
   getPinChatsFromStorage,
@@ -104,6 +105,12 @@ export default async function initContentScript(): Promise<void> {
     await initPinnedChats({
       profileId,
       historyElement,
+    });
+
+    browser.runtime.onMessage.addListener(async (message) => {
+      if (message.action === "pin-current-chat") {
+        await pinCurrentConversation();
+      }
     });
 
     // TODO: Implement drag and drop functionality
