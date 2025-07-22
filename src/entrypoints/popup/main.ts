@@ -1,3 +1,5 @@
+import { showPinShortcutTooltip } from "@/components/pinChats/helpers/showTooltipOnce";
+
 const elements = {
   closePopup: "closePopup",
   errorToast: "errorToast",
@@ -43,6 +45,17 @@ async function popupScript() {
       setVersion();
       if (showErrorToast) await setErrorToast();
       if (showWhatsNewToast) await setWhatsNewToast();
+    }
+
+    const notification = await browser.storage.sync.get(
+      "showShortcutsNotification"
+    );
+    if (notification.showShortcutsNotification) {
+      showPinShortcutTooltip();
+
+      browser.storage.sync.set({
+        showShortcutsNotification: false,
+      });
     }
 
     async function setWhatsNewToast() {
