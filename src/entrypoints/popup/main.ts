@@ -161,7 +161,7 @@ async function popupScript() {
         {
           id: elements.feedbackLink,
           url: import.meta.env.CHROME
-            ? `https://chromewebstore.google.com/detail/${extensionId}/support`
+            ? `https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/${extensionId}/support`
             : import.meta.env.FIREFOX
             ? `https://addons.mozilla.org/en-US/firefox/addon/rtlify-gpt/`
             : "",
@@ -169,7 +169,7 @@ async function popupScript() {
         {
           id: elements.rateUsLink,
           url: import.meta.env.CHROME
-            ? `https://chromewebstore.google.com/detail/${extensionId}/reviews`
+            ? `https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/${extensionId}/reviews`
             : import.meta.env.FIREFOX
             ? `https://addons.mozilla.org/en-US/firefox/addon/pinflux/`
             : "",
