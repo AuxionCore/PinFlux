@@ -1,5 +1,4 @@
 import getProfileId from "@/components/utils/getProfileId";
-import getSidebarElement from "@/components/pinChats/core/getSidebarElement";
 import getHistoryElement from "@/components/pinChats/core/getHistoryElement";
 import initPinnedChats from "@/components/pinChats/core/initPinnedChats";
 import createPinButton from "./pinButton/PinButton";
@@ -7,9 +6,9 @@ import createUnpinButton from "./pinButton/UnpinButton";
 import setupUnpinChatListener from "@/components/pinChats/core/setupUnpinChatListener";
 import handleDragStart from "@/components/pinChats/dragAndDrop/handleDragStart";
 import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
-import setupPinChatListener from "./core/setupPinChatListener";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
 import pinCurrentConversation from "@/components/pinChats/core/pinCurrentConversation";
+import { showTooltipOnce } from "@/components/pinChats/helpers/showTooltipOnce";
 
 import {
   getPinChatsFromStorage,
@@ -96,7 +95,6 @@ export default async function initContentScript(): Promise<void> {
 
   try {
     const profileId = await getProfileId();
-    const sidebarElement = await getSidebarElement();
     const historyElement = await getHistoryElement();
 
     // Create pin and unpin buttons
@@ -109,9 +107,23 @@ export default async function initContentScript(): Promise<void> {
 
     browser.runtime.onMessage.addListener(async (message) => {
       if (message.action === "pin-current-chat") {
-        await pinCurrentConversation();
+        try {
+          await pinCurrentConversation();
+        } catch (error) {
+          console.error("Failed to pin current conversation:", error);
+        }
       }
     });
+    // const notification = await browser.storage.sync.get(
+    //   "notification"
+    // );
+    // if (notification.showShortcutsNotification) {
+    //   showTooltipOnce();
+
+    //   browser.storage.sync.set({
+    //     showShortcutsNotification: false,
+    //   });
+    // }
 
     // TODO: Implement drag and drop functionality
     historyElement.addEventListener("dragstart", handleDragStart);
