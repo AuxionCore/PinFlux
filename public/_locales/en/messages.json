@@ -23,6 +23,20 @@
     "message": "Shortcut Settings",
     "description": "Text for link to shortcut settings"
   },
+  "pinShortcutNotificationTitle": {
+    "message": "Pin Shortcut Set",
+    "description": "Title for notification when pin shortcut is set"
+  },
+  "pinShortcutNotificationMessage": {
+    "message": "Now you can pin current chat with the shortcut: $SHORTCUT$. You can change it in the Shortcut Settings.",
+    "description": "Notification for setting pin shortcut",
+    "placeholders": {
+      "SHORTCUT": {
+        "content": "$1",
+        "description": "Shortcut placeholder"
+      }
+    }
+  },
   "pinCurrentChatCommand": {
     "message": "Pin Current Chat",
     "description": "Command to pin the current chat"
