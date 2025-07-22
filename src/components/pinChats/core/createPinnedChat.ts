@@ -25,7 +25,7 @@ export default function createPinnedChat(
   anchor.setAttribute("data-fill", "");
   anchor.setAttribute("data-discovery", "true");
   anchor.href = `https://chatgpt.com/c/${urlId}`;
-  anchor.className = "group __menu-item justify-between gap-6 data-fill:gap-2";
+  anchor.className = "group __menu-item hoverable";
 
   anchor.addEventListener("click", (event) => {
     event.preventDefault();
@@ -40,7 +40,7 @@ export default function createPinnedChat(
 
   titleSpan.textContent = title;
   titleSpan.setAttribute("dir", "auto");
-  titleDiv1.className = "flex min-w-0 grow items-center gap-2";
+  titleDiv1.className = "flex min-w-0 grow items-center gap-2.5";
   titleDiv2.className = "truncate";
 
   const chatOptionsButton = createChatOptionsButton(
