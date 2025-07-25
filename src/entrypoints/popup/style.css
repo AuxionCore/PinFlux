@@ -24,7 +24,7 @@ body {
   min-width: 330px;
   width: 100%;
   max-width: 800px;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: #333;
@@ -113,6 +113,7 @@ p {
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding-block-end: 15px;
 }
 
 .toast {
@@ -127,7 +128,7 @@ p {
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.3s ease;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 }
 
 .toast.show {
@@ -291,7 +292,7 @@ p {
   }
 
   .theme-rate-icon {
-    content: url("../../../icons/light-rate-icon.png");
+    content: url('../../../icons/light-rate-icon.png');
   }
 }
 
@@ -366,6 +367,6 @@ p {
   }
 
   .theme-rate-icon {
-    content: url("../../../icons/dark-rate-icon.png");
+    content: url('../../../icons/dark-rate-icon.png');
   }
 }
