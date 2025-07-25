@@ -37,6 +37,18 @@
       }
     }
   },
+  "featureSurveyNotificationTitle": {
+    "message": "Feature Survey",
+    "description": "Title for feature survey notification"
+  },
+  "featureSurveyNotificationMessage": {
+    "message": "I'm working on new features for the pinned chats extension — and I’d love your input. Please take a moment to fill out this short survey to help shape the future of PinFlux.",
+    "description": "Message for feature survey notification"
+  },
+  "featureSurveyNotificationLinkText": {
+    "message": "Take the Survey",
+    "description": "Text for link to feature survey"
+  },
   "pinCurrentChatCommand": {
     "message": "Pin Current Chat",
     "description": "Command to pin the current chat"
