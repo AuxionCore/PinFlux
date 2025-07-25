@@ -1,47 +1,46 @@
 function createShortcutSettingsLink() {
-  const container = document.createElement("div");
-  container.style.marginTop = "1rem";
+  const container = document.createElement('div')
+  container.style.marginTop = '1rem'
 
-  const paragraph = document.createElement("p");
+  const paragraph = document.createElement('p')
   paragraph.textContent = browser.i18n.getMessage(
-    "shortcutSettingsParagraphText"
-  );
+    'shortcutSettingsParagraphText'
+  )
 
-  const shortcutsLink = document.createElement("button");
-  shortcutsLink.className = "button-link";
+  const shortcutsLink = document.createElement('button')
+  shortcutsLink.className = 'button-link'
   shortcutsLink.textContent = browser.i18n.getMessage(
-    "shortcutSettingsLinkText"
-  );
+    'shortcutSettingsLinkText'
+  )
 
   shortcutsLink.addEventListener(
-    "click",
-    async () => await openTab("chrome://extensions/shortcuts")
-  );
+    'click',
+    async () => await openTab('chrome://extensions/shortcuts')
+  )
 
-  paragraph.appendChild(shortcutsLink);
-  paragraph.appendChild(document.createTextNode("."));
+  paragraph.appendChild(shortcutsLink)
+  paragraph.appendChild(document.createTextNode('.'))
 
-  container.appendChild(paragraph);
+  container.appendChild(paragraph)
 
-  return container;
+  return container
 }
 
-const optionsTitle = document.getElementById("optionsTitle");
-const optionsDescription = document.getElementById("optionsDescription");
-const container = document.getElementById("shortcut-link-container");
+const optionsTitle = document.getElementById('optionsTitle')
+const optionsDescription = document.getElementById('optionsDescription')
+const container = document.getElementById('shortcut-link-container')
 if (container) {
-  container.appendChild(createShortcutSettingsLink());
+  container.appendChild(createShortcutSettingsLink())
 }
 
 if (optionsTitle) {
-  optionsTitle.textContent = browser.i18n.getMessage("optionsTitle");
+  optionsTitle.textContent = browser.i18n.getMessage('optionsTitle')
 }
 
 if (optionsDescription) {
-  optionsDescription.textContent =
-    browser.i18n.getMessage("optionsDescription");
+  optionsDescription.textContent = browser.i18n.getMessage('optionsDescription')
 }
 
 async function openTab(url: string): Promise<void> {
-  await browser.tabs.create({ url });
+  await browser.tabs.create({ url })
 }
