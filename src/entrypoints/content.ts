@@ -15,17 +15,34 @@ export default defineContentScript({
     }
 
     ctx.addEventListener(window, 'wxt:locationchange', async ({ newUrl }) => {
-      if (urlMatchPatterns.some(pattern => pattern.includes(newUrl))) {
-        const pinnedContainer = document.querySelector(
-          '#chatListContainer'
-        ) as HTMLOListElement
-        if (!pinnedContainer) {
-          await initContentScript()
+      try {
+        if (urlMatchPatterns.some(pattern => pattern.includes(newUrl))) {
+          const pinnedContainer = document.querySelector(
+            '#chatListContainer'
+          ) as HTMLOListElement
+          if (!pinnedContainer) {
+            try {
+              await initContentScript()
+            } catch (err) {
+              console.error('Failed to initialize content script:', err)
+            }
+          }
         }
-      }
 
-      if (chatPagePattern.includes(newUrl)) {
-        initBookmarks()
+        // Prevent repeated initialization of bookmarks
+        const bookmarksContainerId = 'chatBookmarksContainer'
+        const bookmarksAlreadyInitialized =
+          !!document.getElementById(bookmarksContainerId)
+
+        if (chatPagePattern.includes(newUrl) && !bookmarksAlreadyInitialized) {
+          try {
+            await initBookmarks()
+          } catch (err) {
+            console.error('Failed to initialize bookmarks:', err)
+          }
+        }
+      } catch (err) {
+        console.error('Error in locationchange event handler:', err)
       }
     })
   },
