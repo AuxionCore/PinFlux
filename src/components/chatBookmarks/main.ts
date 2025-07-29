@@ -18,6 +18,7 @@ async function waitForArticles(
 }
 
 let bookmarkClickListenerAdded = false
+let observer: MutationObserver | null = null
 
 export default async function initBookmarks({
   profileId,
@@ -35,33 +36,71 @@ export default async function initBookmarks({
 
   console.log(`initBookmarks conversationId=${conversationId}`)
 
-  const articles = await waitForArticles()
-  if (!articles) return
-
   let bookmarkIds: string[] = await getConversationBookmarksIds(
     profileId,
     conversationId
   )
 
-  for (const article of articles) {
-    // Skip if already has a bookmark button
-    if (article.querySelector('[data-bookmark-button]')) continue
+  // פונקציה פנימית שמוסיפה כפתורי סימניה למאמרים
+  const addButtonsToArticles = (articles: Iterable<HTMLElement>) => {
+    for (const article of articles) {
+      if (article.querySelector('[data-bookmark-button]')) continue
+      article.classList.add('relative', 'group')
 
-    // Add a relative class for positioning the button absolutely and group class for hover effects
-    article.classList.add('relative', 'group')
+      const articleId = article.getAttribute('data-testid')
+      if (!articleId) continue
 
-    const articleId = article.getAttribute('data-testid')
-    if (!articleId) continue
-
-    const isBookmarked = bookmarkIds.includes(articleId)
-    const buttonHtml = isBookmarked
-      ? removeBookmarkButtonHtml
-      : addBookmarkButtonHtml
-    article.insertAdjacentHTML('beforeend', buttonHtml)
+      const isBookmarked = bookmarkIds.includes(articleId)
+      const buttonHtml = isBookmarked
+        ? removeBookmarkButtonHtml
+        : addBookmarkButtonHtml
+      article.insertAdjacentHTML('beforeend', buttonHtml)
+    }
   }
 
+  // עיבוד ראשוני לכל המאמרים הקיימים
+  const initialArticles = await waitForArticles()
+  if (initialArticles) {
+    addButtonsToArticles(initialArticles)
+  }
+
+  // מאזין ללחיצות על הכפתורים פעם אחת בלבד
   if (!bookmarkClickListenerAdded) {
     document.body.addEventListener('click', handleBookmarkButtonClick)
     bookmarkClickListenerAdded = true
   }
+
+  // אם יש Observer קיים, נבטל כדי למנוע כפילויות
+  if (observer) observer.disconnect()
+
+  // יצירת ה-Observer שיעקוב אחרי אלמנטים חדשים שנוספים לדף
+  observer = new MutationObserver(mutations => {
+    const newArticles: HTMLElement[] = []
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue
+
+        // אם נוצר מאמר חדש
+        if (node.tagName.toLowerCase() === 'article') {
+          newArticles.push(node)
+        }
+
+        // אם נוספו צאצאים של מאמרים
+        const innerArticles = node.querySelectorAll?.('article')
+        if (innerArticles && innerArticles.length) {
+          newArticles.push(...(innerArticles as any))
+        }
+      }
+    }
+
+    if (newArticles.length > 0) {
+      addButtonsToArticles(newArticles)
+    }
+  })
+
+  // מאזין על ה-body כולו (או container ייעודי אם יש)
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  })
 }
