@@ -28,64 +28,111 @@ export default async function initBookmarks({
   conversationId: string
 }) {
   if (!profileId || !conversationId) {
-    console.warn(
-      '[initBookmarks] Missing profileId or conversationId, aborting.'
-    )
+    console.warn('[initBookmarks] Missing profileId or conversationId.')
     return
   }
 
   console.log(`initBookmarks conversationId=${conversationId}`)
 
-  let bookmarkIds: string[] = await getConversationBookmarksIds(
+  const bookmarkIds: string[] = await getConversationBookmarksIds(
     profileId,
     conversationId
   )
 
-  // פונקציה פנימית שמוסיפה כפתורי סימניה למאמרים
-  const addButtonsToArticles = (articles: Iterable<HTMLElement>) => {
-    for (const article of articles) {
-      if (article.querySelector('[data-bookmark-button]')) continue
-      article.classList.add('relative', 'group')
+  /**
+   * יצירת כפתורי סימניה לפי חלוקה למקטעים במאמר
+   */
+  const addButtonsToSections = (article: HTMLElement) => {
+    const markdown = article.querySelector<HTMLElement>('.markdown.prose')
+    if (!markdown) return
 
-      const articleId = article.getAttribute('data-testid')
-      if (!articleId) continue
+    // אל תעבד פעמיים את אותו article
+    if (markdown.dataset.bookmarkProcessed) return
+    markdown.dataset.bookmarkProcessed = 'true'
 
-      const isBookmarked = bookmarkIds.includes(articleId)
+    const children = Array.from(markdown.children)
+    let currentSection: HTMLElement[] = []
+    let sectionIndex = 0
+
+    const createSection = (elements: HTMLElement[], index: number) => {
+      if (!elements.length) return
+
+      const wrapper = document.createElement('div')
+      wrapper.classList.add('relative', 'group', 'bookmark-section')
+
+      elements[0].before(wrapper)
+      for (const el of elements) wrapper.appendChild(el)
+
+      // מזהה ייחודי של המקטע, עם prefix
+      const articleId = article.dataset.testid || ''
+      const sectionId = `${articleId}-${index}`
+      wrapper.id = sectionId
+
+      const isBookmarked = bookmarkIds.includes(sectionId)
       const buttonHtml = isBookmarked
         ? removeBookmarkButtonHtml
         : addBookmarkButtonHtml
-      article.insertAdjacentHTML('beforeend', buttonHtml)
+
+      wrapper.insertAdjacentHTML('beforeend', buttonHtml)
+
+      const button = wrapper.querySelector(
+        '[data-bookmark-button]'
+      ) as HTMLElement
+      if (button) {
+        button.dataset.sectionId = sectionId
+        button.dataset.sectionIndex = String(index)
+      }
+    }
+
+    // חלוקה לפי HR
+    children.forEach(child => {
+      if (child.tagName.toLowerCase() === 'hr') {
+        createSection(currentSection, sectionIndex++)
+        currentSection = []
+      } else {
+        currentSection.push(child as HTMLElement)
+      }
+    })
+
+    // המקטע האחרון
+    createSection(currentSection, sectionIndex)
+  }
+
+  /**
+   * טיפול בכל המאמרים
+   */
+  const addButtonsToArticles = (articles: Iterable<HTMLElement>) => {
+    for (const article of articles) {
+      addButtonsToSections(article)
     }
   }
 
-  // עיבוד ראשוני לכל המאמרים הקיימים
+  // טיפול במאמרים קיימים
   const initialArticles = await waitForArticles()
   if (initialArticles) {
     addButtonsToArticles(initialArticles)
   }
 
-  // מאזין ללחיצות על הכפתורים פעם אחת בלבד
+  // מאזין ללחיצות פעם אחת בלבד
   if (!bookmarkClickListenerAdded) {
     document.body.addEventListener('click', handleBookmarkButtonClick)
     bookmarkClickListenerAdded = true
   }
 
-  // אם יש Observer קיים, נבטל כדי למנוע כפילויות
+  // נבטל Observer קודם
   if (observer) observer.disconnect()
 
-  // יצירת ה-Observer שיעקוב אחרי אלמנטים חדשים שנוספים לדף
+  // Observer שמזהה מאמרים חדשים
   observer = new MutationObserver(mutations => {
     const newArticles: HTMLElement[] = []
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (!(node instanceof HTMLElement)) continue
 
-        // אם נוצר מאמר חדש
         if (node.tagName.toLowerCase() === 'article') {
           newArticles.push(node)
         }
 
-        // אם נוספו צאצאים של מאמרים
         const innerArticles = node.querySelectorAll?.('article')
         if (innerArticles && innerArticles.length) {
           newArticles.push(...(innerArticles as any))
@@ -98,7 +145,6 @@ export default async function initBookmarks({
     }
   })
 
-  // מאזין על ה-body כולו (או container ייעודי אם יש)
   observer.observe(document.body, {
     childList: true,
     subtree: true,
