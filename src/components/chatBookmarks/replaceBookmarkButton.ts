@@ -1,5 +1,9 @@
-export default function replaceBookmarkButton(article: Element, newHtml: string) {
-  const oldButton = article.querySelector('[data-bookmark-button]')
+export default function replaceBookmarkButton(section: Element, newHtml: string) {
+  // החיפוש נעשה ב-container (האלמנט ההורה)
+  const container = section.parentElement
+  if (!container) return
+  
+  const oldButton = container.querySelector('[data-bookmark-button]')
   if (oldButton) oldButton.remove()
-  article.insertAdjacentHTML('beforeend', newHtml)
+  container.insertAdjacentHTML('beforeend', newHtml)
 }
