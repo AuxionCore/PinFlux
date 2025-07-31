@@ -12,7 +12,12 @@ import replaceBookmarkButton from './replaceBookmarkButton'
 let isMenuInitialized = false
 
 export default async function initBookmarksMenu() {
-  if (isMenuInitialized) return
+  // בדיקה אם הכפתור כבר קיים בדף
+  const existingButton = document.querySelector('[data-bookmarks-menu-button]')
+  if (existingButton) {
+    console.log('Bookmarks menu button already exists')
+    return
+  }
   
   console.log('Initializing bookmarks menu...')
   
@@ -146,7 +151,6 @@ export default async function initBookmarksMenu() {
       e.stopPropagation()
     })
 
-    isMenuInitialized = true
   }, 100)
 }
 

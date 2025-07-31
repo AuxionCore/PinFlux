@@ -35,7 +35,7 @@ export default async function initBookmarks({
 
   console.log(`initBookmarks conversationId=${conversationId}`)
 
-  // אתחול תפריט הסימניות
+  // אתחול תפריט הסימניות - עכשיו זה יקרה בכל עמוד חדש
   await initBookmarksMenu()
 
   const bookmarkIds: string[] = await getConversationBookmarksIds(
@@ -47,66 +47,88 @@ export default async function initBookmarks({
    * יצירת כפתורי סימניה לפי חלוקה למקטעים במאמר
    */
   const addButtonsToSections = (article: HTMLElement) => {
-    const markdown = article.querySelector<HTMLElement>('.markdown.prose')
-    if (!markdown) return
-
-    // אל תעבד פעמיים את אותו article
-    if (markdown.dataset.bookmarkProcessed) return
-    markdown.dataset.bookmarkProcessed = 'true'
-
-    const children = Array.from(markdown.children)
-    let currentSection: HTMLElement[] = []
-    let sectionIndex = 0
-
-    const createSection = (elements: HTMLElement[], index: number) => {
-      if (!elements.length) return
-
-      // יצירת container חיצוני
-      const container = document.createElement('div')
-      container.classList.add('relative', 'group', 'flex', 'items-start', 'gap-2', 'mb-4')
-
-      // יצירת wrapper לתוכן
-      const wrapper = document.createElement('div')
-      wrapper.classList.add('bookmark-section', 'flex-1')
-
-      elements[0].before(container)
-      for (const el of elements) wrapper.appendChild(el)
-      container.appendChild(wrapper)
-
-      // מזהה ייחודי של המקטע, עם prefix
-      const articleId = article.dataset.testid || ''
-      const sectionId = `${articleId}-${index}`
-      wrapper.id = sectionId
-
-      const isBookmarked = bookmarkIds.includes(sectionId)
-      const buttonHtml = isBookmarked
-        ? removeBookmarkButtonHtml
-        : addBookmarkButtonHtml
-
-      // הוספת הכפתור לcontainer (לא לwrapper)
-      container.insertAdjacentHTML('beforeend', buttonHtml)
-
-      const button = container.querySelector(
-        '[data-bookmark-button]'
-      ) as HTMLElement
-      if (button) {
-        button.dataset.sectionId = sectionId
-        button.dataset.sectionIndex = String(index)
+    try {
+      // בדיקה נוספת שהמאמר עדיין קיים ב-DOM
+      if (!document.contains(article)) {
+        return
       }
+
+      const markdown = article.querySelector<HTMLElement>('.markdown.prose')
+      if (!markdown) return
+
+      // אל תעבד פעמיים את אותו article
+      if (markdown.dataset.bookmarkProcessed) {
+        console.log('Article already processed, skipping')
+        return
+      }
+      
+      // בדיקה פשוטה שהמאמר לא במצב streaming
+      const isStreaming = article.querySelector('.result-streaming')
+      if (isStreaming) {
+        console.log('Article still streaming, skipping')
+        return // לא ננסה שוב
+      }
+
+      console.log('Processing article for bookmark buttons')
+      markdown.dataset.bookmarkProcessed = 'true'
+      
+      const children = Array.from(markdown.children)
+      let currentSection: HTMLElement[] = []
+      let sectionIndex = 0
+
+      const createSection = (elements: HTMLElement[], index: number) => {
+        if (!elements.length) return
+
+        // יצירת container חיצוני
+        const container = document.createElement('div')
+        container.classList.add('relative', 'group', 'flex', 'items-start', 'gap-2', 'mb-4')
+
+        // יצירת wrapper לתוכן
+        const wrapper = document.createElement('div')
+        wrapper.classList.add('bookmark-section', 'flex-1')
+
+        elements[0].before(container)
+        for (const el of elements) wrapper.appendChild(el)
+        container.appendChild(wrapper)
+
+        // מזהה ייחודי של המקטע, עם prefix
+        const articleId = article.dataset.testid || ''
+        const sectionId = `${articleId}-${index}`
+        wrapper.id = sectionId
+
+        const isBookmarked = bookmarkIds.includes(sectionId)
+        const buttonHtml = isBookmarked
+          ? removeBookmarkButtonHtml
+          : addBookmarkButtonHtml
+
+        // הוספת הכפתור לcontainer (לא לwrapper)
+        container.insertAdjacentHTML('beforeend', buttonHtml)
+
+        const button = container.querySelector(
+          '[data-bookmark-button]'
+        ) as HTMLElement
+        if (button) {
+          button.dataset.sectionId = sectionId
+          button.dataset.sectionIndex = String(index)
+        }
+      }
+
+      // חלוקה לפי HR
+      children.forEach((child: Element) => {
+        if (child.tagName.toLowerCase() === 'hr') {
+          createSection(currentSection, sectionIndex++)
+          currentSection = []
+        } else {
+          currentSection.push(child as HTMLElement)
+        }
+      })
+
+      // המקטע האחרון
+      createSection(currentSection, sectionIndex)
+    } catch (error) {
+      console.error('Error in addButtonsToSections:', error)
+      return
     }
-
-    // חלוקה לפי HR
-    children.forEach(child => {
-      if (child.tagName.toLowerCase() === 'hr') {
-        createSection(currentSection, sectionIndex++)
-        currentSection = []
-      } else {
-        currentSection.push(child as HTMLElement)
-      }
-    })
-
-    // המקטע האחרון
-    createSection(currentSection, sectionIndex)
   }
 
   /**
@@ -133,31 +155,34 @@ export default async function initBookmarks({
   // נבטל Observer קודם
   if (observer) observer.disconnect()
 
-  // Observer שמזהה מאמרים חדשים
+  // Observer חדש שמקשיב לכפתור האודיו שמופיע/נעלם
   observer = new MutationObserver(mutations => {
-    const newArticles: HTMLElement[] = []
     for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (!(node instanceof HTMLElement)) continue
-
-        if (node.tagName.toLowerCase() === 'article') {
-          newArticles.push(node)
-        }
-
-        const innerArticles = node.querySelectorAll?.('article')
-        if (innerArticles && innerArticles.length) {
-          newArticles.push(...(innerArticles as any))
+      if (mutation.type === 'attributes' || mutation.type === 'childList') {
+        // בדיקה אם כפתור האודיו מופיע (סימן שהתגובה הושלמה)
+        const speechButton = document.querySelector('[data-testid="composer-speech-button"]')
+        const speechButtonContainer = document.querySelector('[data-testid="composer-speech-button-container"]')
+        
+        if (speechButton && speechButtonContainer && !speechButton.hasAttribute('disabled')) {
+          console.log('Speech button is active - response completed, adding bookmark buttons')
+          
+          // דיחוי קצר כדי להבטיח שהתוכן יציב
+          setTimeout(() => {
+            const allArticles = document.querySelectorAll<HTMLElement>('article')
+            if (allArticles.length > 0) {
+              console.log('Processing articles after response completion:', allArticles.length)
+              addButtonsToArticles(allArticles)
+            }
+          }, 300)
         }
       }
-    }
-
-    if (newArticles.length > 0) {
-      addButtonsToArticles(newArticles)
     }
   })
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
+    attributes: true,
+    attributeFilter: ['disabled', 'data-state', 'class'],
   })
 }
