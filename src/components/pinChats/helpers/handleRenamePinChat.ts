@@ -23,31 +23,36 @@ export default function handleRenamePinChat(
 
   const input = document.createElement("input");
   input.className =
-    "w-full border-none bg-transparent p-0 text-sm focus:ring-0";
+    "w-full border border-blue-400 dark:border-blue-500 rounded-sm bg-transparent px-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500";
   input.type = "text";
   input.value = originalTitle;
+  // Match the height of other links
+  input.style.height = "36px";
+  input.style.lineHeight = "36px";
 
   const inputWrapper = document.createElement("div");
-  inputWrapper.className = "flex min-w-0 grow items-center gap-2";
+  inputWrapper.className = "flex min-w-0 grow items-center gap-2 px-3";
+  inputWrapper.style.height = "36px";
   inputWrapper.appendChild(input);
 
-  // Add input for editing
-  anchor.querySelector(".flex.min-w-0")?.appendChild(inputWrapper);
+  // Find the parent container and add input outside the anchor
+  const parentContainer = anchor.parentElement;
+  if (!parentContainer) return;
+
+  // Insert the input wrapper right after the anchor
+  parentContainer.insertBefore(inputWrapper, anchor.nextSibling);
+  
+  // Hide the entire anchor during editing
+  anchor.style.display = "none";
 
   input.focus();
-
-  // Disable link action
-  const preventClick = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  anchor.addEventListener("click", preventClick, true); // useCapture true to catch early
 
   const cleanup = () => {
     inputWrapper.remove();
     (wrapperDiv as HTMLElement).style.display = "";
     buttonWrapper.style.display = "";
-    anchor.removeEventListener("click", preventClick, true);
+    // Show the anchor again
+    anchor.style.display = "";
   };
 
   const finishEditing = async () => {
