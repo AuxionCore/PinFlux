@@ -3,6 +3,7 @@ import addBookmarkButtonHtml from './add-bookmark-button.html?raw'
 import handleBookmarkButtonClick from './bookmarkHandler'
 import getConversationBookmarksIds from './getConversationBookmarksIds'
 import removeBookmarkButtonHtml from './remove-bookmark-button.html?raw'
+import initBookmarksMenu from './bookmarksMenu'
 
 async function waitForArticles(
   maxRetries = 10,
@@ -33,6 +34,9 @@ export default async function initBookmarks({
   }
 
   console.log(`initBookmarks conversationId=${conversationId}`)
+
+  // אתחול תפריט הסימניות
+  await initBookmarksMenu()
 
   const bookmarkIds: string[] = await getConversationBookmarksIds(
     profileId,
