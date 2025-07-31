@@ -8,7 +8,7 @@ export default async function bumpBookmarkGroupTimestamp(
     const result = await browser.storage.sync.get(null)
     const allKeys = Object.keys(result)
 
-    // מפתח יחיד של שיחה הזו
+    // Unique key for this conversation
     const matchingKey = `bm_${profileId}_${conversationId}`
     const relevantKey = allKeys.find(key => key.startsWith(matchingKey))
 

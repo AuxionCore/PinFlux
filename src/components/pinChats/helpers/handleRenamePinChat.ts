@@ -17,7 +17,7 @@ export default function handleRenamePinChat(
 
   const originalTitle = titleSpan.textContent?.trim() || "";
 
-  // הסתרת הטקסט המקורי
+  // Hide the original text
   (wrapperDiv as HTMLElement).style.display = "none";
   buttonWrapper.style.display = "none";
 
@@ -31,17 +31,17 @@ export default function handleRenamePinChat(
   inputWrapper.className = "flex min-w-0 grow items-center gap-2";
   inputWrapper.appendChild(input);
 
-  // הוספת input לעריכה
+  // Add input for editing
   anchor.querySelector(".flex.min-w-0")?.appendChild(inputWrapper);
 
   input.focus();
 
-  // השבתת פעולת הקישור
+  // Disable link action
   const preventClick = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
-  anchor.addEventListener("click", preventClick, true); // useCapture true כדי לתפוס מוקדם
+  anchor.addEventListener("click", preventClick, true); // useCapture true to catch early
 
   const cleanup = () => {
     inputWrapper.remove();

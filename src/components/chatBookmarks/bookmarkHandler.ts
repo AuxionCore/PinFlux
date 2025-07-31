@@ -14,14 +14,14 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
     )
     if (!button) return
 
-    // מציאת המקטע - עכשיו הוא נמצא בתוך ה-container
+    // Find the section - it's now inside the container
     const container = button.parentElement
     if (!container) return
     
     const section = container.querySelector('.bookmark-section')
     if (!section) return
 
-    // קבלת המזהה של המקטע מהכפתור או מה-ID של המקטע
+    // Get the section ID from the button or from the section's ID
     const sectionId = button.getAttribute('data-section-id') || section.id
     if (!sectionId) return
 
@@ -51,11 +51,11 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
       await deleteBookmark({ articleId: sectionId, profileId, conversationId })
       replaceBookmarkButton(section, addBookmarkButtonHtml)
     } else {
-      // שמירה ראשונית ללא שם מותאם
+      // Initial save without custom name
       await saveBookmark({ articleId: sectionId, profileId, conversationId })
       replaceBookmarkButton(section, removeBookmarkButtonHtml)
       
-      // הצגת שדה input מרחף לשינוי שם
+      // Show floating input field for name change
       showFloatingBookmarkInput(container, sectionId, profileId, conversationId)
     }
   } catch (error) {
@@ -69,11 +69,11 @@ function showFloatingBookmarkInput(
   profileId: string, 
   conversationId: string
 ) {
-  // מוודא שאין כבר modal קיים
+  // Ensure no modal already exists
   const existingModals = document.querySelectorAll('.bookmark-modal-overlay')
   existingModals.forEach(modal => modal.remove())
 
-  // יוצר את ה-modal ב-JavaScript במקום HTML
+  // Create the modal in JavaScript instead of HTML
   const modalOverlay = document.createElement('div')
   modalOverlay.className = 'bookmark-modal-overlay'
   modalOverlay.style.cssText = `
@@ -124,7 +124,7 @@ function showFloatingBookmarkInput(
   modalOverlay.appendChild(inputContainer)
   document.body.appendChild(modalOverlay)
 
-  // עכשיו מחפש את האלמנטים שיודע שקיימים
+  // Now find the elements that we know exist
   const input = inputContainer.querySelector('.bookmark-name-input') as HTMLInputElement
   const cancelBtn = inputContainer.querySelector('.bookmark-name-cancel') as HTMLButtonElement
   const saveBtn = inputContainer.querySelector('.bookmark-name-save') as HTMLButtonElement
@@ -134,16 +134,16 @@ function showFloatingBookmarkInput(
     return
   }
 
-  // פוקוס על ה-input
+  // Focus on the input
   setTimeout(() => input.focus(), 50)
 
-  // פונקציה לסגירת ה-modal
+  // Function to close the modal
   const closeInput = () => {
     modalOverlay.remove()
     cleanup()
   }
 
-  // פונקציה לשמירה
+  // Function to save
   const saveBookmarkName = async () => {
     const customName = input.value.trim()
     if (customName) {
@@ -161,7 +161,7 @@ function showFloatingBookmarkInput(
     closeInput()
   }
 
-  // מאזינים זמניים
+  // Temporary listeners
   const handleCancel = () => closeInput()
   const handleSave = () => saveBookmarkName()
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -177,13 +177,13 @@ function showFloatingBookmarkInput(
     }
   }
 
-  // הוספת מאזינים
+  // Add listeners
   cancelBtn.addEventListener('click', handleCancel)
   saveBtn.addEventListener('click', handleSave)
   input.addEventListener('keydown', handleKeyDown)
   modalOverlay.addEventListener('click', handleOverlayClick)
 
-  // פונקציה לניקוי מאזינים
+  // Function to clean up listeners
   const cleanup = () => {
     cancelBtn.removeEventListener('click', handleCancel)
     saveBtn.removeEventListener('click', handleSave)

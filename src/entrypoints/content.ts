@@ -3,10 +3,19 @@ import initBookmarks from '@/components/chatBookmarks/main'
 import getProfileId from '@/components/utils/getProfileId'
 import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkGroupTimestamp'
 
+/**
+ * URL patterns that the content script should match against
+ */
 const urlPatternStrings = ['https://chatgpt.com/*']
 const chatPagePattern = new MatchPattern('https://chatgpt.com/c/*')
 const urlMatchPatterns = urlPatternStrings.map(p => new MatchPattern(p))
 
+/**
+ * Waits for both profile ID and conversation ID to be available
+ * @param maxRetries - Maximum number of retry attempts
+ * @param delayMs - Delay between retry attempts in milliseconds
+ * @returns Promise that resolves to profile and conversation IDs or null if not found
+ */
 async function waitForProfileAndConversationId(
   maxRetries = 10,
   delayMs = 300
@@ -40,13 +49,18 @@ async function waitForProfileAndConversationId(
   return null
 }
 
+/**
+ * Main content script definition for the PinFlux extension
+ * Handles initialization of pin chats and bookmarks features
+ */
 export default defineContentScript({
   matches: urlPatternStrings,
   async main(ctx) {
     try {
+      // Initialize the main pin chats functionality
       await initContentScript()
 
-      // אתחול סימניות בכניסה ראשונית לדף שיחה
+      // Initialize bookmarks on initial entry to chat page
       if (chatPagePattern.includes(window.location.href)) {
         const result = await waitForProfileAndConversationId()
         if (result) {
@@ -56,8 +70,10 @@ export default defineContentScript({
         }
       }
 
+      // Listen for navigation changes within the SPA
       ctx.addEventListener(window, 'wxt:locationchange', async ({ newUrl }) => {
         try {
+          // Re-initialize pin chats if container doesn't exist
           if (urlMatchPatterns.some(pattern => pattern.includes(newUrl))) {
             const pinnedContainer = document.querySelector(
               '#chatListContainer'
@@ -71,6 +87,7 @@ export default defineContentScript({
             }
           }
 
+          // Initialize bookmarks when navigating to a chat page
           if (chatPagePattern.includes(newUrl)) {
             try {
               const result = await waitForProfileAndConversationId()
@@ -78,6 +95,7 @@ export default defineContentScript({
 
               const { profileId, conversationId } = result
 
+              // Update bookmark group timestamp and initialize bookmarks
               await bumpBookmarkGroupTimestamp(profileId, conversationId)
               await initBookmarks({ profileId, conversationId })
             } catch (err) {

@@ -35,7 +35,7 @@ export default async function initBookmarks({
 
   console.log(`initBookmarks conversationId=${conversationId}`)
 
-  // אתחול תפריט הסימניות - עכשיו זה יקרה בכל עמוד חדש
+  // Initialize bookmarks menu - this will happen on every new page
   await initBookmarksMenu()
 
   const bookmarkIds: string[] = await getConversationBookmarksIds(
@@ -44,11 +44,11 @@ export default async function initBookmarks({
   )
 
   /**
-   * יצירת כפתורי סימניה לפי חלוקה למקטעים במאמר
+   * Creating bookmark buttons by dividing into sections within an article
    */
   const addButtonsToSections = (article: HTMLElement) => {
     try {
-      // בדיקה נוספת שהמאמר עדיין קיים ב-DOM
+      // Additional check that the article still exists in the DOM
       if (!document.contains(article)) {
         return
       }
@@ -56,17 +56,17 @@ export default async function initBookmarks({
       const markdown = article.querySelector<HTMLElement>('.markdown.prose')
       if (!markdown) return
 
-      // אל תעבד פעמיים את אותו article
+      // Don't process the same article twice
       if (markdown.dataset.bookmarkProcessed) {
         console.log('Article already processed, skipping')
         return
       }
       
-      // בדיקה פשוטה שהמאמר לא במצב streaming
+      // Simple check that the article is not in streaming mode
       const isStreaming = article.querySelector('.result-streaming')
       if (isStreaming) {
         console.log('Article still streaming, skipping')
-        return // לא ננסה שוב
+        return // Don't try again
       }
 
       console.log('Processing article for bookmark buttons')
@@ -79,11 +79,11 @@ export default async function initBookmarks({
       const createSection = (elements: HTMLElement[], index: number) => {
         if (!elements.length) return
 
-        // יצירת container חיצוני
+        // Create outer container
         const container = document.createElement('div')
         container.classList.add('relative', 'group', 'flex', 'items-start', 'gap-2', 'mb-4')
 
-        // יצירת wrapper לתוכן
+        // Create content wrapper
         const wrapper = document.createElement('div')
         wrapper.classList.add('bookmark-section', 'flex-1')
 
@@ -91,7 +91,7 @@ export default async function initBookmarks({
         for (const el of elements) wrapper.appendChild(el)
         container.appendChild(wrapper)
 
-        // מזהה ייחודי של המקטע, עם prefix
+        // Unique section identifier with prefix
         const articleId = article.dataset.testid || ''
         const sectionId = `${articleId}-${index}`
         wrapper.id = sectionId
@@ -101,7 +101,7 @@ export default async function initBookmarks({
           ? removeBookmarkButtonHtml
           : addBookmarkButtonHtml
 
-        // הוספת הכפתור לcontainer (לא לwrapper)
+        // Add the button to container (not to wrapper)
         container.insertAdjacentHTML('beforeend', buttonHtml)
 
         const button = container.querySelector(
@@ -113,7 +113,7 @@ export default async function initBookmarks({
         }
       }
 
-      // חלוקה לפי HR
+      // Split by HR tags
       children.forEach((child: Element) => {
         if (child.tagName.toLowerCase() === 'hr') {
           createSection(currentSection, sectionIndex++)
@@ -123,7 +123,7 @@ export default async function initBookmarks({
         }
       })
 
-      // המקטע האחרון
+      // The last section
       createSection(currentSection, sectionIndex)
     } catch (error) {
       console.error('Error in addButtonsToSections:', error)
@@ -132,7 +132,7 @@ export default async function initBookmarks({
   }
 
   /**
-   * טיפול בכל המאמרים
+   * Handle all articles
    */
   const addButtonsToArticles = (articles: Iterable<HTMLElement>) => {
     for (const article of articles) {
@@ -140,33 +140,33 @@ export default async function initBookmarks({
     }
   }
 
-  // טיפול במאמרים קיימים
+  // Handle existing articles
   const initialArticles = await waitForArticles()
   if (initialArticles) {
     addButtonsToArticles(initialArticles)
   }
 
-  // מאזין ללחיצות פעם אחת בלבד
+  // Add click listener only once
   if (!bookmarkClickListenerAdded) {
     document.body.addEventListener('click', handleBookmarkButtonClick)
     bookmarkClickListenerAdded = true
   }
 
-  // נבטל Observer קודם
+  // Disconnect previous observer
   if (observer) observer.disconnect()
 
-  // Observer חדש שמקשיב לכפתור האודיו שמופיע/נעלם
+  // New observer that listens for audio button appearing/disappearing
   observer = new MutationObserver(mutations => {
     for (const mutation of mutations) {
       if (mutation.type === 'attributes' || mutation.type === 'childList') {
-        // בדיקה אם כפתור האודיו מופיע (סימן שהתגובה הושלמה)
+        // Check if audio button appears (sign that response is completed)
         const speechButton = document.querySelector('[data-testid="composer-speech-button"]')
         const speechButtonContainer = document.querySelector('[data-testid="composer-speech-button-container"]')
         
         if (speechButton && speechButtonContainer && !speechButton.hasAttribute('disabled')) {
           console.log('Speech button is active - response completed, adding bookmark buttons')
           
-          // דיחוי קצר כדי להבטיח שהתוכן יציב
+          // Short delay to ensure content is stable
           setTimeout(() => {
             const allArticles = document.querySelectorAll<HTMLElement>('article')
             if (allArticles.length > 0) {

@@ -17,7 +17,7 @@ export default async function updateBookmarkName({
     const result = await browser.storage.sync.get(key)
     const bookmarks: any[] = result[key] || []
 
-    // מוצא את הסימניה ומעדכן את השם
+    // Find the bookmark and update the name
     const bookmarkIndex = bookmarks.findIndex(b => b.articleId === articleId)
     if (bookmarkIndex !== -1) {
       bookmarks[bookmarkIndex].customName = customName || null

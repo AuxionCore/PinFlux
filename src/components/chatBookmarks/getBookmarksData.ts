@@ -21,13 +21,13 @@ export default async function getBookmarksData(
 
     for (const bookmark of bookmarks) {
       const sectionId = bookmark.articleId
-      // מחפש את האלמנט בדף
+      // Find the element in the page
       const sectionElement = document.getElementById(sectionId)
       
       let displayName = bookmark.customName
       
       if (!displayName && sectionElement) {
-        // לוקח את הטקסט הראשון מהמקטע (עד 100 תווים)
+        // Take the first text from the section (up to 100 characters)
         const textContent = sectionElement.textContent?.trim() || ''
         displayName = textContent.length > 100 
           ? textContent.substring(0, 100) + '...'

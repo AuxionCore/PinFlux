@@ -1,5 +1,5 @@
 export default function replaceBookmarkButton(section: Element, newHtml: string) {
-  // החיפוש נעשה ב-container (האלמנט ההורה)
+  // Search is done in container (parent element)
   const container = section.parentElement
   if (!container) return
   
@@ -8,7 +8,7 @@ export default function replaceBookmarkButton(section: Element, newHtml: string)
   
   container.insertAdjacentHTML('beforeend', newHtml)
   
-  // צריך להוסיף את הattributes לכפתור החדש
+  // Need to add attributes to the new button
   const newButton = container.querySelector('[data-bookmark-button]:last-child') as HTMLElement
   if (newButton && section.id) {
     newButton.setAttribute('data-section-id', section.id)

@@ -12,7 +12,7 @@ import replaceBookmarkButton from './replaceBookmarkButton'
 let isMenuInitialized = false
 
 export default async function initBookmarksMenu() {
-  // בדיקה אם הכפתור כבר קיים בדף
+  // Check if the button already exists on the page
   const existingButton = document.querySelector('[data-bookmarks-menu-button]')
   if (existingButton) {
     console.log('Bookmarks menu button already exists')
@@ -27,12 +27,12 @@ export default async function initBookmarksMenu() {
     return
   }
 
-  // מחפש את האזור של כפתורי הפעולות
+  // Look for the actions buttons area
   const actionsDiv = document.getElementById('conversation-header-actions')
   if (!actionsDiv) {
     console.warn('Conversation header actions not found, trying alternative selectors...')
     
-    // נסה למצוא אלמנט חלופי
+    // Try to find an alternative element
     const alternatives = [
       '[data-testid="conversation-header-actions"]',
       '.conversation-header-actions',
@@ -55,7 +55,7 @@ export default async function initBookmarksMenu() {
       return
     }
     
-    // השתמש באלמנט שנמצא
+    // Use the found element
     const bookmarksContainer = document.createElement('div')
     bookmarksContainer.className = 'relative'
     bookmarksContainer.innerHTML = bookmarksMenuButtonHtml + bookmarksDropdownHtml
@@ -65,24 +65,24 @@ export default async function initBookmarksMenu() {
   } else {
     console.log('Found conversation-header-actions')
     
-    // יוצר container לתפריט הסימניות
+    // Create container for bookmarks menu
     const bookmarksContainer = document.createElement('div')
     bookmarksContainer.className = 'relative'
     bookmarksContainer.innerHTML = bookmarksMenuButtonHtml + bookmarksDropdownHtml
 
-    // מוסיף לתחילת אזור הפעולות
+    // Add to the beginning of the actions area
     actionsDiv.insertBefore(bookmarksContainer, actionsDiv.firstChild)
     console.log('Bookmarks menu added to conversation-header-actions')
     console.log('Menu HTML:', bookmarksMenuButtonHtml.substring(0, 100))
     console.log('Dropdown HTML:', bookmarksDropdownHtml.substring(0, 100))
   }
 
-  // מוסיף את ה-popup לשינוי שם
+  // Add the name change popup
   if (!document.getElementById('bookmark-name-popup')) {
     document.body.insertAdjacentHTML('beforeend', bookmarkNamePopupHtml)
   }
 
-  // מוצא את הכפתור והdropdown שנוצרו (עם timeout)
+  // Find the created button and dropdown (with timeout)
   setTimeout(() => {
     const menuButton = document.querySelector('[data-bookmarks-menu-button]')
     const dropdown = document.querySelector('#bookmarks-dropdown')
@@ -104,13 +104,13 @@ export default async function initBookmarksMenu() {
 
     console.log('Bookmarks menu initialized successfully')
 
-    // מאזין ללחיצה על הכפתור
+    // Listen to button clicks
     menuButton.addEventListener('click', async (e: Event) => {
       e.stopPropagation()
       await toggleBookmarksMenu(dropdown)
     })
 
-    // מאזין לסגירת התפריט בלחיצה מחוץ אליו
+    // Listen for menu closing when clicking outside
     document.addEventListener('click', (e: Event) => {
       const bookmarksContainer = (menuButton as Element).closest('.relative')
       if (!bookmarksContainer || !bookmarksContainer.contains(e.target as Node)) {
@@ -118,18 +118,18 @@ export default async function initBookmarksMenu() {
       }
     })
 
-    // מאזיני התפריט
+    // Menu event listeners
     dropdown.addEventListener('click', async (e: Event) => {
       const target = e.target as HTMLElement
       
-      // טיפול בלחיצה על קישור סימניה - רק זה יסגור את התפריט
+      // Handle bookmark link click - only this will close the menu
       const bookmarkLink = target.closest('[data-bookmark-link]')
       if (bookmarkLink) {
         dropdown.classList.add('hidden')
         return
       }
 
-      // טיפול בהסרת סימניה
+      // Handle bookmark removal
       const removeButton = target.closest('[data-remove-bookmark]')
       if (removeButton) {
         e.preventDefault()
@@ -138,7 +138,7 @@ export default async function initBookmarksMenu() {
         return
       }
 
-      // טיפול בעריכת שם סימניה
+      // Handle bookmark name editing
       const editButton = target.closest('[data-edit-bookmark]')
       if (editButton) {
         e.preventDefault()
@@ -147,7 +147,7 @@ export default async function initBookmarksMenu() {
         return
       }
 
-      // מונע סגירת התפריט עבור כל לחיצה אחרת בתוכו
+      // Prevent menu closing for any other click inside it
       e.stopPropagation()
     })
 
@@ -190,21 +190,21 @@ async function updateBookmarksList(dropdown: Element) {
 
     const bookmarksData = await getBookmarksData(profileId, conversationId)
 
-    // הצגה/הסתרה של שדה החיפוש לפי מספר הסימניות
+    // Show/hide search field based on number of bookmarks
     if (bookmarksData.length > 4) {
       searchContainer.classList.remove('hidden')
-      // כשיש חיפוש, הכותרת צריכה מרווח תחתון
+      // When there's search, the title needs bottom margin
       headerTitle.classList.add('mb-2')
       headerTitle.classList.remove('mb-0')
       setupSearchFunctionality(dropdown, bookmarksData)
     } else {
       searchContainer.classList.add('hidden')
-      // כשאין חיפוש, אין צורך במרווח תחתון לכותרת
+      // When there's no search, no need for bottom margin on title
       headerTitle.classList.remove('mb-2')
       headerTitle.classList.add('mb-0')
     }
 
-    // מנקה את הרשימה
+    // Clear the list
     bookmarksList.innerHTML = ''
     noSearchResults.classList.add('hidden')
 
@@ -215,7 +215,7 @@ async function updateBookmarksList(dropdown: Element) {
       noBookmarks.classList.add('hidden')
       bookmarksList.classList.remove('hidden')
 
-      // יוצר פריט לכל סימניה
+      // Create item for each bookmark
       renderBookmarks(bookmarksList, bookmarksData)
     }
   } catch (error) {
@@ -241,11 +241,11 @@ function setupSearchFunctionality(dropdown: Element, allBookmarks: any[]) {
   
   if (!searchInput || !bookmarksList || !noSearchResults) return
 
-  // הסרת מאזינים קיימים
+  // Remove existing listeners
   const newSearchInput = searchInput.cloneNode(true) as HTMLInputElement
   searchInput.parentNode?.replaceChild(newSearchInput, searchInput)
 
-  // מונע סגירת התפריט בלחיצה על שדה החיפוש
+  // Prevent menu closing when clicking on search field
   newSearchInput.addEventListener('click', (e) => {
     e.stopPropagation()
   })
@@ -254,12 +254,12 @@ function setupSearchFunctionality(dropdown: Element, allBookmarks: any[]) {
     const searchTerm = newSearchInput.value.toLowerCase().trim()
     
     if (searchTerm === '') {
-      // הצגת כל הסימניות
+      // Show all bookmarks
       renderBookmarks(bookmarksList, allBookmarks)
       noSearchResults.classList.add('hidden')
       bookmarksList.classList.remove('hidden')
     } else {
-      // סינון סימניות לפי החיפוש
+      // Filter bookmarks by search
       const filteredBookmarks = allBookmarks.filter(bookmark =>
         bookmark.displayName.toLowerCase().includes(searchTerm)
       )
@@ -275,7 +275,7 @@ function setupSearchFunctionality(dropdown: Element, allBookmarks: any[]) {
     }
   })
 
-  // מאזין לניקוי החיפוש עם Escape
+  // Listen for search clearing with Escape
   newSearchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       newSearchInput.value = ''
@@ -301,13 +301,13 @@ async function handleRemoveBookmark(removeButton: HTMLElement, dropdown: Element
 
     if (!conversationId) return
 
-    // מוחק את הסימניה
+    // Delete the bookmark
     await deleteBookmark({ articleId: sectionId, profileId, conversationId })
     
-    // מעדכן את התפריט
+    // Update the menu
     await updateBookmarksList(dropdown)
     
-    // מעדכן את הכפתור בדף (אם קיים)
+    // Update the button on the page (if exists)
     const sectionElement = document.getElementById(sectionId)
     if (sectionElement) {
       replaceBookmarkButton(sectionElement, addBookmarkButtonHtml)
@@ -321,7 +321,7 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
   const sectionId = editButton.getAttribute('data-section-id')
   if (!sectionId) return
 
-  // מוצא את הפריט של הסימניה
+  // Find the bookmark item
   const bookmarkItem = editButton.closest('.bookmark-item')
   if (!bookmarkItem) return
 
@@ -332,16 +332,16 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
 
   if (!bookmarkLink || !editContainer || !actionsContainer || !editInput) return
 
-  // מעבר למצב עריכה
+  // Switch to edit mode
   bookmarkLink.style.display = 'none'
   actionsContainer.style.display = 'none'
   editContainer.classList.remove('hidden')
   
-  // פוקוס על השדה ובחירת הטקסט
+  // Focus on the field and select text
   editInput.focus()
   editInput.select()
 
-  // מאזין לכפתור שמירה
+  // Listen for save button
   const saveButton = editContainer.querySelector('[data-save-edit]')
   const cancelButton = editContainer.querySelector('[data-cancel-edit]')
 
@@ -360,7 +360,7 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
 
       if (!conversationId) return
 
-      // מעדכן את השם
+      // Update the name
       await updateBookmarkName({ 
         articleId: sectionId, 
         profileId, 
@@ -368,7 +368,7 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
         customName: newName
       })
       
-      // מעדכן את התפריט
+      // Update the menu
       await updateBookmarksList(dropdown)
     } catch (error) {
       console.error('Error updating bookmark name:', error)
@@ -376,12 +376,12 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
   }
 
   const handleCancel = () => {
-    // חזרה למצב רגיל
+    // Return to normal mode
     editContainer.classList.add('hidden')
     bookmarkLink.style.display = ''
     actionsContainer.style.display = ''
     
-    // ניקוי מאזינים
+    // Clean up listeners
     cleanup()
   }
 
@@ -393,12 +393,12 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
     }
   }
 
-  // הוספת מאזינים
+  // Add listeners
   saveButton?.addEventListener('click', handleSave)
   cancelButton?.addEventListener('click', handleCancel)
   editInput.addEventListener('keydown', handleKeyDown)
 
-  // פונקציה לניקוי מאזינים
+  // Function to clean up listeners
   const cleanup = () => {
     saveButton?.removeEventListener('click', handleSave)
     cancelButton?.removeEventListener('click', handleCancel)
@@ -407,6 +407,6 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
 }
 
 function showNamePopup(sectionId: string, currentName: string, callback: (name: string) => void) {
-  // נשתמש בפונקציה הפשוטה יותר מה-bookmarkHandler
+  // Will use the simpler function from bookmarkHandler
   console.log('Edit bookmark functionality - will be implemented with inline popup')
 }

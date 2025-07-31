@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -303,7 +303,7 @@ p {
   }
 
   body {
-    /* מבטל את צבע הטקסט המקורי (#333) רק במצב כהה */
+    /* Cancel the original text color (#333) only in dark mode */
     color: #e0e0e0;
     background-color: rgb(33, 33, 32);
   }
@@ -347,7 +347,7 @@ p {
   }
 
   .toast-header_error {
-    background-color: #d9534f; /* אדום בולט */
+    background-color: #d9534f; /* Bold red */
   }
 
   .toast .btn-close:hover {

@@ -1,3 +1,8 @@
+/**
+ * Retrieves storage data for a specific user profile
+ * @param profileId - The user's profile identifier
+ * @returns Promise containing saved pin chats and bookmarks for the profile
+ */
 async function getStorageData(profileId: string): Promise<{
   savedPinChats: { urlId: string; title: string }[];
   // savedBookmarks: { urlId: string; title: string }[];
@@ -25,6 +30,11 @@ async function getStorageData(profileId: string): Promise<{
   }
 }
 
+/**
+ * Retrieves all pinned chats for a specific user profile from storage
+ * @param profileId - The user's profile identifier
+ * @returns Promise that resolves to an array of pinned chat objects
+ */
 export async function getPinChatsFromStorage(
   profileId: string
 ): Promise<{ urlId: string; title: string }[]> {
@@ -37,6 +47,12 @@ export async function getPinChatsFromStorage(
   }
 }
 
+/**
+ * Saves a new pinned chat to storage for a specific user profile
+ * @param profileId - The user's profile identifier
+ * @param urlId - The unique identifier for the chat URL
+ * @param chatTitle - The title/name of the chat to be pinned
+ */
 export async function savePinChatToStorage(
   profileId: string,
   urlId: string,
@@ -48,7 +64,7 @@ export async function savePinChatToStorage(
     const savedPinChats: { urlId: string; title: string }[] =
       storageData.savedPinChats || [];
 
-    // Check if the chat is already saved
+    // Check if the chat is already saved to avoid duplicates
     if (urlId && !savedPinChats.some((chat) => chat.urlId === urlId)) {
       savedPinChats.push({ urlId, title: chatTitle || "" });
       await browser.storage.sync.set({ [`${profileId}`]: savedPinChats });
@@ -58,6 +74,11 @@ export async function savePinChatToStorage(
   }
 }
 
+/**
+ * Removes a pinned chat from storage for a specific user profile
+ * @param profileId - The user's profile identifier
+ * @param urlId - The unique identifier for the chat URL to be removed
+ */
 export async function removePinChatFromStorage(
   profileId: string,
   urlId: string
@@ -79,6 +100,12 @@ export async function removePinChatFromStorage(
   }
 }
 
+/**
+ * Updates the title of a pinned chat in storage
+ * @param profileId - The user's profile identifier  
+ * @param urlId - The unique identifier for the chat URL
+ * @param newTitle - The new title to assign to the pinned chat
+ */
 export async function renamePinChatInStorage(
   profileId: string,
   urlId: string,
