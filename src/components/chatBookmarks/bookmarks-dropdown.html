@@ -3,14 +3,41 @@
   class="hidden absolute top-full right-0 mt-2 w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
 >
   <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
       Bookmarks in this conversation
     </h3>
+    <!-- שדה חיפוש (מוסתר בהתחלה) -->
+    <div id="bookmark-search-container" class="hidden">
+      <div class="relative">
+        <input
+          type="text"
+          id="bookmark-search-input"
+          placeholder="Search bookmarks..."
+          class="w-full px-3 py-2 pl-10 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        />
+        <svg
+          class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+    </div>
   </div>
   <div id="bookmarks-list" class="p-2">
     <!-- הסימניות יוכנסו כאן דינמית -->
   </div>
   <div id="no-bookmarks" class="p-4 text-center text-gray-500 dark:text-gray-400 text-sm hidden">
     No bookmarks yet. Click the bookmark icon next to any section to save it.
+  </div>
+  <div id="no-search-results" class="p-4 text-center text-gray-500 dark:text-gray-400 text-sm hidden">
+    No bookmarks found matching your search.
   </div>
 </div>
