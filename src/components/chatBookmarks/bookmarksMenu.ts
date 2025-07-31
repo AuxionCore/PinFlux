@@ -186,38 +186,88 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
   const sectionId = editButton.getAttribute('data-section-id')
   if (!sectionId) return
 
-  // מוצא את הסימניה הנוכחית
+  // מוצא את הפריט של הסימניה
   const bookmarkItem = editButton.closest('.bookmark-item')
-  const bookmarkLink = bookmarkItem?.querySelector('[data-bookmark-link]')
-  const currentName = bookmarkLink?.textContent?.trim() || ''
+  if (!bookmarkItem) return
 
-  // מציג prompt לעריכת השם
-  const newName = prompt('Enter new bookmark name:', currentName)
-  if (newName === null) return // ביטול
+  const bookmarkLink = bookmarkItem.querySelector('.bookmark-link') as HTMLElement
+  const editContainer = bookmarkItem.querySelector('.bookmark-edit-container') as HTMLElement
+  const actionsContainer = bookmarkItem.querySelector('.bookmark-actions') as HTMLElement
+  const editInput = editContainer?.querySelector('[data-edit-input]') as HTMLInputElement
 
-  try {
-    const profileId = await getProfileId()
-    const path = window.location.pathname.replace(/\/+$/, '')
-    let conversationId = ''
-    const match = path.match(/\/c\/([\w-]+)/)
-    if (match) {
-      conversationId = match[1]
+  if (!bookmarkLink || !editContainer || !actionsContainer || !editInput) return
+
+  // מעבר למצב עריכה
+  bookmarkLink.style.display = 'none'
+  actionsContainer.style.display = 'none'
+  editContainer.classList.remove('hidden')
+  
+  // פוקוס על השדה ובחירת הטקסט
+  editInput.focus()
+  editInput.select()
+
+  // מאזין לכפתור שמירה
+  const saveButton = editContainer.querySelector('[data-save-edit]')
+  const cancelButton = editContainer.querySelector('[data-cancel-edit]')
+
+  const handleSave = async () => {
+    const newName = editInput.value.trim()
+    if (!newName) return
+
+    try {
+      const profileId = await getProfileId()
+      const path = window.location.pathname.replace(/\/+$/, '')
+      let conversationId = ''
+      const match = path.match(/\/c\/([\w-]+)/)
+      if (match) {
+        conversationId = match[1]
+      }
+
+      if (!conversationId) return
+
+      // מעדכן את השם
+      await updateBookmarkName({ 
+        articleId: sectionId, 
+        profileId, 
+        conversationId, 
+        customName: newName
+      })
+      
+      // מעדכן את התפריט
+      await updateBookmarksList(dropdown)
+    } catch (error) {
+      console.error('Error updating bookmark name:', error)
     }
+  }
 
-    if (!conversationId) return
-
-    // מעדכן את השם
-    await updateBookmarkName({ 
-      articleId: sectionId, 
-      profileId, 
-      conversationId, 
-      customName: newName.trim() 
-    })
+  const handleCancel = () => {
+    // חזרה למצב רגיל
+    editContainer.classList.add('hidden')
+    bookmarkLink.style.display = ''
+    actionsContainer.style.display = ''
     
-    // מעדכן את התפריט
-    await updateBookmarksList(dropdown)
-  } catch (error) {
-    console.error('Error updating bookmark name:', error)
+    // ניקוי מאזינים
+    cleanup()
+  }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave()
+    } else if (e.key === 'Escape') {
+      handleCancel()
+    }
+  }
+
+  // הוספת מאזינים
+  saveButton?.addEventListener('click', handleSave)
+  cancelButton?.addEventListener('click', handleCancel)
+  editInput.addEventListener('keydown', handleKeyDown)
+
+  // פונקציה לניקוי מאזינים
+  const cleanup = () => {
+    saveButton?.removeEventListener('click', handleSave)
+    cancelButton?.removeEventListener('click', handleCancel)
+    editInput.removeEventListener('keydown', handleKeyDown)
   }
 }
 
