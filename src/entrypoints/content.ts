@@ -46,15 +46,15 @@ export default defineContentScript({
     try {
       await initContentScript()
 
-      // if (chatPagePattern.includes(window.location.href)) {
-      //   const result = await waitForProfileAndConversationId()
-      //   if (!result) return
-
-      //   const { profileId, conversationId } = result
-
-      //   await bumpBookmarkGroupTimestamp(profileId, conversationId)
-      //   await initBookmarks({ profileId, conversationId })
-      // }
+      // אתחול סימניות בכניסה ראשונית לדף שיחה
+      if (chatPagePattern.includes(window.location.href)) {
+        const result = await waitForProfileAndConversationId()
+        if (result) {
+          const { profileId, conversationId } = result
+          await bumpBookmarkGroupTimestamp(profileId, conversationId)
+          await initBookmarks({ profileId, conversationId })
+        }
+      }
 
       ctx.addEventListener(window, 'wxt:locationchange', async ({ newUrl }) => {
         try {
