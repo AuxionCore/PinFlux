@@ -5,7 +5,7 @@ export default function UnpinButton(): HTMLDivElement {
   const unpinButton: HTMLDivElement = document.createElement("div");
   unpinButton.setAttribute("role", "menuitem");
   unpinButton.setAttribute("data-orientation", "vertical");
-  unpinButton.className = "group __menu-item pe-8 gap-1.5";
+  unpinButton.className = "group __menu-item pe-8 gap-1.5 hover:bg-token-main-surface-secondary transition-colors duration-200 cursor-pointer";
   unpinButton.innerHTML = unpinButtonElm;
   return unpinButton;
 }
