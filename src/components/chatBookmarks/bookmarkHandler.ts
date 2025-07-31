@@ -13,11 +13,13 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
     )
     if (!button) return
 
-    const article = button.closest('article')
-    if (!article) return
+    // מציאת המקטע (section) במקום המאמר
+    const section = button.closest('.bookmark-section')
+    if (!section) return
 
-    const articleId = article.getAttribute('data-testid')
-    if (!articleId) return
+    // קבלת המזהה של המקטע מהכפתור או מה-ID של המקטע
+    const sectionId = button.getAttribute('data-section-id') || section.id
+    if (!sectionId) return
 
     const profileId = await getProfileId()
     // Robust extraction of conversationId from pathname (e.g., /c/{conversationId})
@@ -39,14 +41,14 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
       conversationId
     )
 
-    const isCurrentlyBookmarked = bookmarkIds.includes(articleId)
+    const isCurrentlyBookmarked = bookmarkIds.includes(sectionId)
 
     if (isCurrentlyBookmarked) {
-      await deleteBookmark({ articleId, profileId, conversationId })
-      replaceBookmarkButton(article, addBookmarkButtonHtml)
+      await deleteBookmark({ articleId: sectionId, profileId, conversationId })
+      replaceBookmarkButton(section, addBookmarkButtonHtml)
     } else {
-      await saveBookmark({ articleId, profileId, conversationId })
-      replaceBookmarkButton(article, removeBookmarkButtonHtml)
+      await saveBookmark({ articleId: sectionId, profileId, conversationId })
+      replaceBookmarkButton(section, removeBookmarkButtonHtml)
     }
   } catch (error) {
     console.error('Failed to handle bookmark button click:', error)

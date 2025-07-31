@@ -57,11 +57,17 @@ export default async function initBookmarks({
     const createSection = (elements: HTMLElement[], index: number) => {
       if (!elements.length) return
 
-      const wrapper = document.createElement('div')
-      wrapper.classList.add('relative', 'group', 'bookmark-section')
+      // יצירת container חיצוני
+      const container = document.createElement('div')
+      container.classList.add('relative', 'group', 'flex', 'items-start', 'gap-2', 'mb-4')
 
-      elements[0].before(wrapper)
+      // יצירת wrapper לתוכן
+      const wrapper = document.createElement('div')
+      wrapper.classList.add('bookmark-section', 'flex-1')
+
+      elements[0].before(container)
       for (const el of elements) wrapper.appendChild(el)
+      container.appendChild(wrapper)
 
       // מזהה ייחודי של המקטע, עם prefix
       const articleId = article.dataset.testid || ''
@@ -73,9 +79,10 @@ export default async function initBookmarks({
         ? removeBookmarkButtonHtml
         : addBookmarkButtonHtml
 
-      wrapper.insertAdjacentHTML('beforeend', buttonHtml)
+      // הוספת הכפתור לcontainer (לא לwrapper)
+      container.insertAdjacentHTML('beforeend', buttonHtml)
 
-      const button = wrapper.querySelector(
+      const button = container.querySelector(
         '[data-bookmark-button]'
       ) as HTMLElement
       if (button) {
