@@ -5,15 +5,21 @@ export default async function saveBookmark({
   articleId,
   profileId,
   conversationId,
+  customName,
 }: {
   articleId: string
   profileId: string
   conversationId: string
+  customName?: string
 }) {
   try {
     const dateStr = getCompactDateString()
     const key = `bm_${profileId}_${conversationId}_lastAccess_${dateStr}`
-    const newBookmark = { articleId: articleId }
+    const newBookmark = { 
+      articleId: articleId,
+      customName: customName || null,
+      timestamp: Date.now()
+    }
     const result = await browser.storage.sync.get(key)
 
     if (key in result) {
