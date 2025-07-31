@@ -7,14 +7,18 @@ import getConversationBookmarksIds from './getConversationBookmarksIds'
 import getProfileId from '../utils/getProfileId'
 
 export default async function handleBookmarkButtonClick(event: MouseEvent) {
+  console.log('Bookmark button clicked!', event.target)
   try {
     const button = (event.target as HTMLElement).closest(
       '[data-bookmark-button]'
     )
     if (!button) return
 
-    // מציאת המקטע (section) במקום המאמר
-    const section = button.closest('.bookmark-section')
+    // מציאת המקטע - עכשיו הוא נמצא בתוך ה-container
+    const container = button.parentElement
+    if (!container) return
+    
+    const section = container.querySelector('.bookmark-section')
     if (!section) return
 
     // קבלת המזהה של המקטע מהכפתור או מה-ID של המקטע
