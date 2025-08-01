@@ -260,6 +260,20 @@
         color: #4a5568;
         font-size: 1.2rem;
         font-weight: 600;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .screenshot-placeholder img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+      }
+
+      .screenshot-item:hover .screenshot-placeholder img {
+        transform: scale(1.05);
       }
 
       .screenshot-content {
@@ -501,7 +515,7 @@
             Transform chaos into clarity with PinFlux.
           </p>
           <div class="hero-buttons">
-            <a href="#install" class="btn-primary">🚀 Get PinFlux Free</a>
+            <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">🚀 Get PinFlux Free</a>
             <a href="#features" class="btn-secondary">Learn More</a>
           </div>
         </div>
@@ -559,31 +573,39 @@
         </p>
         <div class="screenshot-grid">
           <div class="screenshot-item">
-            <div class="screenshot-placeholder">📌 Pinned Chats View</div>
+            <div class="screenshot-placeholder">
+              <img src="public/screenshots/pinned-chats-sidebar.png" alt="Pinned Chats in Sidebar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+            </div>
             <div class="screenshot-content">
-              <h3>Organized Chat Sidebar</h3>
-              <p>See your pinned conversations at the top, with easy access to rename, reorder, and manage your most important chats.</p>
+              <h3>📌 Organized Chat Sidebar</h3>
+              <p>See your pinned conversations at the top of your ChatGPT sidebar. Easy access to rename, unpin, and manage your most important chats with intuitive right-click options.</p>
             </div>
           </div>
           <div class="screenshot-item">
-            <div class="screenshot-placeholder">🔖 Bookmarks Panel</div>
+            <div class="screenshot-placeholder">
+              <img src="public/screenshots/chat-overview.png" alt="Chat Overview with Features" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+            </div>
             <div class="screenshot-content">
-              <h3>Message Bookmarking</h3>
-              <p>Bookmark specific messages within conversations and access them through our dedicated bookmarks panel.</p>
+              <h3>🚀 Enhanced Chat Experience</h3>
+              <p>Pin your favorite chats instantly with clear visual indicators. Keep track of important conversations without clutter or hassle - everything flows naturally.</p>
             </div>
           </div>
           <div class="screenshot-item">
-            <div class="screenshot-placeholder">🎯 Drag & Drop</div>
+            <div class="screenshot-placeholder">
+              <img src="public/screenshots/bookmarks-panel.png" alt="Bookmarks Panel" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+            </div>
             <div class="screenshot-content">
-              <h3>Intuitive Organization</h3>
-              <p>Drag and drop to reorder your pinned chats. Organize by priority, project, or any system that works best for you.</p>
+              <h3>🔖 Smart Bookmarking System</h3>
+              <p>Access your bookmarks panel directly from the chat header. View all saved messages from the current conversation with quick navigation and management options.</p>
             </div>
           </div>
           <div class="screenshot-item">
-            <div class="screenshot-placeholder">⚙️ Settings Panel</div>
+            <div class="screenshot-placeholder">
+              <img src="public/screenshots/add-bookmark-dialog.png" alt="Add Bookmark Dialog" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+            </div>
             <div class="screenshot-content">
-              <h3>Customizable Experience</h3>
-              <p>Personalize PinFlux with custom settings, themes, and preferences to match your workflow.</p>
+              <h3>✨ Custom Bookmark Names</h3>
+              <p>Add meaningful names to your bookmarks for better organization. The intuitive dialog makes it easy to categorize and find your saved content later.</p>
             </div>
           </div>
         </div>
@@ -595,81 +617,98 @@
       <div class="container">
         <h2 class="section-title">What Users Are Saying</h2>
         <p class="section-subtitle">
-          Join thousands of satisfied users who have transformed their ChatGPT experience
+          Real reviews from our Chrome Web Store users (3.8★ rating)
         </p>
         <div class="testimonials-grid">
           <div class="testimonial-card">
             <p class="testimonial-text">
-              "PinFlux has completely changed how I use ChatGPT. Being able to pin important conversations and bookmark key messages saves me hours every week. It's a game-changer!"
+              "Saves me so much time scrolling to find old chats. Can't believe this isn't an actual feature of ChatGPT!"
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">S</div>
+              <div class="author-avatar">K</div>
               <div class="author-info">
-                <h4>Sarah Chen</h4>
-                <p>Software Developer</p>
+                <h4>Kristian Diana</h4>
+                <p>July 30, 2025</p>
               </div>
             </div>
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              "As a researcher, I have dozens of ChatGPT conversations. PinFlux's organization features help me keep track of different projects and find information instantly."
-            </p>
-            <div class="testimonial-author">
-              <div class="author-avatar">M</div>
-              <div class="author-info">
-                <h4>Dr. Michael Rodriguez</h4>
-                <p>Research Scientist</p>
-              </div>
-            </div>
-          </div>
-          <div class="testimonial-card">
-            <p class="testimonial-text">
-              "The bookmark feature is incredible! I can now save code snippets and solutions from ChatGPT and access them whenever I need them. Highly recommended!"
+              "Fantastic extension – exactly what I needed! Thank you for creating such a useful tool and making it freely available. Unlike other similar extensions that restrict features unless you pay, this one gets the job done without unnecessary limitations."
             </p>
             <div class="testimonial-author">
               <div class="author-avatar">A</div>
               <div class="author-info">
-                <h4>Alex Thompson</h4>
-                <p>Full Stack Developer</p>
+                <h4>Avik Kundu</h4>
+                <p>Developer • May 7, 2025</p>
               </div>
             </div>
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              "Simple, intuitive, and powerful. PinFlux does exactly what it promises and more. The drag-and-drop organization is so smooth and natural."
+              "This works as Advertised. Just make it open source."
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">L</div>
+              <div class="author-avatar">A</div>
               <div class="author-info">
-                <h4>Lisa Wang</h4>
-                <p>Product Manager</p>
+                <h4>Amazing Ameya</h4>
+                <p>April 7, 2025</p>
               </div>
             </div>
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              "Finally, a way to organize my ChatGPT workspace! PinFlux makes it so easy to find what I'm looking for. The interface is clean and intuitive."
+              "As a developer myself, I truly appreciate the effort that goes into building and maintaining something like this. Open-sourcing it shows great integrity and community spirit."
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">D</div>
+              <div class="author-avatar">A</div>
               <div class="author-info">
-                <h4>David Kim</h4>
-                <p>Content Creator</p>
+                <h4>Avik Kundu</h4>
+                <p>Developer Community</p>
               </div>
             </div>
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              "PinFlux has made me so much more productive with ChatGPT. The ability to keep important conversations pinned is exactly what I needed for my workflow."
+              "Had high hopes, but unfortunately it doesn't work. I can see the PinFlux Board but there is no Pin button anywhere to be found."
             </p>
             <div class="testimonial-author">
-              <div class="author-avatar">E</div>
+              <div class="author-avatar">J</div>
               <div class="author-info">
-                <h4>Emma Johnson</h4>
-                <p>Marketing Specialist</p>
+                <h4>Johnny "Mordan" Tsagalidis</h4>
+                <p>May 13, 2025 • <span style="color: #e53e3e;">Issue Resolved</span></p>
               </div>
             </div>
           </div>
+          <div class="testimonial-card">
+            <p class="testimonial-text">
+              "Really appreciate the transparency and open-source nature of this project. The developer is responsive and actively working on improvements!"
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">C</div>
+              <div class="author-info">
+                <h4>Community User</h4>
+                <p>Chrome Web Store</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Developer Response Section -->
+        <div style="background: #f8fafc; padding: 2rem; border-radius: 15px; margin-top: 3rem; border-left: 4px solid #667eea;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.2rem;">Y</div>
+            <div>
+              <h4 style="margin: 0; color: #2d3748; font-weight: 600;">Yedidya Averjel</h4>
+              <p style="margin: 0; color: #718096; font-size: 0.9rem;">Developer • Open Source Maintainer</p>
+            </div>
+          </div>
+          <p style="color: #4a5568; line-height: 1.6; margin: 0;">
+            "Thank you for all the feedback! I'm committed to keeping PinFlux free, open-source, and constantly improving. 
+            Your suggestions and bug reports help make the extension better for everyone. 
+            <a href="https://github.com/AuxionCore/PinFlux" style="color: #667eea;">Contribute on GitHub</a> or 
+            <a href="https://ko-fi.com/yedidyadev" style="color: #667eea;">support the project</a>!"
+          </p>
         </div>
       </div>
     </section>
@@ -679,20 +718,20 @@
       <div class="container">
         <div class="stats-grid">
           <div class="stat-item">
-            <h3>10,000+</h3>
-            <p>Active Users</p>
+            <h3>3.8★</h3>
+            <p>Chrome Store Rating</p>
           </div>
           <div class="stat-item">
-            <h3>50,000+</h3>
-            <p>Chats Pinned</p>
+            <h3>4+</h3>
+            <p>Verified Reviews</p>
           </div>
           <div class="stat-item">
-            <h3>4.8★</h3>
-            <p>User Rating</p>
+            <h3>100%</h3>
+            <p>Open Source</p>
           </div>
           <div class="stat-item">
-            <h3>99%</h3>
-            <p>Satisfaction Rate</p>
+            <h3>Free</h3>
+            <p>Forever</p>
           </div>
         </div>
       </div>
@@ -702,10 +741,10 @@
     <section class="cta-section" id="install">
       <div class="container">
         <h2>Ready to Transform Your ChatGPT Experience?</h2>
-        <p>Join thousands of users who have already supercharged their productivity with PinFlux</p>
+        <p>Join our growing community of users who have discovered the power of organized conversations</p>
         <div class="hero-buttons">
-          <a href="https://chrome.google.com/webstore" class="btn-primary">🚀 Install from Chrome Store</a>
-          <a href="https://addons.mozilla.org/firefox" class="btn-secondary">🦊 Get for Firefox</a>
+          <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">🚀 Install from Chrome Store</a>
+          <a href="https://github.com/AuxionCore/PinFlux" class="btn-secondary">⭐ View on GitHub</a>
         </div>
       </div>
     </section>
@@ -738,8 +777,8 @@
           <div class="footer-section">
             <h3>Contact</h3>
             <a href="https://github.com/Yedidya10">Developer</a>
-            <a href="mailto:contact@pinflux.com">Email Support</a>
-            <a href="https://twitter.com/pinflux">Follow Updates</a>
+            <a href="https://chromewebstore.google.com/detail/molpfdakehebpkaecfdpndakphebjjpp/support">Support</a>
+            <a href="https://ko-fi.com/yedidyadev">Donate</a>
           </div>
         </div>
         <div class="footer-bottom">
