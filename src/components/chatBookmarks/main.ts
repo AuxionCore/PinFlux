@@ -20,6 +20,9 @@ async function waitForArticles(
 
 let bookmarkClickListenerAdded = false
 let observer: MutationObserver | null = null
+let isProcessingArticles = false
+let lastProcessedArticleCount = 0
+let observerTimeout: NodeJS.Timeout | null = null
 
 export default async function initBookmarks({
   profileId,
@@ -153,18 +156,36 @@ export default async function initBookmarks({
   }
 
   // Disconnect previous observer
-  if (observer) observer.disconnect()
+  if (observer) {
+    observer.disconnect()
+    if (observerTimeout) {
+      clearTimeout(observerTimeout)
+      observerTimeout = null
+    }
+  }
 
   // New observer that listens for audio button appearing/disappearing
   observer = new MutationObserver(mutations => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'attributes' || mutation.type === 'childList') {
-        // Check if audio button appears (sign that response is completed)
-        const speechButton = document.querySelector('[data-testid="composer-speech-button"]')
-        const speechButtonContainer = document.querySelector('[data-testid="composer-speech-button-container"]')
+    // Prevent infinite loop
+    if (isProcessingArticles) return
+    
+    // Throttle the observer - only check every 500ms
+    if (observerTimeout) clearTimeout(observerTimeout)
+    observerTimeout = setTimeout(() => {
+      // Check if audio button appears (sign that response is completed)
+      const speechButton = document.querySelector('[data-testid="composer-speech-button"]')
+      const speechButtonContainer = document.querySelector('[data-testid="composer-speech-button-container"]')
+      
+      if (speechButton && speechButtonContainer && !speechButton.hasAttribute('disabled')) {
+        const currentArticleCount = document.querySelectorAll('article').length
         
-        if (speechButton && speechButtonContainer && !speechButton.hasAttribute('disabled')) {
+        // Only process if we have new articles or haven't processed this conversation yet
+        if (currentArticleCount > lastProcessedArticleCount) {
           console.log('Speech button is active - response completed, adding bookmark buttons')
+          
+          // Set flag to prevent recursive calls
+          isProcessingArticles = true
+          lastProcessedArticleCount = currentArticleCount
           
           // Short delay to ensure content is stable
           setTimeout(() => {
@@ -173,10 +194,12 @@ export default async function initBookmarks({
               console.log('Processing articles after response completion:', allArticles.length)
               addButtonsToArticles(allArticles)
             }
+            // Reset flag after processing
+            isProcessingArticles = false
           }, 300)
         }
       }
-    }
+    }, 500)
   })
 
   observer.observe(document.body, {
