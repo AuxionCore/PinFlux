@@ -33,6 +33,7 @@ export default function handleDragStart(event: DragEvent): void {
     if (pinnedChats.offsetHeight < 70) {
       requestAnimationFrame(() => {
         pinnedChats.style.height = '70px'
+        draggableDisplay.style.height = '70px'
         pinnedChats.style.transition = 'height 0.3s'
         pinnedChats.style.borderStyle = 'dashed'
       })
