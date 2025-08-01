@@ -21,13 +21,22 @@ export default function createPinnedContainerElement(): HTMLElement {
   style.textContent = `
           #chatListContainer {
           max-height: 150px;
-          overflow-y: auto;
-          overflow-x: hidden;
-          scrollbar-width: thin; /* Firefox */
+          overflow: hidden; /* Start with hidden */
           --scroll-thumb: #e0e0e0; 
           --scroll-thumb-hover: #c0c0c0; 
           --scroll-thumb-active: #a0a0a0; 
-          scrollbar-color: var(--scroll-thumb) transparent;
+        }
+
+        /* Scrollable state - only when needed */
+        #chatListContainer.scrollable {
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        #chatListContainer.scrollable::-webkit-scrollbar {
+          display: none;
         }
 
         ${
@@ -37,17 +46,23 @@ export default function createPinnedContainerElement(): HTMLElement {
             --scroll-thumb: #303030;
             --scroll-thumb-hover: #505050;
             --scroll-thumb-active: #707070;
-            scrollbar-color: var(--scroll-thumb) transparent;
           }
         `
         }
 
-        #chatListContainer::-webkit-scrollbar {
+        /* Show scrollbar on hover only when scrollable */
+        #chatListContainer.scrollable:hover {
+          scrollbar-width: thin;
+          scrollbar-color: var(--scroll-thumb-hover) transparent;
+        }
+
+        #chatListContainer.scrollable:hover::-webkit-scrollbar {
+          display: block;
           width: 6px;
           height: 6px;
         }
 
-        #chatListContainer::-webkit-scrollbar-thumb {
+        #chatListContainer.scrollable:hover::-webkit-scrollbar-thumb {
           background-color: var(--scroll-thumb);
           border-radius: 10px;
           border: 2px solid transparent;
@@ -55,22 +70,51 @@ export default function createPinnedContainerElement(): HTMLElement {
           transition: background-color 0.2s ease;
         }
 
-        #chatListContainer:hover {
-          --scroll-thumb: var(--scroll-thumb-hover);
-        }
-
-        #chatListContainer::-webkit-scrollbar-thumb:hover {
+        #chatListContainer.scrollable:hover::-webkit-scrollbar-thumb:hover {
           background-color: var(--scroll-thumb-active);
         }
 
-        #chatListContainer::-webkit-scrollbar-track,
-        #chatListContainer::-webkit-scrollbar-corner,
-        #chatListContainer::-webkit-scrollbar-button {
+        #chatListContainer.scrollable:hover::-webkit-scrollbar-track,
+        #chatListContainer.scrollable:hover::-webkit-scrollbar-corner,
+        #chatListContainer.scrollable:hover::-webkit-scrollbar-button {
           background-color: transparent;
         }
       
     `;
   document.head.appendChild(style);
+
+  // Function to check if scrolling is needed
+  function checkScrollNeed(): void {
+    // Measure content without changing overflow first
+    const currentHeight = chatListContainer.clientHeight;
+    const contentHeight = chatListContainer.scrollHeight;
+    
+    const needsScroll = contentHeight > currentHeight;
+    
+    if (needsScroll) {
+      chatListContainer.classList.add('scrollable');
+    } else {
+      chatListContainer.classList.remove('scrollable');
+      // Remove any inline overflow styles
+      chatListContainer.style.removeProperty('overflow');
+      chatListContainer.style.removeProperty('overflow-y');
+      chatListContainer.style.removeProperty('overflow-x');
+    }
+  }
+
+  // Observer to watch for content changes
+  const observer = new MutationObserver(() => {
+    requestAnimationFrame(checkScrollNeed);
+  });
+
+  observer.observe(chatListContainer, {
+    childList: true,
+    subtree: true,
+    attributes: true
+  });
+
+  // Initial check
+  setTimeout(checkScrollNeed, 100);
 
   function handleDragOver(event: DragEvent): void {
     event.preventDefault();
