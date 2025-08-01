@@ -1,6 +1,6 @@
 const KEYS_LIMIT = 512
 // Change this value to control how many keys are deleted at once
-let DELETE_BATCH_SIZE = 1
+let DELETE_BATCH_SIZE = 5
 
 function getDateFromBookmarkKey(key: string): number | null {
   const match = key.match(/_lastAccess_(\d{8})$/)
