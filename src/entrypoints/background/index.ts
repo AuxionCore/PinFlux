@@ -6,7 +6,7 @@ export default defineBackground({
   type: 'module',
   main() {
     // Handle extension installation and updates
-    browser.runtime.onInstalled.addListener(details => {
+    browser.runtime.onInstalled.addListener(async details => {
       // Show shortcuts notification after updating from version 2.0.0
       if (details.reason === 'update' && details.previousVersion === '2.0.0') {
         browser.storage.sync.set({ showShortcutsNotification: true })
@@ -15,8 +15,14 @@ export default defineBackground({
 
       // Show feature survey notification after updating from version 2.0.1
       if (details.reason === 'update') {
+        const showFeatureSurveyNotification = await browser.storage.sync.get(
+          'showFeatureSurveyNotification'
+        )
+        if (!showFeatureSurveyNotification) {
+          browser.action.openPopup()
+        }
+
         browser.storage.sync.set({ showFeatureSurveyNotification: true })
-        browser.action.openPopup()
       }
     })
 
