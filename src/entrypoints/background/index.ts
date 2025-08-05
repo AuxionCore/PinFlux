@@ -14,7 +14,7 @@ export default defineBackground({
       }
 
       // Show feature survey notification after updating from version 2.0.1
-      if (details.reason === 'update' && details.previousVersion === '2.0.1') {
+      if (details.reason === 'update') {
         browser.storage.sync.set({ showFeatureSurveyNotification: true })
         browser.action.openPopup()
       }
