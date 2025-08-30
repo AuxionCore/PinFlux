@@ -174,7 +174,7 @@ body {
 
 .feature-category li {
   background: #f9fafb;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 2rem;
   border-radius: 8px;
   border-left: 4px solid #4f46e5;
   transition: all 0.2s ease;
@@ -189,10 +189,9 @@ body {
 .feature-category li::before {
   content: '✨';
   position: absolute;
-  left: -12px;
+  left: 4px;
   top: 50%;
   transform: translateY(-50%);
-  background: white;
   padding: 0.25rem;
   border-radius: 50%;
   font-size: 0.8rem;
