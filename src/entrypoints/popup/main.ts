@@ -151,10 +151,10 @@ async function popupScript() {
         {
           id: elements.versionLink,
           url: import.meta.env.CHROME
-            ? `#`
+            ? `changelog.html`
             : import.meta.env.FIREFOX
-            ? `https://addons.mozilla.org/en-US/firefox/addon/pinflux/versions/`
-            : '#',
+            ? `changelog.html`
+            : 'changelog.html',
         },
       ]
 
