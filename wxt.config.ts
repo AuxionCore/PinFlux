@@ -9,7 +9,6 @@ export default defineConfig({
   webExt: {
     disabled: true,
   },
-  debug: true,
   manifest: ({ browser }) => {
     const isFirefox = browser === "firefox";
 
