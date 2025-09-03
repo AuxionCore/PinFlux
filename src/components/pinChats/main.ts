@@ -9,6 +9,7 @@ import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
 import pinCurrentConversation from "@/components/pinChats/core/pinCurrentConversation";
 import { showTooltipOnce } from "@/components/pinChats/helpers/showTooltipOnce";
+import { showOneTimeNotification } from "@/components/utils/notifications";
 
 import {
   getPinChatsFromStorage,
@@ -104,6 +105,25 @@ export default async function initContentScript(): Promise<void> {
       profileId,
       historyElement,
     });
+
+    // Show drag and drop notification for users updating from v2.1.0 (only if they have pinned chats)
+    setTimeout(async () => {
+      try {
+        const pinnedChats = await getPinChatsFromStorage(profileId);
+        if (pinnedChats.length > 0) {
+          showOneTimeNotification({
+            id: 'drag_drop_feature_v2_1_1',
+            title: '', // Will use hardcoded English text
+            message: '', // Will use hardcoded English text
+            version: '2.1.1',
+            type: 'success',
+            duration: 15000
+          });
+        }
+      } catch (error) {
+        console.error('Failed to check pinned chats for notification:', error);
+      }
+    }, 1000);
 
     browser.runtime.onMessage.addListener(async (message) => {
       if (message.action === "pin-current-chat") {

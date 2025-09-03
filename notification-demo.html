@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Demo</title>
+</head>
+<body style="padding: 20px; background: #f5f5f5;">
+    <h1>PinFlux Notification Demo</h1>
+    <p>This is a preview of the new drag & drop notification.</p>
+    
+    <button onclick="showDemoNotification()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+        Show Notification
+    </button>
+
+    <div id="pinnedContainer" style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px; border: 2px dashed #ddd;">
+        <h2 style="margin: 0 0 10px 0; font-size: 16px; color: #666;">PinFlux Board</h2>
+        <div style="padding: 20px; background: #f9f9f9; border-radius: 6px; text-align: center; color: #666;">
+            Pinned chats would appear here
+        </div>
+    </div>
+
+    <script>
+        // Copy of the notification code
+        function showDemoNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'pinflux-notification';
+            
+            const title = '🎉 New Feature!';
+            const message = 'You can now drag and drop pinned chats to reorder them! Just click and hold 🖱️';
+            const closeLabel = 'Close notification';
+            
+            notification.innerHTML = `
+                <div class="pinflux-notification-content">
+                    <div class="pinflux-notification-brand">
+                        <div class="pinflux-notification-logo">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L13.09 8.26L19 7L15.74 12L19 17L13.09 15.74L12 22L10.91 15.74L5 17L8.26 12L5 7L10.91 8.26L12 2Z"/>
+                            </svg>
+                        </div>
+                        <span class="pinflux-notification-brand-text">PinFlux</span>
+                    </div>
+                    <div class="pinflux-notification-header">
+                        <div class="pinflux-notification-icon success">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </div>
+                        <h3 class="pinflux-notification-title">${title}</h3>
+                        <button class="pinflux-notification-close" aria-label="${closeLabel}">×</button>
+                    </div>
+                    <p class="pinflux-notification-message">${message}</p>
+                </div>
+            `;
+
+            addNotificationStyles();
+            positionNotification(notification);
+            
+            const closeBtn = notification.querySelector('.pinflux-notification-close');
+            const closeNotification = () => {
+                notification.classList.add('hide');
+                setTimeout(() => notification.remove(), 300);
+            };
+            
+            closeBtn.addEventListener('click', closeNotification);
+            
+            // Auto-close with mouse hover pause
+            let timeoutId = null;
+            let remainingTime = 10000;
+            let startTime = Date.now();
+
+            const startTimer = () => {
+                startTime = Date.now();
+                timeoutId = setTimeout(closeNotification, remainingTime);
+            };
+
+            const pauseTimer = () => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    remainingTime -= Date.now() - startTime;
+                    timeoutId = null;
+                }
+            };
+
+            notification.addEventListener('mouseenter', pauseTimer);
+            notification.addEventListener('mouseleave', startTimer);
+
+            // Start initial timer
+            startTimer();
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+        }
+
+        function positionNotification(notification) {
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                const pinnedContainer = document.querySelector('#pinnedContainer');
+
+                if (pinnedContainer) {
+                    const rect = pinnedContainer.getBoundingClientRect();
+                    notification.style.position = 'fixed';
+                    notification.style.top = `${Math.max(10, rect.bottom + 15)}px`;
+                    notification.style.left = `${Math.max(10, rect.left)}px`;
+                    notification.style.maxWidth = `${Math.max(300, rect.width)}px`;
+                    notification.style.zIndex = '10000';
+                } else {
+                    notification.style.position = 'fixed';
+                    notification.style.top = '120px';
+                    notification.style.left = '20px';
+                    notification.style.maxWidth = '320px';
+                    notification.style.zIndex = '10000';
+                }
+            }, 100);
+        }
+
+        function addNotificationStyles() {
+            if (document.getElementById('pinflux-notification-styles')) {
+                return;
+            }
+
+            const styles = document.createElement('style');
+            styles.id = 'pinflux-notification-styles';
+            styles.textContent = `
+                .pinflux-notification {
+                    max-width: 320px;
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 12px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                    color: #374151;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(0, 0, 0, 0.05);
+                    overflow: hidden;
+                }
+                
+                .pinflux-notification.show {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+                
+                .pinflux-notification.hide {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                }
+                
+                .pinflux-notification-content {
+                    padding: 0;
+                    position: relative;
+                }
+                
+                .pinflux-notification-content::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 4px;
+                    height: 100%;
+                    background: linear-gradient(135deg, #10b981, #3b82f6);
+                    border-radius: 0 2px 2px 0;
+                }
+                
+                .pinflux-notification-brand {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 16px 8px 20px;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(139, 92, 246, 0.02));
+                }
+                
+                .pinflux-notification-logo {
+                    width: 18px;
+                    height: 18px;
+                    color: #6366f1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(99, 102, 241, 0.1);
+                    border-radius: 4px;
+                    padding: 2px;
+                }
+                
+                .pinflux-notification-logo svg {
+                    width: 12px;
+                    height: 12px;
+                }
+                
+                .pinflux-notification-brand-text {
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #6366f1;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+                }
+                
+                .pinflux-notification-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 12px 16px 8px 20px;
+                }
+                
+                .pinflux-notification-icon {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+                
+                .pinflux-notification-icon svg {
+                    width: 14px;
+                    height: 14px;
+                }
+                
+                .pinflux-notification-icon.success {
+                    background: linear-gradient(135deg, #34d399, #10b981);
+                    color: white;
+                }
+                
+                .pinflux-notification-title {
+                    flex: 1;
+                    margin: 0;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #111827;
+                }
+                
+                .pinflux-notification-close {
+                    background: none;
+                    border: none;
+                    color: #9ca3af;
+                    font-size: 16px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease;
+                }
+                
+                .pinflux-notification-close:hover {
+                    background: rgba(107, 114, 128, 0.1);
+                    color: #374151;
+                }
+                
+                .pinflux-notification-message {
+                    margin: 0;
+                    font-size: 13px;
+                    line-height: 1.4;
+                    color: #6b7280;
+                    padding: 0 16px 16px 20px;
+                }
+            `;
+            
+            document.head.appendChild(styles);
+        }
+    </script>
+</body>
+</html>

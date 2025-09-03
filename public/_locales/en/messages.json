@@ -96,5 +96,21 @@
         "description": "Browser name placeholder"
       }
     }
+  },
+  "dragDropFeatureTitle": {
+    "message": "🎉 New Feature!",
+    "description": "Title for drag and drop feature notification"
+  },
+  "pinfluxBrandText": {
+    "message": "PinFlux",
+    "description": "PinFlux brand name for notifications"
+  },
+  "dragDropFeatureMessage": {
+    "message": "You can now drag and drop pinned chats to reorder them! Just click and hold 🖱️",
+    "description": "Message for drag and drop feature notification"
+  },
+  "notificationCloseLabel": {
+    "message": "Close notification",
+    "description": "Aria label for notification close button"
   }
 }
