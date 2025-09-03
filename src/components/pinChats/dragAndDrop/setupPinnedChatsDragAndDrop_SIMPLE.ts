@@ -1,38 +1,26 @@
 // פונקציה פשוטה לגרירה של שיחות מוצמדות
 import { updatePinChatsOrder } from '@/components/utils/storage'
 
-// Polyfill for requestIdleCallback to fix console errors
-if (!window.requestIdleCallback) {
-  window.requestIdleCallback = function(callback: IdleRequestCallback) {
-    const start = Date.now()
-    return Number(setTimeout(() => {
-      callback({
-        didTimeout: false,
-        timeRemaining() {
-          return Math.max(0, 50 - (Date.now() - start))
-        }
-      })
-    }, 1))
-  }
-}
-
-if (!window.cancelIdleCallback) {
-  window.cancelIdleCallback = function(id: number) {
-    clearTimeout(id)
-  }
-}
-
 export default function setupPinnedChatsDragAndDrop(
   pinnedChats: HTMLElement,
   profileId: string
 ) {
   console.log('🔥 Starting SIMPLE drag and drop setup')
+  
+  // Prevent multiple instances
+  if (pinnedChats.hasAttribute('data-drag-setup')) {
+    console.log('🔥 Drag and drop already setup for this container')
+    return
+  }
+  pinnedChats.setAttribute('data-drag-setup', 'true')
+  
   let draggedElement: HTMLElement | null = null
   let dropIndicator: HTMLElement | null = null
 
-  // הוספת CSS פשוט
-  const style = document.createElement('style')
-  style.id = 'simple-drag-css'
+  // הוספת CSS פשוט - רק אם עדיין לא קיים
+  if (!document.querySelector('#simple-drag-css')) {
+    const style = document.createElement('style')
+    style.id = 'simple-drag-css'
   style.textContent = `
     .being-dragged {
       opacity: 0.4 !important;
@@ -57,11 +45,12 @@ export default function setupPinnedChatsDragAndDrop(
         box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
       }
     }
-  `
-  document.head.appendChild(style)
-  console.log('🔥 Added simple CSS')
-
-  function closeAllOptionsMenus() {
+    `
+    document.head.appendChild(style)
+    console.log('🔥 Added simple CSS')
+  } else {
+    console.log('🔥 CSS already exists, skipping')
+  }  function closeAllOptionsMenus() {
     // חפש ותסגור כל תפריטי אפשרויות פתוחים
     const openMenus = document.querySelectorAll('[data-testid="conversation-turn-action-menu"], .options-menu, #chatOptionsMenu')
     openMenus.forEach(menu => {
