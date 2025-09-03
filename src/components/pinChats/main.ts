@@ -1,20 +1,20 @@
-import getProfileId from "@/components/utils/getProfileId";
-import getHistoryElement from "@/components/pinChats/core/getHistoryElement";
-import initPinnedChats from "@/components/pinChats/core/initPinnedChats";
-import createPinButton from "./pinButton/PinButton";
-import createUnpinButton from "./pinButton/UnpinButton";
-import setupUnpinChatListener from "@/components/pinChats/core/setupUnpinChatListener";
-import handleDragStart from "@/components/pinChats/dragAndDrop/handleDragStart";
-import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
-import handlePinChat from "@/components/pinChats/core/handlePinChat";
-import pinCurrentConversation from "@/components/pinChats/core/pinCurrentConversation";
-import { showTooltipOnce } from "@/components/pinChats/helpers/showTooltipOnce";
-import { showOneTimeNotification } from "@/components/utils/notifications";
+import getProfileId from '@/components/utils/getProfileId'
+import getHistoryElement from '@/components/pinChats/core/getHistoryElement'
+import initPinnedChats from '@/components/pinChats/core/initPinnedChats'
+import createPinButton from './pinButton/PinButton'
+import createUnpinButton from './pinButton/UnpinButton'
+import setupUnpinChatListener from '@/components/pinChats/core/setupUnpinChatListener'
+import handleDragStart from '@/components/pinChats/dragAndDrop/handleDragStart'
+import handleDragEnd from '@/components/pinChats/dragAndDrop/handleDragEnd'
+import handlePinChat from '@/components/pinChats/core/handlePinChat'
+import pinCurrentConversation from '@/components/pinChats/core/pinCurrentConversation'
+import { showTooltipOnce } from '@/components/pinChats/helpers/showTooltipOnce'
+import { showOneTimeNotification } from '@/components/utils/notifications'
 
 import {
   getPinChatsFromStorage,
   removePinChatFromStorage,
-} from "../utils/storage";
+} from '../utils/storage'
 
 // Handle rename chat button click
 // function handleRenameChat(li: HTMLLIElement, profileId: string): void {
@@ -92,48 +92,48 @@ import {
 // }
 
 export default async function initContentScript(): Promise<void> {
-  let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null;
+  let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null
 
   try {
-    const profileId = await getProfileId();
-    const historyElement = await getHistoryElement();
+    const profileId = await getProfileId()
+    const historyElement = await getHistoryElement()
 
     // Create pin and unpin buttons
-    const unpinButton: HTMLDivElement = createUnpinButton();
+    const unpinButton: HTMLDivElement = createUnpinButton()
 
     await initPinnedChats({
       profileId,
       historyElement,
-    });
+    })
 
-    // Show drag and drop notification for users updating from v2.1.0 (only if they have pinned chats)
+    // Show drag and drop notification for existing users who already have 2+ pinned chats
     setTimeout(async () => {
       try {
-        const pinnedChats = await getPinChatsFromStorage(profileId);
-        if (pinnedChats.length > 0) {
+        const pinnedChats = await getPinChatsFromStorage(profileId)
+        if (pinnedChats.length >= 2) {
           showOneTimeNotification({
             id: 'drag_drop_feature_v2_1_1',
-            title: '', // Will use hardcoded English text
-            message: '', // Will use hardcoded English text
+            title: '', // Will use localized text
+            message: '', // Will use localized text
             version: '2.1.1',
             type: 'success',
-            duration: 15000
-          });
+            duration: 15000,
+          })
         }
       } catch (error) {
-        console.error('Failed to check pinned chats for notification:', error);
+        console.error('Failed to check pinned chats for notification:', error)
       }
-    }, 1000);
+    }, 1000)
 
-    browser.runtime.onMessage.addListener(async (message) => {
-      if (message.action === "pin-current-chat") {
+    browser.runtime.onMessage.addListener(async message => {
+      if (message.action === 'pin-current-chat') {
         try {
-          await pinCurrentConversation();
+          await pinCurrentConversation()
         } catch (error) {
-          console.error("Failed to pin current conversation:", error);
+          console.error('Failed to pin current conversation:', error)
         }
       }
-    });
+    })
     // const notification = await browser.storage.sync.get(
     //   "notification"
     // );
@@ -146,77 +146,77 @@ export default async function initContentScript(): Promise<void> {
     // }
 
     // TODO: Implement drag and drop functionality
-    historyElement.addEventListener("dragstart", handleDragStart);
-    historyElement.addEventListener("dragend", handleDragEnd);
+    historyElement.addEventListener('dragstart', handleDragStart)
+    historyElement.addEventListener('dragend', handleDragEnd)
 
     // Handle click events in the sidebar
-    historyElement.addEventListener("click", async (event: MouseEvent) => {
+    historyElement.addEventListener('click', async (event: MouseEvent) => {
       const target = (event.target as HTMLElement)?.closest(
         '[data-testid^="history-item-"][data-testid$="-options"]'
-      );
-      const chatLink = target?.closest("a") as HTMLAnchorElement | null;
-      const chatUrl = chatLink?.getAttribute("href") as string;
-      const urlId = chatUrl?.split("/").slice(-1)[0];
-      const chatTitle = chatLink?.querySelector("span")?.textContent;
+      )
+      const chatLink = target?.closest('a') as HTMLAnchorElement | null
+      const chatUrl = chatLink?.getAttribute('href') as string
+      const urlId = chatUrl?.split('/').slice(-1)[0]
+      const chatTitle = chatLink?.querySelector('span')?.textContent
       if (target) {
         const chatOptionsMenu = document.querySelector(
           'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
-        ) as HTMLDivElement;
+        ) as HTMLDivElement
 
         if (chatOptionsMenu) {
           const deleteButton = chatOptionsMenu.querySelector(
             '[data-testid="delete-chat-menu-item"]'
-          );
+          )
 
           if (deleteButton) {
-            deleteButton.addEventListener("click", async () => {
+            deleteButton.addEventListener('click', async () => {
               setTimeout(() => {
                 const deleteConversationConfirmButton = document.querySelector(
                   '[data-testid="delete-conversation-confirm-button"]'
-                ) as HTMLButtonElement;
+                ) as HTMLButtonElement
 
                 if (deleteConversationConfirmButton) {
                   deleteConversationConfirmButton.addEventListener(
-                    "click",
+                    'click',
                     async () => {
                       const pinnedContainer = document.querySelector(
-                        "#pinnedContainer"
-                      ) as HTMLElement;
+                        '#pinnedContainer'
+                      ) as HTMLElement
                       if (urlId) {
                         const pinnedChat = pinnedContainer.querySelector(
                           `a[href="https://chatgpt.com/c/${urlId}"]`
-                        );
+                        )
 
                         if (pinnedChat) {
-                          pinnedChat.remove();
+                          pinnedChat.remove()
                         }
-                        await removePinChatFromStorage(profileId, urlId);
+                        await removePinChatFromStorage(profileId, urlId)
                       }
                     }
-                  );
+                  )
                 }
-              }, 100);
-            });
+              }, 100)
+            })
           }
 
           // Check pinned status and display the appropriate button
-          const savedPinChats = await getPinChatsFromStorage(profileId);
-          if (urlId && savedPinChats.some((chat) => chat.urlId === urlId)) {
-            chatOptionsMenu.prepend(unpinButton);
+          const savedPinChats = await getPinChatsFromStorage(profileId)
+          if (urlId && savedPinChats.some(chat => chat.urlId === urlId)) {
+            chatOptionsMenu.prepend(unpinButton)
           } else {
-            const pinButton: HTMLDivElement = createPinButton();
-            chatOptionsMenu.prepend(pinButton);
+            const pinButton: HTMLDivElement = createPinButton()
+            chatOptionsMenu.prepend(pinButton)
             if (urlId && chatTitle) {
               async function pinChatHandler(event: MouseEvent) {
-                event.stopPropagation();
+                event.stopPropagation()
                 await handlePinChat(
                   urlId,
                   chatTitle!,
                   pinButton,
                   chatOptionsMenu
-                );
+                )
               }
-              pinButton.addEventListener("click", pinChatHandler);
+              pinButton.addEventListener('click', pinChatHandler)
               // setupPinChatListener(urlId, pinButton, pinChatHandler, chatTitle);
             }
           }
@@ -228,63 +228,63 @@ export default async function initContentScript(): Promise<void> {
             urlId,
             unpinButton,
             unpinChatHandler
-          );
+          )
         }
       }
-    });
+    })
 
     const conversationOptionsButton = document.querySelector(
       '[data-testid="conversation-options-button"]'
-    ) as HTMLButtonElement;
+    ) as HTMLButtonElement
     if (conversationOptionsButton) {
-      conversationOptionsButton.addEventListener("click", async () => {
+      conversationOptionsButton.addEventListener('click', async () => {
         const chatOptionsMenu = document.querySelector(
           'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
-        ) as HTMLDivElement;
+        ) as HTMLDivElement
 
         if (chatOptionsMenu) {
           const deleteButton = chatOptionsMenu.querySelector(
             '[data-testid="delete-chat-menu-item"]'
-          );
+          )
           if (deleteButton) {
-            deleteButton.addEventListener("click", async () => {
+            deleteButton.addEventListener('click', async () => {
               setTimeout(() => {
                 const deleteConversationConfirmButton = document.querySelector(
                   '[data-testid="delete-conversation-confirm-button"]'
-                ) as HTMLButtonElement;
+                ) as HTMLButtonElement
 
                 if (deleteConversationConfirmButton) {
                   deleteConversationConfirmButton.addEventListener(
-                    "click",
+                    'click',
                     async () => {
                       const pinnedContainer = document.querySelector(
-                        "#pinnedContainer"
-                      ) as HTMLElement;
+                        '#pinnedContainer'
+                      ) as HTMLElement
                       if (profileId) {
                         const savedPinChats = await getPinChatsFromStorage(
                           profileId
-                        );
-                        savedPinChats.forEach(async (chat) => {
+                        )
+                        savedPinChats.forEach(async chat => {
                           const pinnedChat = pinnedContainer.querySelector(
                             `a[href="https://chatgpt.com/c/${chat.urlId}"]`
-                          );
+                          )
 
                           if (pinnedChat) {
-                            pinnedChat.remove();
+                            pinnedChat.remove()
                           }
-                          await removePinChatFromStorage(profileId, chat.urlId);
-                        });
+                          await removePinChatFromStorage(profileId, chat.urlId)
+                        })
                       }
                     }
-                  );
+                  )
                 }
-              }, 100);
-            });
+              }, 100)
+            })
           }
         }
-      });
+      })
     }
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }

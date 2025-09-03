@@ -245,6 +245,7 @@ function addNotificationStyles(): void {
       font-size: 12px;
       font-weight: 700;
       color: #6366f1;
+
       letter-spacing: 1px;
       text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
     }
@@ -352,7 +353,7 @@ function addNotificationStyles(): void {
         color: #f9fafb;
       }
     }
-  `;
+  `
 
-  document.head.appendChild(styles);
+  document.head.appendChild(styles)
 }
