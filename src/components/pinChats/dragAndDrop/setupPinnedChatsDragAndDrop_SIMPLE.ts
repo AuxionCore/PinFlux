@@ -61,6 +61,33 @@ export default function setupPinnedChatsDragAndDrop(
   document.head.appendChild(style)
   console.log('🔥 Added simple CSS')
 
+  function closeAllOptionsMenus() {
+    // חפש ותסגור כל תפריטי אפשרויות פתוחים
+    const openMenus = document.querySelectorAll('[data-testid="conversation-turn-action-menu"], .options-menu, #chatOptionsMenu')
+    openMenus.forEach(menu => {
+      if (menu instanceof HTMLElement) {
+        menu.remove()
+      }
+    })
+    
+    // גם הסר כל overlay או backdrop שעלול להיות פתוח
+    const overlays = document.querySelectorAll('.overlay, .backdrop, [role="menu"]')
+    overlays.forEach(overlay => {
+      if (overlay instanceof HTMLElement && overlay.style.display !== 'none') {
+        overlay.style.display = 'none'
+      }
+    })
+    
+    console.log('🔥 Closed all options menus')
+  }
+
+  // הוסף מאזין גלובלי למקש ESC לסגירת תפריטים
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllOptionsMenus()
+    }
+  })
+
   function createDropIndicator(): HTMLElement {
     const indicator = document.createElement('div')
     indicator.className = 'drop-indicator'
@@ -93,6 +120,10 @@ export default function setupPinnedChatsDragAndDrop(
     
     element.addEventListener('dragstart', (e) => {
       console.log('🔥 DRAG START!', element.textContent?.trim())
+      
+      // סגור כל תפריטי אפשרויות פתוחים
+      closeAllOptionsMenus()
+      
       draggedElement = element
       element.classList.add('being-dragged')
       
