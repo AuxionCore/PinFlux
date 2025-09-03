@@ -1,36 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notification Demo</title>
-</head>
-<body style="padding: 20px; background: #f5f5f5;">
+  </head>
+  <body style="padding: 20px; background: #f5f5f5">
     <h1>PinFlux Notification Demo</h1>
     <p>This is a preview of the new drag & drop notification.</p>
-    
-    <button onclick="showDemoNotification()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
-        Show Notification
+
+    <button
+      onclick="showDemoNotification()"
+      style="
+        padding: 10px 20px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      "
+    >
+      Show Notification
     </button>
 
-    <div id="pinnedContainer" style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px; border: 2px dashed #ddd;">
-        <h2 style="margin: 0 0 10px 0; font-size: 16px; color: #666;">PinFlux Board</h2>
-        <div style="padding: 20px; background: #f9f9f9; border-radius: 6px; text-align: center; color: #666;">
-            Pinned chats would appear here
-        </div>
+    <div
+      id="pinnedContainer"
+      style="
+        margin-top: 30px;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        border: 2px dashed #ddd;
+      "
+    >
+      <h2 style="margin: 0 0 10px 0; font-size: 16px; color: #666">
+        PinFlux Board
+      </h2>
+      <div
+        style="
+          padding: 20px;
+          background: #f9f9f9;
+          border-radius: 6px;
+          text-align: center;
+          color: #666;
+        "
+      >
+        Pinned chats would appear here
+      </div>
     </div>
 
     <script>
-        // Copy of the notification code
-        function showDemoNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'pinflux-notification';
-            
-            const title = '🎉 New Feature!';
-            const message = 'You can now drag and drop pinned chats to reorder them! Just click and hold 🖱️';
-            const closeLabel = 'Close notification';
-            
-            notification.innerHTML = `
+      // Copy of the notification code
+      function showDemoNotification() {
+        const notification = document.createElement('div')
+        notification.className = 'pinflux-notification'
+
+        const title = '🎉 New Feature!'
+        const message =
+          'You can now drag and drop pinned chats to reorder them! Just click and hold 🖱️'
+        const closeLabel = 'Close notification'
+
+        notification.innerHTML = `
                 <div class="pinflux-notification-content">
                     <div class="pinflux-notification-brand">
                         <div class="pinflux-notification-logo">
@@ -49,77 +79,79 @@
                     </div>
                     <p class="pinflux-notification-message">${message}</p>
                 </div>
-            `;
+            `
 
-            addNotificationStyles();
-            positionNotification(notification);
-            
-            const closeBtn = notification.querySelector('.pinflux-notification-close');
-            const closeNotification = () => {
-                notification.classList.add('hide');
-                setTimeout(() => notification.remove(), 300);
-            };
-            
-            closeBtn.addEventListener('click', closeNotification);
-            
-            // Auto-close with mouse hover pause
-            let timeoutId = null;
-            let remainingTime = 10000;
-            let startTime = Date.now();
+        addNotificationStyles()
+        positionNotification(notification)
 
-            const startTimer = () => {
-                startTime = Date.now();
-                timeoutId = setTimeout(closeNotification, remainingTime);
-            };
-
-            const pauseTimer = () => {
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    remainingTime -= Date.now() - startTime;
-                    timeoutId = null;
-                }
-            };
-
-            notification.addEventListener('mouseenter', pauseTimer);
-            notification.addEventListener('mouseleave', startTimer);
-
-            // Start initial timer
-            startTimer();
-            
-            setTimeout(() => notification.classList.add('show'), 100);
+        const closeBtn = notification.querySelector(
+          '.pinflux-notification-close'
+        )
+        const closeNotification = () => {
+          notification.classList.add('hide')
+          setTimeout(() => notification.remove(), 300)
         }
 
-        function positionNotification(notification) {
-            document.body.appendChild(notification);
+        closeBtn.addEventListener('click', closeNotification)
 
-            setTimeout(() => {
-                const pinnedContainer = document.querySelector('#pinnedContainer');
+        // Auto-close with mouse hover pause
+        let timeoutId = null
+        let remainingTime = 10000
+        let startTime = Date.now()
 
-                if (pinnedContainer) {
-                    const rect = pinnedContainer.getBoundingClientRect();
-                    notification.style.position = 'fixed';
-                    notification.style.top = `${Math.max(10, rect.bottom + 15)}px`;
-                    notification.style.left = `${Math.max(10, rect.left)}px`;
-                    notification.style.maxWidth = `${Math.max(300, rect.width)}px`;
-                    notification.style.zIndex = '10000';
-                } else {
-                    notification.style.position = 'fixed';
-                    notification.style.top = '120px';
-                    notification.style.left = '20px';
-                    notification.style.maxWidth = '320px';
-                    notification.style.zIndex = '10000';
-                }
-            }, 100);
+        const startTimer = () => {
+          startTime = Date.now()
+          timeoutId = setTimeout(closeNotification, remainingTime)
         }
 
-        function addNotificationStyles() {
-            if (document.getElementById('pinflux-notification-styles')) {
-                return;
-            }
+        const pauseTimer = () => {
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+            remainingTime -= Date.now() - startTime
+            timeoutId = null
+          }
+        }
 
-            const styles = document.createElement('style');
-            styles.id = 'pinflux-notification-styles';
-            styles.textContent = `
+        notification.addEventListener('mouseenter', pauseTimer)
+        notification.addEventListener('mouseleave', startTimer)
+
+        // Start initial timer
+        startTimer()
+
+        setTimeout(() => notification.classList.add('show'), 100)
+      }
+
+      function positionNotification(notification) {
+        document.body.appendChild(notification)
+
+        setTimeout(() => {
+          const pinnedContainer = document.querySelector('#pinnedContainer')
+
+          if (pinnedContainer) {
+            const rect = pinnedContainer.getBoundingClientRect()
+            notification.style.position = 'fixed'
+            notification.style.top = `${Math.max(10, rect.bottom + 15)}px`
+            notification.style.left = `${Math.max(10, rect.left)}px`
+            notification.style.maxWidth = `${Math.max(300, rect.width)}px`
+            notification.style.zIndex = '10000'
+          } else {
+            notification.style.position = 'fixed'
+            notification.style.top = '120px'
+            notification.style.left = '20px'
+            notification.style.maxWidth = '320px'
+            notification.style.zIndex = '10000'
+          }
+        }, 100)
+      }
+
+      function addNotificationStyles() {
+        if (document.getElementById('pinflux-notification-styles')) {
+          return
+        }
+
+        const styles = document.createElement('style')
+        styles.id = 'pinflux-notification-styles'
+        styles.textContent = `
                 .pinflux-notification {
                     max-width: 320px;
                     background: rgba(255, 255, 255, 0.95);
@@ -259,10 +291,10 @@
                     color: #6b7280;
                     padding: 0 16px 16px 20px;
                 }
-            `;
-            
-            document.head.appendChild(styles);
-        }
+            `
+
+        document.head.appendChild(styles)
+      }
     </script>
-</body>
+  </body>
 </html>
