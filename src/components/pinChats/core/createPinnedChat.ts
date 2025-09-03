@@ -2,8 +2,6 @@ import createChatOptionsButton from "@/components/pinChats/helpers/createChatOpt
 import clearActiveChatStyles from "@/components/pinChats/helpers/clearActiveChatStyles";
 import styleActiveChat from "@/components/pinChats/helpers/styleActiveChat";
 import { isDarkMode } from "@/components/utils/styleScheme";
-import handleDragStart from "@/components/pinChats/dragAndDrop/handleDragStart";
-import handleDragEnd from "@/components/pinChats/dragAndDrop/handleDragEnd";
 
 // Function to create a pinned chat element
 export default function createPinnedChat(
@@ -24,6 +22,7 @@ export default function createPinnedChat(
   anchor.setAttribute("tabindex", "0");
   anchor.setAttribute("data-fill", "");
   anchor.setAttribute("data-discovery", "true");
+  // Note: draggable attribute is handled by setupPinnedChatsDragAndDrop
   anchor.href = `https://chatgpt.com/c/${urlId}`;
   anchor.className = "group __menu-item hoverable";
 
@@ -89,12 +88,8 @@ export default function createPinnedChat(
       anchor.setAttribute("data-active", "");
     }
   });
-  anchor.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-  });
 
-  anchor.addEventListener("dragstart", handleDragStart);
-  anchor.addEventListener("dragend", handleDragEnd);
+  // Note: drag listeners are now handled by setupPinnedChatsDragAndDrop
 
   return anchor;
 }
