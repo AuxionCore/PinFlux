@@ -1,34 +1,34 @@
 {
   "extensionName": {
-    "message": "PinFlux - Pin ChatGPT Chats",
+    "message": "PinFlux - ChatGPTチャットをピン留め",
     "description": "Name of the extension"
   },
   "extensionDescription": {
-    "message": "Pin your favorite Chats in ChatGPT for quick access",
+    "message": "お気に入りのChatGPTチャットをピン留めしてクイックアクセス",
     "description": "Description of the extension"
   },
   "optionsTitle": {
-    "message": "Options",
+    "message": "オプション",
     "description": "Title for options page"
   },
   "optionsDescription": {
-    "message": "Customize your PinFlux experience",
+    "message": "PinFluxの体験をカスタマイズ",
     "description": "Description for options page"
   },
   "shortcutSettingsParagraphText": {
-    "message": "To customize your shortcuts, visit the ",
+    "message": "ショートカットをカスタマイズするには、",
     "description": "Text for link to shortcut settings"
   },
   "shortcutSettingsLinkText": {
-    "message": "Shortcut Settings",
+    "message": "ショートカット設定",
     "description": "Text for link to shortcut settings"
   },
   "pinShortcutNotificationTitle": {
-    "message": "Pin Shortcut Set",
+    "message": "ピンショートカットが設定されました",
     "description": "Title for notification when pin shortcut is set"
   },
   "pinShortcutNotificationMessage": {
-    "message": "Now you can pin current chat with the shortcut: $SHORTCUT$. You can change it in the Shortcut Settings.",
+    "message": "ショートカット: $SHORTCUT$ で現在のチャットをピン留めできます。ショートカット設定で変更できます。",
     "description": "Notification for setting pin shortcut",
     "placeholders": {
       "SHORTCUT": {
@@ -38,31 +38,31 @@
     }
   },
   "featureSurveyNotificationTitle": {
-    "message": "Feature Survey",
+    "message": "機能アンケート",
     "description": "Title for feature survey notification"
   },
   "featureSurveyNotificationMessage": {
-    "message": "I'm working on new features for the pinned chats extension — and I’d love your input. Please take a moment to fill out this short survey to help shape the future of PinFlux.",
+    "message": "ピン留めチャット拡張機能の新機能を開発中です — あなたのご意見をお聞かせください。PinFluxの未来を形作るために、この短いアンケートにご回答ください。",
     "description": "Message for feature survey notification"
   },
   "featureSurveyNotificationLinkText": {
-    "message": "Take the Survey",
+    "message": "アンケートに回答する",
     "description": "Text for link to feature survey"
   },
   "pinCurrentChatCommand": {
-    "message": "Pin Current Chat",
+    "message": "現在のチャットをピン留め",
     "description": "Command to pin the current chat"
   },
   "popupCloseButton": {
-    "message": "Close",
+    "message": "閉じる",
     "description": "Close button text"
   },
   "newReleaseTitle": {
-    "message": "New Release Came Out!",
+    "message": "新しいリリースが公開されました！",
     "description": "Title for new release notification"
   },
   "extensionWasUpdated": {
-    "message": "Extension was updated to version $VERSION_NUMBER$ $ICON$",
+    "message": "拡張機能がバージョン $VERSION_NUMBER$ にアップデートされました $ICON$",
     "description": "Extension was updated to version $VERSION_NUMBER$",
     "placeholders": {
       "VERSION_NUMBER": {
@@ -76,19 +76,19 @@
     }
   },
   "errorToastTitle": {
-    "message": "Error",
+    "message": "エラー",
     "description": "Title for error toast"
   },
   "feedbackTitle": {
-    "message": "Feedback",
+    "message": "フィードバック",
     "description": "Title for feedback section"
   },
   "bugReportTitle": {
-    "message": "Report a Bug",
+    "message": "バグを報告",
     "description": "Title for bug report section"
   },
   "rateUsTitle": {
-    "message": "Please rate us on the $BROWSER_NAME$ store",
+    "message": "$BROWSER_NAME$ ストアで評価してください",
     "description": "Rate us title",
     "placeholders": {
       "BROWSER_NAME": {
@@ -98,7 +98,7 @@
     }
   },
   "dragDropFeatureTitle": {
-    "message": "🎉 New Feature!",
+    "message": "🎉 新機能！",
     "description": "Title for drag and drop feature notification"
   },
   "pinfluxBrandText": {
@@ -106,179 +106,179 @@
     "description": "PinFlux brand name for notifications"
   },
   "dragDropFeatureMessage": {
-    "message": "You can now drag and drop pinned chats to reorder them! Just click and hold 🖱️",
+    "message": "ピン留めしたチャットをドラッグ&ドロップで並び替えできるようになりました！クリック&ホールドしてください 🖱️",
     "description": "Message for drag and drop feature notification"
   },
   "notificationCloseLabel": {
-    "message": "Close notification",
+    "message": "通知を閉じる",
     "description": "Aria label for notification close button"
   },
   "tutorialStartButton": {
-    "message": "Start Tutorial",
+    "message": "チュートリアルを開始",
     "description": "Button to start the tutorial"
   },
   "tutorialNextButton": {
-    "message": "Next",
+    "message": "次へ",
     "description": "Button to go to next tutorial step"
   },
   "tutorialPrevButton": {
-    "message": "Previous",
+    "message": "前へ",
     "description": "Button to go to previous tutorial step"
   },
   "tutorialSkipButton": {
-    "message": "Skip",
+    "message": "スキップ",
     "description": "Button to skip the tutorial"
   },
   "tutorialFinishButton": {
-    "message": "Finish",
+    "message": "完了",
     "description": "Button to finish the tutorial"
   },
   "tutorialCloseButton": {
-    "message": "Close",
+    "message": "閉じる",
     "description": "Button to close the tutorial"
   },
   "tutorialTitle": {
-    "message": "Welcome to PinFlux!",
+    "message": "PinFluxへようこそ！",
     "description": "Main tutorial title"
   },
   "tutorialSubtitle": {
-    "message": "Let's explore all the amazing features",
+    "message": "すべての素晴らしい機能を探索しましょう",
     "description": "Tutorial subtitle"
   },
   "tutorialPinChatsName": {
-    "message": "Pin Your Favorite Chats",
+    "message": "お気に入りのチャットをピン留め",
     "description": "Pin chats feature name"
   },
   "tutorialPinChatsDesc": {
-    "message": "Keep your most important conversations at the top",
+    "message": "最も重要な会話を上部に保持",
     "description": "Pin chats feature description"
   },
   "tutorialPinStep1Title": {
-    "message": "Find the Options Menu",
+    "message": "オプションメニューを見つける",
     "description": "Title for pin tutorial step 1"
   },
   "tutorialPinStep1Message": {
-    "message": "Click the three dots next to any chat to open the options menu",
+    "message": "チャットの横にある三点リーダーをクリックしてオプションメニューを開く",
     "description": "Message for pin tutorial step 1"
   },
   "tutorialPinStep2Title": {
-    "message": "Pin Your Chat",
+    "message": "チャットをピン留め",
     "description": "Title for pin tutorial step 2"
   },
   "tutorialPinStep2Message": {
-    "message": "Click 'Pin Chat' to add it to your pinned collection",
+    "message": "「チャットをピン留め」をクリックしてピン留めコレクションに追加",
     "description": "Message for pin tutorial step 2"
   },
   "tutorialPinStep3Title": {
-    "message": "Your Pinned Chats",
+    "message": "ピン留めしたチャット",
     "description": "Title for pin tutorial step 3"
   },
   "tutorialPinStep3Message": {
-    "message": "All your pinned chats appear here for quick access!",
+    "message": "ピン留めしたすべてのチャットがここに表示され、クイックアクセスできます！",
     "description": "Message for pin tutorial step 3"
   },
   "tutorialDragDropName": {
-    "message": "Drag & Drop Organization",
+    "message": "ドラッグ&ドロップで整理",
     "description": "Drag and drop feature name"
   },
   "tutorialDragDropDesc": {
-    "message": "Organize your pinned chats by dragging them around",
+    "message": "ピン留めしたチャットをドラッグして整理",
     "description": "Drag and drop feature description"
   },
   "tutorialDragStep1Title": {
-    "message": "Drag to Reorder",
+    "message": "ドラッグして並び替え",
     "description": "Title for drag tutorial step 1"
   },
   "tutorialDragStep1Message": {
-    "message": "Click and hold any pinned chat, then drag it to reorder",
+    "message": "ピン留めしたチャットをクリック&ホールドして、ドラッグして並び替え",
     "description": "Message for drag tutorial step 1"
   },
   "tutorialDragStep2Title": {
-    "message": "Perfect Organization",
+    "message": "完璧な整理",
     "description": "Title for drag tutorial step 2"
   },
   "tutorialDragStep2Message": {
-    "message": "Arrange your chats in the order that works best for you!",
+    "message": "あなたにとって最適な順序でチャットを配置しましょう！",
     "description": "Message for drag tutorial step 2"
   },
   "tutorialBookmarksName": {
-    "message": "Bookmark Important Messages",
+    "message": "重要なメッセージをブックマーク",
     "description": "Bookmarks feature name"
   },
   "tutorialBookmarksDesc": {
-    "message": "Save and organize important messages within conversations",
+    "message": "会話内の重要なメッセージを保存して整理",
     "description": "Bookmarks feature description"
   },
   "tutorialBookmarkStep1Title": {
-    "message": "Add Bookmarks",
+    "message": "ブックマークを追加",
     "description": "Title for bookmark tutorial step 1"
   },
   "tutorialBookmarkStep1Message": {
-    "message": "Click the bookmark button next to important messages",
+    "message": "重要なメッセージの横にあるブックマークボタンをクリック",
     "description": "Message for bookmark tutorial step 1"
   },
   "tutorialBookmarkStep2Title": {
-    "message": "Access Your Bookmarks",
+    "message": "ブックマークにアクセス",
     "description": "Title for bookmark tutorial step 2"
   },
   "tutorialBookmarkStep2Message": {
-    "message": "Click this button to view all your saved bookmarks",
+    "message": "このボタンをクリックして保存したすべてのブックマークを表示",
     "description": "Message for bookmark tutorial step 2"
   },
   "tutorialBookmarkStep3Title": {
-    "message": "Bookmark Management",
+    "message": "ブックマーク管理",
     "description": "Title for bookmark tutorial step 3"
   },
   "tutorialBookmarkStep3Message": {
-    "message": "Search, edit names, and organize your bookmarks here",
+    "message": "ここで検索、名前の編集、ブックマークの整理ができます",
     "description": "Message for bookmark tutorial step 3"
   },
   "tutorialRenameName": {
-    "message": "Rename Pinned Chats",
+    "message": "ピン留めチャットの名前変更",
     "description": "Rename feature name"
   },
   "tutorialRenameDesc": {
-    "message": "Give your pinned chats custom names for better organization",
+    "message": "ピン留めしたチャットにカスタム名をつけて整理を改善",
     "description": "Rename feature description"
   },
   "tutorialRenameStep1Title": {
-    "message": "Chat Options",
+    "message": "チャットオプション",
     "description": "Title for rename tutorial step 1"
   },
   "tutorialRenameStep1Message": {
-    "message": "Right-click or use the options button on any pinned chat",
+    "message": "ピン留めしたチャットを右クリックまたはオプションボタンを使用",
     "description": "Message for rename tutorial step 1"
   },
   "tutorialRenameStep2Title": {
-    "message": "Rename Option",
+    "message": "名前変更オプション",
     "description": "Title for rename tutorial step 2"
   },
   "tutorialRenameStep2Message": {
-    "message": "Select 'Rename' to give your chat a custom name",
+    "message": "「名前変更」を選択してチャットにカスタム名を付ける",
     "description": "Message for rename tutorial step 2"
   },
   "tutorialShortcutsName": {
-    "message": "Keyboard Shortcuts",
+    "message": "キーボードショートカット",
     "description": "Shortcuts feature name"
   },
   "tutorialShortcutsDesc": {
-    "message": "Use keyboard shortcuts for faster pinning",
+    "message": "より速いピン留めのためのキーボードショートカットを使用",
     "description": "Shortcuts feature description"
   },
   "tutorialShortcutStep1Title": {
-    "message": "Quick Pin Shortcut",
+    "message": "クイックピンショートカット",
     "description": "Title for shortcut tutorial step 1"
   },
   "tutorialShortcutStep1Message": {
-    "message": "Use the keyboard shortcut to quickly pin the current conversation",
+    "message": "キーボードショートカットを使用して現在の会話をすばやくピン留め",
     "description": "Message for shortcut tutorial step 1"
   },
   "tutorialShortcutStep2Title": {
-    "message": "Customize Shortcuts",
+    "message": "ショートカットのカスタマイズ",
     "description": "Title for shortcut tutorial step 2"
   },
   "tutorialShortcutStep2Message": {
-    "message": "Open the extension popup to customize your shortcuts",
+    "message": "拡張機能のポップアップを開いてショートカットをカスタマイズ",
     "description": "Message for shortcut tutorial step 2"
   }
 }
