@@ -158,7 +158,7 @@
     "description": "Title for pin tutorial step 1"
   },
   "tutorialPinStep1Message": {
-    "message": "チャットの横にある三点リーダーをクリックしてオプションメニューを開く",
+    "message": "ハイライトされたチャットにマウスを重ね、表示される三点リーダー（⋯）メニューをクリックしてください",
     "description": "Message for pin tutorial step 1"
   },
   "tutorialPinStep2Title": {
@@ -270,7 +270,7 @@
     "description": "Title for shortcut tutorial step 1"
   },
   "tutorialShortcutStep1Message": {
-    "message": "キーボードショートカットを使用して現在の会話をすばやくピン留め",
+    "message": "キーボードショートカット（デフォルト：Ctrl+Shift+P）を使用して現在の会話をすばやくピン留め",
     "description": "Message for shortcut tutorial step 1"
   },
   "tutorialShortcutStep2Title": {
@@ -278,7 +278,7 @@
     "description": "Title for shortcut tutorial step 2"
   },
   "tutorialShortcutStep2Message": {
-    "message": "拡張機能のポップアップを開いてショートカットをカスタマイズ",
+    "message": "拡張機能アイコンを右クリックして設定にアクセスし、ピンのショートカットをカスタマイズ",
     "description": "Message for shortcut tutorial step 2"
   }
 }

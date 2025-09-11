@@ -158,7 +158,7 @@
     "description": "Title for pin tutorial step 1"
   },
   "tutorialPinStep1Message": {
-    "message": "채팅 옆의 점 세 개를 클릭하여 옵션 메뉴를 엽니다",
+    "message": "강조표시된 채팅 위에 마우스를 올리고 나타나는 점 세 개（⋯）메뉴를 클릭해주세요",
     "description": "Message for pin tutorial step 1"
   },
   "tutorialPinStep2Title": {
@@ -270,7 +270,7 @@
     "description": "Title for shortcut tutorial step 1"
   },
   "tutorialShortcutStep1Message": {
-    "message": "키보드 단축키를 사용하여 현재 대화를 빠르게 고정합니다",
+    "message": "키보드 단축키(기본값: Ctrl+Shift+P)를 사용하여 현재 대화를 빠르게 고정합니다",
     "description": "Message for shortcut tutorial step 1"
   },
   "tutorialShortcutStep2Title": {
@@ -278,7 +278,7 @@
     "description": "Title for shortcut tutorial step 2"
   },
   "tutorialShortcutStep2Message": {
-    "message": "확장 프로그램 팝업을 열어 단축키를 사용자 정의합니다",
+    "message": "확장 프로그램 아이콘을 우클릭하여 설정에 접근하고 고정 단축키를 사용자 정의합니다",
     "description": "Message for shortcut tutorial step 2"
   }
 }
