@@ -8,6 +8,7 @@ import getProfileId from '../utils/getProfileId'
 import deleteBookmark from './deleteBookmark'
 import updateBookmarkName from './updateBookmarkName'
 import replaceBookmarkButton from './replaceBookmarkButton'
+import { showBookmarksTutorial } from '../tutorial/bookmarksTutorial'
 
 let isMenuInitialized = false
 
@@ -160,6 +161,12 @@ async function toggleBookmarksMenu(dropdown: Element) {
   if (isHidden) {
     await updateBookmarksList(dropdown)
     dropdown.classList.remove('hidden')
+    
+    // Show tutorial if conditions are met
+    setTimeout(() => {
+      console.log('Attempting to show bookmarks tutorial...')
+      showBookmarksTutorial()
+    }, 300) // Small delay to ensure DOM is ready
   } else {
     dropdown.classList.add('hidden')
   }

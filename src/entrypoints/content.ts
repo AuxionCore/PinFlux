@@ -2,6 +2,8 @@ import initContentScript from '@/components/pinChats/main'
 import initBookmarks from '@/components/chatBookmarks/main'
 import getProfileId from '@/components/utils/getProfileId'
 import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkGroupTimestamp'
+import { tutorialManager } from '@/components/tutorial/tutorialManager'
+import '@/components/tutorial/tutorialAPI' // Load API for debugging
 
 /**
  * URL patterns that the content script should match against
@@ -57,8 +59,34 @@ export default defineContentScript({
   matches: urlPatternStrings,
   async main(ctx) {
     try {
+      // Set up message listener for tutorial actions
+      browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.action === 'start-tutorial') {
+          // Start tutorial with specified feature or from beginning
+          tutorialManager.startTutorial(message.featureId, true)
+          sendResponse({ success: true })
+        }
+        return true // Indicates we'll respond asynchronously
+      })
+
       // Initialize the main pin chats functionality
       await initContentScript()
+
+      // Expose tutorial manager for debugging (development only)
+      if (import.meta.env.DEV) {
+        (window as any).pinfluxTutorial = tutorialManager
+      }
+
+      // Check if tutorial should auto-start for new users
+      setTimeout(async () => {
+        const shouldAutoStart = await tutorialManager.shouldAutoStart()
+        if (shouldAutoStart) {
+          // Wait a bit more for the UI to fully load
+          setTimeout(() => {
+            tutorialManager.startTutorial()
+          }, 2000)
+        }
+      }, 1000)
 
       // Initialize bookmarks on initial entry to chat page
       if (chatPagePattern.includes(window.location.href)) {

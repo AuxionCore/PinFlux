@@ -20,6 +20,7 @@ const elements = {
   feedbackLink: 'feedbackLink',
   rateUsLink: 'rateUsLink',
   rateUsLinkText: 'rateUsLinkText',
+  startTutorialBtn: 'startTutorialBtn',
 }
 
 async function popupScript() {
@@ -40,6 +41,7 @@ async function popupScript() {
     async function setupPopup() {
       setClosePopupButton()
       setGeneralEventListeners()
+      setupTutorialButton()
       if (import.meta.env.CHROME) {
         setBrowserSpecificEventListeners()
         setFeedbackLink()
@@ -217,6 +219,34 @@ async function popupScript() {
           : 'Browser',
       ])
       rateUsLink.title = rateUsTitle
+    }
+
+    function setupTutorialButton() {
+      const tutorialBtn = document.getElementById(elements.startTutorialBtn)
+      if (!tutorialBtn) return
+
+      // Set button text
+      const buttonText = tutorialBtn.querySelector('span')
+      if (buttonText) {
+        buttonText.textContent = browser.i18n.getMessage('tutorialStartButton') || 'Start Tutorial'
+      }
+
+      tutorialBtn.addEventListener('click', async () => {
+        try {
+          // Send message to content script to start tutorial
+          const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+          if (tabs[0]?.id) {
+            await browser.tabs.sendMessage(tabs[0].id, {
+              action: 'start-tutorial',
+              featureId: undefined // Start from beginning
+            })
+            // Close popup after starting tutorial
+            window.close()
+          }
+        } catch (error) {
+          console.error('Failed to start tutorial:', error)
+        }
+      })
     }
 
     async function openTab(url: string): Promise<void> {

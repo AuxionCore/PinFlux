@@ -22,6 +22,7 @@ export default function createPinnedChat(
   anchor.setAttribute("tabindex", "0");
   anchor.setAttribute("data-fill", "");
   anchor.setAttribute("data-discovery", "true");
+  anchor.setAttribute("data-pinflux-pinned-chat", "true"); // Add tutorial identifier
   // Note: draggable attribute is handled by setupPinnedChatsDragAndDrop
   anchor.href = `https://chatgpt.com/c/${urlId}`;
   anchor.className = "group __menu-item hoverable";

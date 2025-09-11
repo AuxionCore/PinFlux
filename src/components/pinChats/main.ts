@@ -10,6 +10,7 @@ import handlePinChat from '@/components/pinChats/core/handlePinChat'
 import pinCurrentConversation from '@/components/pinChats/core/pinCurrentConversation'
 import { showTooltipOnce } from '@/components/pinChats/helpers/showTooltipOnce'
 import { showOneTimeNotification } from '@/components/utils/notifications'
+import { tutorialManager } from '@/components/tutorial/tutorialManager'
 
 import {
   getPinChatsFromStorage,
@@ -125,12 +126,33 @@ export default async function initContentScript(): Promise<void> {
       }
     }, 1000)
 
+    // Check if tutorial should auto-start for new users
+    setTimeout(async () => {
+      try {
+        if (await tutorialManager.shouldAutoStart()) {
+          // Wait a bit more for the UI to fully load
+          setTimeout(() => {
+            tutorialManager.startTutorial()
+          }, 2000)
+        }
+      } catch (error) {
+        console.error('Failed to check tutorial auto-start:', error)
+      }
+    }, 1500)
+
     browser.runtime.onMessage.addListener(async message => {
       if (message.action === 'pin-current-chat') {
         try {
           await pinCurrentConversation()
         } catch (error) {
           console.error('Failed to pin current conversation:', error)
+        }
+      } else if (message.action === 'start-tutorial') {
+        // Handle tutorial start request from popup
+        try {
+          await tutorialManager.startTutorial(message.featureId, true)
+        } catch (error) {
+          console.error('Failed to start tutorial:', error)
         }
       }
     })
