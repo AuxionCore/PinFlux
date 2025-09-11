@@ -194,6 +194,49 @@ p {
   text-decoration: underline;
 }
 
+/* Tutorial Section Styles */
+.tutorial-section {
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+.tutorial-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.tutorial-button:hover {
+  background: linear-gradient(135deg, #5856eb, #7c3aed);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.tutorial-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.tutorial-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .popup-footer {
   padding-block-start: 10px;
 }
@@ -368,5 +411,19 @@ p {
 
   .theme-rate-icon {
     content: url('../../../icons/dark-rate-icon.png');
+  }
+
+  .tutorial-section {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .tutorial-button {
+    background: linear-gradient(135deg, #5856eb, #7c3aed);
+    box-shadow: 0 2px 8px rgba(88, 86, 235, 0.3);
+  }
+
+  .tutorial-button:hover {
+    background: linear-gradient(135deg, #4f46e5, #6d28d9);
+    box-shadow: 0 4px 12px rgba(88, 86, 235, 0.4);
   }
 }
