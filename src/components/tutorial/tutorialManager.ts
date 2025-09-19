@@ -10,7 +10,7 @@ interface TutorialState {
 
 interface TutorialElementRefs {
   overlay?: HTMLElement
-  tooltip?: HTMLElement
+  tooltip?: HTMLElement | null
   highlight?: HTMLElement
 }
 
@@ -18,6 +18,7 @@ export class TutorialManager {
   private state: TutorialState
   private elements: TutorialElementRefs = {}
   private stepCompletionCallbacks: Map<string, () => void> = new Map()
+  private isCreatingTooltip = false
 
   constructor() {
     this.state = {
@@ -149,18 +150,109 @@ export class TutorialManager {
     // Create highlight if needed
     if (step.highlightElement && targetElement) {
       this.elements.highlight = this.createHighlight(targetElement)
-      document.body.appendChild(this.elements.highlight)
+      if (this.elements.highlight) {
+        document.body.appendChild(this.elements.highlight)
+      }
     }
 
     // Create tooltip
-    this.elements.tooltip = await this.createTooltip(step, targetElement)
-    document.body.appendChild(this.elements.tooltip)
+    console.log('Attempting to create tooltip for step:', step.id)
+    
+    // Prevent concurrent tooltip creation
+    if (this.isCreatingTooltip) {
+      console.log('Tooltip creation already in progress, waiting...')
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (!this.isCreatingTooltip) {
+            clearInterval(checkInterval)
+            resolve(undefined)
+          }
+        }, 50)
+      })
+    }
+    
+    this.isCreatingTooltip = true
+    
+    // Add a small delay to ensure DOM is ready
+    await new Promise(resolve => setTimeout(resolve, 10))
+    
+    let tooltipCreated = false
+    let attempts = 0
+    const maxAttempts = 3
+    
+    while (!tooltipCreated && attempts < maxAttempts) {
+      attempts++
+      console.log(`Tooltip creation attempt ${attempts}/${maxAttempts}`)
+      
+      try {
+        this.elements.tooltip = await this.createTooltip(step, targetElement)
+        
+        if (this.elements.tooltip && this.elements.tooltip instanceof HTMLElement) {
+          console.log('Tooltip created successfully, appending to DOM')
+          document.body.appendChild(this.elements.tooltip)
+          tooltipCreated = true
+        } else {
+          console.error(`Attempt ${attempts}: createTooltip returned:`, this.elements.tooltip)
+          this.elements.tooltip = null
+          
+          if (attempts < maxAttempts) {
+            console.log('Retrying tooltip creation in 100ms...')
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
+        }
+      } catch (creationError) {
+        console.error(`Attempt ${attempts}: Error during tooltip creation:`, creationError)
+        this.elements.tooltip = null
+      }
+    }
+    
+    this.isCreatingTooltip = false
+    
+    if (!tooltipCreated) {
+      console.error('Failed to create tooltip after all attempts, step:', step.id)
+      
+      // Try to create a simple fallback tooltip
+      console.log('Attempting to create simple fallback tooltip')
+      try {
+        const fallbackTooltip = document.createElement('div')
+        fallbackTooltip.className = 'tutorial-tooltip'
+        fallbackTooltip.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 10000;
+          background: #6366f1;
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
+          max-width: 300px;
+          font-family: system-ui, sans-serif;
+        `
+        fallbackTooltip.innerHTML = `
+          <h3 style="margin: 0 0 10px 0;">Tutorial Step ${this.state.currentStepIndex + 1}</h3>
+          <p style="margin: 0 0 15px 0;">Find the Options Menu - Hover over the highlighted chat and click the three dots (⋯) menu that appears</p>
+          <div style="text-align: right;">
+            <button onclick="this.closest('.tutorial-tooltip').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px;">Skip</button>
+            <button onclick="this.closest('.tutorial-tooltip').remove()" style="background: rgba(255,255,255,0.3); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Next</button>
+          </div>
+        `
+        this.elements.tooltip = fallbackTooltip
+        document.body.appendChild(this.elements.tooltip)
+        console.log('Simple fallback tooltip created successfully')
+      } catch (fallbackError) {
+        console.error('Even simple fallback tooltip creation failed:', fallbackError)
+        return
+      }
+    }
 
     // Position tooltip
     this.positionTooltip(step, targetElement)
 
     // Re-setup events after adding to DOM
-    this.setupTooltipEvents(this.elements.tooltip)
+    if (this.elements.tooltip) {
+      this.setupTooltipEvents(this.elements.tooltip)
+    }
 
     // Show with animation
     setTimeout(() => {
@@ -251,32 +343,53 @@ export class TutorialManager {
    * Create tooltip with step content
    */
   private async createTooltip(step: TutorialStep, targetElement: HTMLElement | null): Promise<HTMLElement> {
+    console.log('createTooltip called for step:', step.id)
+    
+    // Create base tooltip element
     const tooltip = document.createElement('div')
     tooltip.className = 'tutorial-tooltip'
+    console.log('Base tooltip div created')
     
-    // Get localized text using browser.i18n API
-    const title = await this.getLocalizedMessage(step.titleKey)
-    const message = await this.getLocalizedMessage(step.messageKey)
-    const nextText = await this.getLocalizedMessage('tutorialNextButton') || 'Next'
-    const prevText = await this.getLocalizedMessage('tutorialPrevButton') || 'Previous'
-    const skipText = await this.getLocalizedMessage('tutorialSkipButton') || 'Skip'
-    const finishText = await this.getLocalizedMessage('tutorialFinishButton') || 'Finish'
-    
+    // Get step information
+    const currentStep = this.state.currentFeature?.steps[this.state.currentStepIndex]
     const isLastStep = this.state.currentStepIndex >= (this.state.currentFeature?.steps.length || 1) - 1
     const isFirstStep = this.state.currentStepIndex === 0
     const stepNumber = this.state.currentStepIndex + 1
     const totalSteps = this.state.currentFeature?.steps.length || 1
+    const waitForUserAction = currentStep?.waitForUserAction || false
+    
+    // Use simple fallback text if i18n fails
+    let title = 'Find the Options Menu'
+    let message = 'Hover over the highlighted chat and click the three dots (⋯) menu that appears'
+    let nextText = 'Next'
+    let prevText = 'Previous'
+    let skipText = 'Skip'
+    let finishText = 'Finish'
+    
+    // Try to get localized text
+    try {
+      const localizedTitle = await this.getLocalizedMessage(step.titleKey)
+      const localizedMessage = await this.getLocalizedMessage(step.messageKey)
+      const localizedNext = await this.getLocalizedMessage('tutorialNextButton')
+      const localizedPrev = await this.getLocalizedMessage('tutorialPrevButton')
+      const localizedSkip = await this.getLocalizedMessage('tutorialSkipButton')
+      const localizedFinish = await this.getLocalizedMessage('tutorialFinishButton')
+      
+      if (localizedTitle && localizedTitle !== step.titleKey) title = localizedTitle
+      if (localizedMessage && localizedMessage !== step.messageKey) message = localizedMessage
+      if (localizedNext && localizedNext !== 'tutorialNextButton') nextText = localizedNext
+      if (localizedPrev && localizedPrev !== 'tutorialPrevButton') prevText = localizedPrev
+      if (localizedSkip && localizedSkip !== 'tutorialSkipButton') skipText = localizedSkip
+      if (localizedFinish && localizedFinish !== 'tutorialFinishButton') finishText = localizedFinish
+      
+      console.log('Using localized text')
+    } catch (i18nError) {
+      console.log('Using fallback text due to i18n error:', i18nError)
+    }
 
-    console.log('Creating tooltip:', {
-      currentStep: this.state.currentStepIndex,
-      isFirstStep,
-      isLastStep,
-      stepNumber,
-      totalSteps,
-      prevText,
-      nextText
-    })
+    console.log('Creating tooltip with data:', { stepNumber, totalSteps, title })
 
+    // Set the HTML content
     tooltip.innerHTML = `
       <div class="tutorial-tooltip-content">
         <div class="tutorial-tooltip-header">
@@ -299,17 +412,20 @@ export class TutorialManager {
           <div class="tutorial-tooltip-buttons">
             ${!isFirstStep ? `<button class="tutorial-btn tutorial-btn-ghost tutorial-prev-btn">${prevText}</button>` : ''}
             <button class="tutorial-btn tutorial-btn-ghost tutorial-skip-btn">${skipText}</button>
-            <button class="tutorial-btn tutorial-btn-primary tutorial-next-btn">
+            ${!waitForUserAction ? `<button class="tutorial-btn tutorial-btn-primary tutorial-next-btn">
               ${isLastStep ? finishText : nextText}
-            </button>
+            </button>` : ''}
           </div>
         </div>
       </div>
     `
+    console.log('Tooltip HTML content set')
 
+    // Add styles
     this.addTooltipStyles(tooltip)
-    // Events will be set up after adding to DOM
+    console.log('Tooltip styles added')
     
+    console.log('Tooltip created successfully, returning element')
     return tooltip
   }
 
@@ -319,7 +435,7 @@ export class TutorialManager {
   private addTooltipStyles(tooltip: HTMLElement): void {
     tooltip.style.cssText = `
       position: fixed;
-      background: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
       z-index: 10000;
@@ -328,7 +444,8 @@ export class TutorialManager {
       transform: translateY(-10px) scale(0.95);
       transition: all 0.3s ease;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
     `
 
     // Add internal styles
@@ -344,7 +461,7 @@ export class TutorialManager {
           align-items: center;
           justify-content: space-between;
           padding: 16px 16px 12px 16px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
         .tutorial-tooltip-brand {
           display: flex;
@@ -355,8 +472,8 @@ export class TutorialManager {
         .tutorial-tooltip-logo {
           width: 20px;
           height: 20px;
-          color: #6366f1;
-          background: rgba(99, 102, 241, 0.1);
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.2);
           border-radius: 6px;
           display: flex;
           align-items: center;
@@ -370,13 +487,13 @@ export class TutorialManager {
         .tutorial-tooltip-brand-text {
           font-size: 12px;
           font-weight: 700;
-          color: #6366f1;
+          color: #ffffff;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
         .tutorial-step-indicator {
-          background: rgba(99, 102, 241, 0.1);
-          color: #6366f1;
+          background: rgba(255, 255, 255, 0.2);
+          color: #ffffff;
           font-size: 11px;
           font-weight: 600;
           padding: 2px 6px;
@@ -386,7 +503,7 @@ export class TutorialManager {
         .tutorial-close-btn {
           background: none;
           border: none;
-          color: #9ca3af;
+          color: rgba(255, 255, 255, 0.7);
           font-size: 18px;
           cursor: pointer;
           padding: 0;
@@ -399,8 +516,8 @@ export class TutorialManager {
           transition: all 0.2s ease;
         }
         .tutorial-close-btn:hover {
-          background: rgba(107, 114, 128, 0.1);
-          color: #374151;
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
         }
         .tutorial-tooltip-body {
           padding: 16px;
@@ -409,18 +526,18 @@ export class TutorialManager {
           margin: 0 0 8px 0;
           font-size: 16px;
           font-weight: 600;
-          color: #111827;
+          color: #ffffff;
         }
         .tutorial-tooltip-message {
           margin: 0;
           font-size: 14px;
           line-height: 1.5;
-          color: #6b7280;
+          color: rgba(255, 255, 255, 0.9);
         }
         .tutorial-tooltip-footer {
           padding: 16px;
-          border-top: 1px solid rgba(0, 0, 0, 0.1);
-          background: rgba(249, 250, 251, 0.5);
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.05);
         }
         .tutorial-tooltip-buttons {
           display: flex;
@@ -456,36 +573,17 @@ export class TutorialManager {
         }
         .tutorial-btn-ghost {
           background: transparent;
-          color: #6b7280;
-          border: 1px solid #e5e7eb;
+          color: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.3);
         }
         .tutorial-btn-ghost:hover {
-          background: #f3f4f6;
-          color: #374151;
-          border-color: #d1d5db;
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          border-color: rgba(255, 255, 255, 0.5);
         }
         .tutorial-skip-btn {
           font-size: 12px;
           opacity: 0.8;
-        }
-        @media (prefers-color-scheme: dark) {
-          .tutorial-tooltip {
-            background: #1f2937 !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-          }
-          .tutorial-tooltip-header,
-          .tutorial-tooltip-footer {
-            border-color: rgba(255, 255, 255, 0.1) !important;
-          }
-          .tutorial-tooltip-footer {
-            background: rgba(17, 24, 39, 0.5) !important;
-          }
-          .tutorial-tooltip-title {
-            color: #f9fafb !important;
-          }
-          .tutorial-tooltip-message {
-            color: #d1d5db !important;
-          }
         }
       `
       document.head.appendChild(style)
@@ -718,15 +816,40 @@ export class TutorialManager {
    */
   private async getLocalizedMessage(key: string): Promise<string> {
     try {
+      // Try browser.i18n first
       if (typeof browser !== 'undefined' && browser.i18n && browser.i18n.getMessage) {
         const message = (browser.i18n.getMessage as any)(key)
         console.log(`Translation for ${key}:`, message)
         return message || key
       }
-      console.warn(`browser.i18n not available, using key: ${key}`)
-      return key
+      
+      // Fallback to chrome.i18n if browser is not available
+      if (typeof (globalThis as any).chrome !== 'undefined' && 
+          (globalThis as any).chrome.i18n && 
+          (globalThis as any).chrome.i18n.getMessage) {
+        const message = (globalThis as any).chrome.i18n.getMessage(key)
+        console.log(`Translation (Chrome) for ${key}:`, message)
+        return message || key
+      }
+      
+      // Fallback to English text
+      const fallbacks: Record<string, string> = {
+        'tutorialPinStep1Title': 'Find the Options Menu',
+        'tutorialPinStep1Message': 'Hover over the highlighted chat and click the three dots (⋯) menu that appears',
+        'tutorialPinMenuOpenTitle': 'Find the Pin Option',
+        'tutorialPinMenuOpenMessage': 'Look for the Pin option in the menu and click it',
+        'tutorialPinnedLocationTitle': 'Chat Successfully Pinned!',
+        'tutorialPinnedLocationMessage': 'Your chat is now pinned to the top of your sidebar for easy access. You can unpin it anytime using the same menu.',
+        'tutorialNextButton': 'Next',
+        'tutorialPrevButton': 'Previous',
+        'tutorialSkipButton': 'Skip',
+        'tutorialFinishButton': 'Finish'
+      }
+      
+      console.warn(`i18n API not available, using fallback for key: ${key}`)
+      return fallbacks[key] || key
     } catch (error) {
-      console.warn(`Failed to get localized message for key: ${key}`, error)
+      console.error(`Failed to get localized message for key: ${key}`, error)
       return key
     }
   }

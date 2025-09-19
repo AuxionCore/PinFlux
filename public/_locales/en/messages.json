@@ -161,6 +161,14 @@
     "message": "Hover over the highlighted chat and click the three dots (⋯) menu that appears",
     "description": "Message for pin tutorial step 1"
   },
+  "tutorialPinMenuOpenTitle": {
+    "message": "Perfect! Now Click Pin",
+    "description": "Title shown when options menu opens"
+  },
+  "tutorialPinMenuOpenMessage": {
+    "message": "Great! The options menu is now open. Click the highlighted 'Pin' button to pin this chat",
+    "description": "Message shown when options menu opens"
+  },
   "tutorialPinStep2Title": {
     "message": "Pin Your Chat",
     "description": "Title for pin tutorial step 2"
@@ -168,6 +176,14 @@
   "tutorialPinStep2Message": {
     "message": "Click 'Pin Chat' to add it to your pinned collection",
     "description": "Message for pin tutorial step 2"
+  },
+  "tutorialPinnedLocationTitle": {
+    "message": "Chat Successfully Pinned!",
+    "description": "Title shown after pinning a chat"
+  },
+  "tutorialPinnedLocationMessage": {
+    "message": "Your chat has been pinned! You can now see it in the pinned chats sidebar for quick access",
+    "description": "Message showing where pinned chat appears"
   },
   "tutorialPinStep3Title": {
     "message": "Your Pinned Chats",

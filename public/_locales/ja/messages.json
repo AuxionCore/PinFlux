@@ -161,6 +161,14 @@
     "message": "ハイライトされたチャットにマウスを重ね、表示される三点リーダー（⋯）メニューをクリックしてください",
     "description": "Message for pin tutorial step 1"
   },
+  "tutorialPinMenuOpenTitle": {
+    "message": "完璧！今度はピンをクリック",
+    "description": "Title shown when options menu opens"
+  },
+  "tutorialPinMenuOpenMessage": {
+    "message": "素晴らしい！オプションメニューが開きました。ハイライトされた「ピン」ボタンをクリックしてチャットをピン留めしてください",
+    "description": "Message shown when options menu opens"
+  },
   "tutorialPinStep2Title": {
     "message": "チャットをピン留め",
     "description": "Title for pin tutorial step 2"
@@ -168,6 +176,14 @@
   "tutorialPinStep2Message": {
     "message": "「チャットをピン留め」をクリックしてピン留めコレクションに追加",
     "description": "Message for pin tutorial step 2"
+  },
+  "tutorialPinnedLocationTitle": {
+    "message": "チャットが正常にピン留めされました！",
+    "description": "Title shown after pinning a chat"
+  },
+  "tutorialPinnedLocationMessage": {
+    "message": "チャットがピン留めされました！クイックアクセスのためにピン留めチャットサイドバーで確認できます",
+    "description": "Message showing where pinned chat appears"
   },
   "tutorialPinStep3Title": {
     "message": "ピン留めしたチャット",

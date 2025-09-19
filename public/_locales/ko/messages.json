@@ -161,6 +161,14 @@
     "message": "강조표시된 채팅 위에 마우스를 올리고 나타나는 점 세 개（⋯）메뉴를 클릭해주세요",
     "description": "Message for pin tutorial step 1"
   },
+  "tutorialPinMenuOpenTitle": {
+    "message": "완벽해요! 이제 고정을 클릭하세요",
+    "description": "Title shown when options menu opens"
+  },
+  "tutorialPinMenuOpenMessage": {
+    "message": "훌륭해요! 옵션 메뉴가 열렸습니다. 강조표시된 '고정' 버튼을 클릭하여 이 채팅을 고정해주세요",
+    "description": "Message shown when options menu opens"
+  },
   "tutorialPinStep2Title": {
     "message": "채팅 고정하기",
     "description": "Title for pin tutorial step 2"
@@ -168,6 +176,14 @@
   "tutorialPinStep2Message": {
     "message": "'채팅 고정'을 클릭하여 고정된 컬렉션에 추가합니다",
     "description": "Message for pin tutorial step 2"
+  },
+  "tutorialPinnedLocationTitle": {
+    "message": "채팅이 성공적으로 고정되었습니다!",
+    "description": "Title shown after pinning a chat"
+  },
+  "tutorialPinnedLocationMessage": {
+    "message": "채팅이 고정되었습니다! 빠른 접근을 위해 고정된 채팅 사이드바에서 확인할 수 있습니다",
+    "description": "Message showing where pinned chat appears"
   },
   "tutorialPinStep3Title": {
     "message": "고정된 채팅",

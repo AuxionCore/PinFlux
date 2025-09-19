@@ -1,3 +1,28 @@
+// Add CSS for tutorial animations
+const addTutorialStyles = () => {
+  if (!document.getElementById('tutorial-pin-styles')) {
+    const css = `
+      <style id="tutorial-pin-styles">
+        @keyframes tutorial-pulse {
+          0% { 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 
+                        0 0 20px rgba(99, 102, 241, 0.3);
+          }
+          50% { 
+            box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.4), 
+                        0 0 30px rgba(99, 102, 241, 0.5);
+          }
+          100% { 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 
+                        0 0 20px rgba(99, 102, 241, 0.3);
+          }
+        }
+      </style>
+    `
+    document.head.insertAdjacentHTML('beforeend', css)
+  }
+}
+
 export interface TutorialStep {
   id: string
   titleKey: string
@@ -7,6 +32,7 @@ export interface TutorialStep {
   highlightElement?: boolean
   prerequisite?: () => boolean
   action?: () => Promise<void>
+  waitForUserAction?: boolean // If true, no Next button - waits for user interaction
 }
 
 export interface TutorialFeature {
@@ -36,50 +62,44 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         id: 'pin_step_1',
         titleKey: 'tutorialPinStep1Title',
         messageKey: 'tutorialPinStep1Message',
-        targetSelector: 'nav a[href*="/c/"]:first-of-type, nav [data-testid^="history-item"]:first-child',
+        targetSelector: '#history a[href*="/c/"]:first-of-type, #history [data-testid^="history-item"]:first-child',
         position: 'right',
         highlightElement: true,
+        waitForUserAction: true, // Wait for user to click menu - no Next button
         action: async () => {
-          // Set up intelligent tutorial positioning and menu detection
+          console.log('Step 1: Waiting for user to open options menu')
+          // Add tutorial styles
+          addTutorialStyles()
+          
+          // Set up menu detection that will advance to step 2 when menu opens
           const setupMenuDetection = () => {
-            const chatElement = document.querySelector('nav a[href*="/c/"]:first-of-type, nav [data-testid^="history-item"]:first-child') as HTMLElement
-            if (!chatElement) return
+            console.log('Setting up menu detection for tutorial step 1')
+            let menuAdvanced = false
+            
+            const chatElement = document.querySelector('#history a[href*="/c/"]:first-of-type, #history [data-testid^="history-item"]:first-child') as HTMLElement
+            if (!chatElement) {
+              console.log('Chat element not found for menu detection')
+              return
+            }
 
-            // Monitor for options button visibility
+            // Monitor for options button visibility and clicks
             const checkForOptionsButton = () => {
               const optionsButton = chatElement.querySelector('[data-testid*="options"]') as HTMLElement
               if (optionsButton && optionsButton.offsetParent !== null) {
-                // Options button is visible, add click listener
                 const handleOptionsClick = async () => {
                   console.log('Options button clicked, waiting for menu to appear...')
                   
-                  // Wait a bit for menu to appear, then reposition tooltip
                   setTimeout(() => {
+                    if (menuAdvanced) return
+                    
                     const menu = document.querySelector('[role="menu"]')
                     if (menu) {
-                      console.log('Menu detected, repositioning tutorial...')
-                      // Dispatch event to update tooltip position
-                      const repositionEvent = new CustomEvent('tutorialRepositionTooltip', {
-                        detail: { avoidElement: menu }
-                      })
-                      document.dispatchEvent(repositionEvent)
+                      console.log('Menu detected, advancing to step 2')
+                      menuAdvanced = true
+                      const advanceEvent = new CustomEvent('tutorialAdvance')
+                      document.dispatchEvent(advanceEvent)
                     }
-                  }, 100)
-                  
-                  // Wait for Pin button to appear in menu
-                  const waitForPinButton = setInterval(() => {
-                    const pinButton = document.querySelector('[role="menu"] [data-pinflux-pin-button]')
-                    if (pinButton) {
-                      clearInterval(waitForPinButton)
-                      console.log('Pin button detected in menu, advancing tutorial...')
-                      // Get tutorial manager instance and advance
-                      const tutorialEvent = new CustomEvent('tutorialAdvance')
-                      document.dispatchEvent(tutorialEvent)
-                    }
-                  }, 100)
-                  
-                  // Cleanup after 10 seconds
-                  setTimeout(() => clearInterval(waitForPinButton), 10000)
+                  }, 200)
                 }
                 
                 optionsButton.addEventListener('click', handleOptionsClick, { once: true })
@@ -90,29 +110,109 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             // Check periodically for options button
             const optionsObserver = setInterval(checkForOptionsButton, 500)
             
+            // Also observe for menu opening directly
+            const menuObserver = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as HTMLElement
+                    if (element.getAttribute('role') === 'menu' || element.querySelector('[role="menu"]')) {
+                      setTimeout(() => {
+                        if (menuAdvanced) return
+                        const menu = document.querySelector('[role="menu"]')
+                        if (menu) {
+                          console.log('Menu detected via observer, advancing to step 2')
+                          menuAdvanced = true
+                          const advanceEvent = new CustomEvent('tutorialAdvance')
+                          document.dispatchEvent(advanceEvent)
+                        }
+                      }, 50)
+                    }
+                  }
+                })
+              })
+            })
+            
+            menuObserver.observe(document.body, { childList: true, subtree: true })
+            
             // Cleanup after 30 seconds
-            setTimeout(() => clearInterval(optionsObserver), 30000)
+            setTimeout(() => {
+              clearInterval(optionsObserver)
+              menuObserver.disconnect()
+            }, 30000)
           }
           
           setupMenuDetection()
-          console.log('Interactive step - menu detection and smart positioning active')
         }
       },
       {
         id: 'pin_step_2',
         titleKey: 'tutorialPinStep2Title',
         messageKey: 'tutorialPinStep2Message',
-        targetSelector: '[data-pinflux-pin-button]',
+        targetSelector: '[role="menu"] [data-pinflux-pin-button], [data-pinflux-pin-button]',
         position: 'right',
-        highlightElement: true
+        highlightElement: true,
+        waitForUserAction: true, // Wait for user to click Pin - no Next button
+        action: async () => {
+          console.log('Step 2: Waiting for user to click Pin button')
+          
+          // Try to find Pin button in open menu first, then generally
+          let pinButton = document.querySelector('[role="menu"] [data-pinflux-pin-button]') as HTMLElement
+          if (!pinButton) {
+            pinButton = document.querySelector('[data-pinflux-pin-button]') as HTMLElement
+          }
+          
+          if (pinButton) {
+            console.log('Pin button found, adding click listener')
+            
+            const handlePinClick = () => {
+              console.log('Pin button clicked in step 2, advancing to step 3')
+              // Wait for pinning to complete, then advance to step 3
+              setTimeout(() => {
+                const advanceEvent = new CustomEvent('tutorialAdvance')
+                document.dispatchEvent(advanceEvent)
+              }, 1000)
+            }
+            
+            pinButton.addEventListener('click', handlePinClick, { once: true })
+          } else {
+            console.log('Pin button not found in step 2, waiting for it to appear...')
+            
+            // If Pin button not found, wait for it to appear
+            const waitForPinButton = setInterval(() => {
+              const foundPinButton = document.querySelector('[role="menu"] [data-pinflux-pin-button], [data-pinflux-pin-button]') as HTMLElement
+              if (foundPinButton) {
+                clearInterval(waitForPinButton)
+                console.log('Pin button found after waiting, adding click listener')
+                
+                const handlePinClick = () => {
+                  console.log('Pin button clicked in step 2 (after wait), advancing to step 3')
+                  setTimeout(() => {
+                    const advanceEvent = new CustomEvent('tutorialAdvance')
+                    document.dispatchEvent(advanceEvent)
+                  }, 1000)
+                }
+                
+                foundPinButton.addEventListener('click', handlePinClick, { once: true })
+              }
+            }, 100)
+            
+            // Stop waiting after 10 seconds
+            setTimeout(() => clearInterval(waitForPinButton), 10000)
+          }
+        }
       },
       {
         id: 'pin_step_3',
-        titleKey: 'tutorialPinStep3Title',
-        messageKey: 'tutorialPinStep3Message',
+        titleKey: 'tutorialPinnedLocationTitle',
+        messageKey: 'tutorialPinnedLocationMessage',
         targetSelector: '#pinnedContainer',
         position: 'right',
-        highlightElement: true
+        highlightElement: true,
+        action: async () => {
+          // This step shows the success message after pinning
+          console.log('Showing pinned chat location - step 3 active')
+        }
       },
       {
         id: 'pin_shortcut_step',
