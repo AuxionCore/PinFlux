@@ -193,6 +193,38 @@
     "message": "All your pinned chats appear here for quick access!",
     "description": "Message for pin tutorial step 3"
   },
+  "tutorialAlternativeMethodTitle": {
+    "message": "Alternative Method",
+    "description": "Title for alternative pinning method step"
+  },
+  "tutorialAlternativeMethodMessage": {
+    "message": "Did you know? You can also pin chats by dragging them directly to the pinned area! Let's try this method.",
+    "description": "Message introducing drag-and-drop as alternative pinning method"
+  },
+  "tutorialDragToPinTitle": {
+    "message": "Drag to Pin",
+    "description": "Title for drag-to-pin tutorial step"
+  },
+  "tutorialDragToPinMessage": {
+    "message": "Click and hold any chat from your history, then drag it to the pinned area above to pin it instantly!",
+    "description": "Message for drag-to-pin tutorial step"
+  },
+  "tutorialShortcutMethodTitle": {
+    "message": "Keyboard Shortcut Method",
+    "description": "Title for keyboard shortcut pinning method step"
+  },
+  "tutorialShortcutMethodMessage": {
+    "message": "There's also a super quick way! You can pin the currently open chat using a keyboard shortcut. Let's try it!",
+    "description": "Message introducing keyboard shortcut as pinning method"
+  },
+  "tutorialShortcutDemoTitle": {
+    "message": "Pin with Shortcut",
+    "description": "Title for shortcut demo tutorial step"
+  },
+  "tutorialShortcutDemoMessage": {
+    "message": "Click on this chat to open it, then press Alt+P (or your configured shortcut) to pin it instantly!",
+    "description": "Message for shortcut demo tutorial step"
+  },
   "tutorialDragDropName": {
     "message": "Drag & Drop Organization",
     "description": "Drag and drop feature name"
@@ -286,7 +318,7 @@
     "description": "Title for shortcut tutorial step 1"
   },
   "tutorialShortcutStep1Message": {
-    "message": "Use the keyboard shortcut (Ctrl+Shift+P by default) to quickly pin the current conversation",
+    "message": "Use the keyboard shortcut (Alt+P by default) to quickly pin the current conversation",
     "description": "Message for shortcut tutorial step 1"
   },
   "tutorialShortcutStep2Title": {
@@ -296,5 +328,29 @@
   "tutorialShortcutStep2Message": {
     "message": "Right-click on the extension icon to access settings and customize your pin shortcuts",
     "description": "Message for shortcut tutorial step 2"
+  },
+  "tutorialReorderStepTitle": {
+    "message": "Reorder Your Pins",
+    "description": "Title for reorder tutorial step"
+  },
+  "tutorialReorderStepMessage": {
+    "message": "Click and drag any pinned chat to reorder them. Arrange them in the order that works best for you!",
+    "description": "Message for reorder tutorial step"
+  },
+  "tutorialUnpinStepTitle": {
+    "message": "Unpin a Chat",
+    "description": "Title for unpin tutorial step"
+  },
+  "tutorialUnpinStepMessage": {
+    "message": "Hover over any pinned chat and click the unpin button (✖) to remove it from your pinned collection",
+    "description": "Message for unpin tutorial step"
+  },
+  "tutorialCompleteTitle": {
+    "message": "🎉 Tutorial Complete!",
+    "description": "Title for tutorial completion step"
+  },
+  "tutorialCompleteMessage": {
+    "message": "Congratulations! You've mastered all PinFlux features. You can now pin, reorder, and unpin chats with ease. This dialog will close automatically in 15 seconds.",
+    "description": "Message for tutorial completion step"
   }
 }

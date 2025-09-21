@@ -19,6 +19,10 @@ export class TutorialManager {
   private elements: TutorialElementRefs = {}
   private stepCompletionCallbacks: Map<string, () => void> = new Map()
   private isCreatingTooltip = false
+  private activeObservers: MutationObserver[] = []
+  private activeIntervals: NodeJS.Timeout[] = []
+  private activeTimeouts: NodeJS.Timeout[] = []
+  private activeEventListeners: Array<{element: Element, event: string, handler: EventListener}> = []
 
   constructor() {
     this.state = {
@@ -44,12 +48,28 @@ export class TutorialManager {
         this.updateTooltipPosition(event.detail.avoidElement)
       }
     })
+    
+    // Listen for tutorial close requests
+    document.addEventListener('tutorialClose', () => {
+      if (this.state.isActive) {
+        console.log('Closing tutorial from auto-close event')
+        this.stopTutorial()
+      }
+    })
   }
 
   /**
    * Start tutorial for a specific feature or the next available one
    */
   async startTutorial(featureId?: string, userInitiated = false): Promise<void> {
+    console.log('Starting tutorial, cleaning up any previous state')
+    
+    // Clean up any previous tutorial state
+    this.cleanup()
+    
+    // Notify tutorial features to clean up their resources too
+    document.dispatchEvent(new CustomEvent('tutorialCleanup'))
+    
     this.state.userInitiated = userInitiated
     
     if (featureId) {
@@ -935,15 +955,88 @@ export class TutorialManager {
    * Clean up tutorial elements
    */
   private cleanup(): void {
+    console.log('Cleaning up tutorial elements and handlers')
+    
     // Remove keyboard handler if exists
     if (this.elements.tooltip && (this.elements.tooltip as any).keyHandler) {
       document.removeEventListener('keydown', (this.elements.tooltip as any).keyHandler)
     }
     
+    // Clean up DOM elements
     this.elements.overlay?.remove()
     this.elements.tooltip?.remove()
     this.elements.highlight?.remove()
+    
+    // Clean up tutorial-specific elements
+    document.querySelectorAll('.tutorial-highlight, .tutorial-pin-highlight').forEach(el => el.remove())
+    
+    // Clean up observers
+    this.activeObservers.forEach(observer => {
+      try {
+        observer.disconnect()
+      } catch (error) {
+        console.warn('Error disconnecting observer:', error)
+      }
+    })
+    this.activeObservers = []
+    
+    // Clean up intervals
+    this.activeIntervals.forEach(interval => {
+      try {
+        clearInterval(interval)
+      } catch (error) {
+        console.warn('Error clearing interval:', error)
+      }
+    })
+    this.activeIntervals = []
+    
+    // Clean up timeouts
+    this.activeTimeouts.forEach(timeout => {
+      try {
+        clearTimeout(timeout)
+      } catch (error) {
+        console.warn('Error clearing timeout:', error)
+      }
+    })
+    this.activeTimeouts = []
+    
+    // Clean up event listeners
+    this.activeEventListeners.forEach(({element, event, handler}) => {
+      try {
+        element.removeEventListener(event, handler)
+      } catch (error) {
+        console.warn('Error removing event listener:', error)
+      }
+    })
+    this.activeEventListeners = []
+    
+    // Reset elements
     this.elements = {}
+    
+    console.log('Tutorial cleanup completed')
+  }
+
+  /**
+   * Helper methods for managing cleanup
+   */
+  private addManagedObserver(observer: MutationObserver): MutationObserver {
+    this.activeObservers.push(observer)
+    return observer
+  }
+
+  private addManagedInterval(interval: NodeJS.Timeout): NodeJS.Timeout {
+    this.activeIntervals.push(interval)
+    return interval
+  }
+
+  private addManagedTimeout(timeout: NodeJS.Timeout): NodeJS.Timeout {
+    this.activeTimeouts.push(timeout)
+    return timeout
+  }
+
+  private addManagedEventListener(element: Element, event: string, handler: EventListener, options?: AddEventListenerOptions): void {
+    element.addEventListener(event, handler, options)
+    this.activeEventListeners.push({element, event, handler})
   }
 
   /**

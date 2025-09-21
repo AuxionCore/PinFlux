@@ -193,6 +193,38 @@
     "message": "ピン留めしたすべてのチャットがここに表示され、クイックアクセスできます！",
     "description": "Message for pin tutorial step 3"
   },
+  "tutorialAlternativeMethodTitle": {
+    "message": "別の方法",
+    "description": "Title for alternative pinning method step"
+  },
+  "tutorialAlternativeMethodMessage": {
+    "message": "ご存知ですか？チャットをピン留めエリアに直接ドラッグしてピン留めすることもできます！この方法を試してみましょう。",
+    "description": "Message introducing drag-and-drop as alternative pinning method"
+  },
+  "tutorialDragToPinTitle": {
+    "message": "ドラッグしてピン留め",
+    "description": "Title for drag-to-pin tutorial step"
+  },
+  "tutorialDragToPinMessage": {
+    "message": "履歴から任意のチャットをクリックして長押しし、上のピン留めエリアにドラッグすると即座にピン留めできます！",
+    "description": "Message for drag-to-pin tutorial step"
+  },
+  "tutorialShortcutMethodTitle": {
+    "message": "キーボードショートカット方式",
+    "description": "Title for keyboard shortcut pinning method step"
+  },
+  "tutorialShortcutMethodMessage": {
+    "message": "さらに素早い方法もあります！キーボードショートカットを使って現在開いているチャットをピン留めできます。試してみましょう！",
+    "description": "Message introducing keyboard shortcut as pinning method"
+  },
+  "tutorialShortcutDemoTitle": {
+    "message": "ショートカットでピン留め",
+    "description": "Title for shortcut demo tutorial step"
+  },
+  "tutorialShortcutDemoMessage": {
+    "message": "このチャットをクリックして開き、Alt+P（または設定したショートカット）を押して即座にピン留めしましょう！",
+    "description": "Message for shortcut demo tutorial step"
+  },
   "tutorialDragDropName": {
     "message": "ドラッグ&ドロップで整理",
     "description": "Drag and drop feature name"
@@ -286,7 +318,7 @@
     "description": "Title for shortcut tutorial step 1"
   },
   "tutorialShortcutStep1Message": {
-    "message": "キーボードショートカット（デフォルト：Ctrl+Shift+P）を使用して現在の会話をすばやくピン留め",
+    "message": "キーボードショートカット（デフォルト：Alt+P）を使用して現在の会話をすばやくピン留め",
     "description": "Message for shortcut tutorial step 1"
   },
   "tutorialShortcutStep2Title": {
@@ -296,5 +328,29 @@
   "tutorialShortcutStep2Message": {
     "message": "拡張機能アイコンを右クリックして設定にアクセスし、ピンのショートカットをカスタマイズ",
     "description": "Message for shortcut tutorial step 2"
+  },
+  "tutorialUnpinStepTitle": {
+    "message": "チャットのピン解除",
+    "description": "Title for unpin tutorial step"
+  },
+  "tutorialUnpinStepMessage": {
+    "message": "ピン留めされたチャットにマウスを合わせ、ピン解除ボタン（✖）をクリックしてピン留めコレクションから削除",
+    "description": "Message for unpin tutorial step"
+  },
+  "tutorialCompleteTitle": {
+    "message": "🎉 チュートリアル完了！",
+    "description": "Title for tutorial completion step"
+  },
+  "tutorialCompleteMessage": {
+    "message": "おめでとうございます！PinFluxの全機能をマスターしました。チャットのピン留め、並び替え、解除が簡単にできるようになりました。このダイアログは15秒後に自動的に閉じられます。",
+    "description": "Message for tutorial completion step"
+  },
+  "tutorialReorderStepTitle": {
+    "message": "ピンの並び替え",
+    "description": "Title for reorder tutorial step"
+  },
+  "tutorialReorderStepMessage": {
+    "message": "ピン留めされたチャットをクリックしてドラッグし、並び替えます。あなたに最適な順序に配置してください！",
+    "description": "Message for reorder tutorial step"
   }
 }
