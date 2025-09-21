@@ -39,7 +39,7 @@ export default defineConfig({
       commands: {
         "pin-current-chat": {
           suggested_key: {
-            default: "Alt+Shift+P",
+            default: "Alt+P",
           },
           description: "__MSG_pinCurrentChatCommand__",
         },
