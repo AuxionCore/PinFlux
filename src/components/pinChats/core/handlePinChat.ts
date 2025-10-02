@@ -66,7 +66,8 @@ export default async function handlePinChat(
     )
     pinnedChatsList.prepend(newPinnedChat)
 
-    savedChats.push({ urlId: urlId, title: chatTitle || '' })
+    // Add new chat at the beginning of the array (top of the list)
+    savedChats.unshift({ urlId: urlId, title: chatTitle || '' })
     await browser.storage.sync.set({ [`${profileId}`]: savedChats })
 
     // Check if we should show the drag & drop notification (when reaching 2 pinned chats)

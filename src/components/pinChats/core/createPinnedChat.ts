@@ -59,7 +59,11 @@ export default function createPinnedChat(
   anchor.appendChild(titleDiv1);
   anchor.appendChild(chatOptionsBtnRaper1);
 
-  if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+  // Check if current URL matches (support both /c/{id} and /g/g-p-{projectId}/c/{id})
+  const currentPath = window.location.pathname;
+  const isActive = currentPath.includes(`/c/${urlId}`);
+  
+  if (isActive) {
     clearActiveChatStyles();
     anchor.setAttribute("data-active", "");
   } else {
@@ -68,7 +72,9 @@ export default function createPinnedChat(
 
   // Add hover effect for the list item
   anchor.addEventListener("mouseover", () => {
-    if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
+    const currentPath = window.location.pathname;
+    const isActive = currentPath.includes(`/c/${urlId}`);
+    if (isActive) {
       clearActiveChatStyles();
       anchor.setAttribute("data-active", "");
     }

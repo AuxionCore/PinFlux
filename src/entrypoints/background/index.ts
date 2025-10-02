@@ -41,9 +41,9 @@ export default defineBackground({
           currentWindow: true,
         })
 
-        // Only pin if we're on a ChatGPT conversation page
+        // Only pin if we're on a ChatGPT conversation page (regular or project chat)
         if (!tab || !tab.id || !tab.url) return
-        if (tab.url.includes('chatgpt.com/c')) {
+        if (tab.url.includes('chatgpt.com/c') || tab.url.includes('chatgpt.com/g/g-p-')) {
           browser.tabs.sendMessage(tab.id, { action: 'pin-current-chat' })
         }
       }

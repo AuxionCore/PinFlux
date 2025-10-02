@@ -171,141 +171,241 @@ export default async function initContentScript(): Promise<void> {
     historyElement.addEventListener('dragstart', handleDragStart)
     historyElement.addEventListener('dragend', handleDragEnd)
 
-    // Handle click events in the sidebar
-    historyElement.addEventListener('click', async (event: MouseEvent) => {
+    // Handle click events in the sidebar and projects section
+    document.body.addEventListener('click', async (event: MouseEvent) => {
       const target = (event.target as HTMLElement)?.closest(
-        '[data-testid^="history-item-"][data-testid$="-options"]'
+        '[data-testid^="history-item-"][data-testid$="-options"], [data-testid="undefined-options"], [data-trailing-button]'
       )
+      
+      // Only process if the target is a menu button (has data-trailing-button or is options button)
+      if (!target) {
+        return
+      }
+      
+      console.log('[PinFlux] Sidebar menu button clicked:', target)
+      
       const chatLink = target?.closest('a') as HTMLAnchorElement | null
       const chatUrl = chatLink?.getAttribute('href') as string
-      const urlId = chatUrl?.split('/').slice(-1)[0]
-      const chatTitle = chatLink?.querySelector('span')?.textContent
-      if (target) {
-        const chatOptionsMenu = document.querySelector(
-          'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
-        ) as HTMLDivElement
-
-        if (chatOptionsMenu) {
-          const deleteButton = chatOptionsMenu.querySelector(
-            '[data-testid="delete-chat-menu-item"]'
-          )
-
-          if (deleteButton) {
-            deleteButton.addEventListener('click', async () => {
-              setTimeout(() => {
-                const deleteConversationConfirmButton = document.querySelector(
-                  '[data-testid="delete-conversation-confirm-button"]'
-                ) as HTMLButtonElement
-
-                if (deleteConversationConfirmButton) {
-                  deleteConversationConfirmButton.addEventListener(
-                    'click',
-                    async () => {
-                      const pinnedContainer = document.querySelector(
-                        '#pinnedContainer'
-                      ) as HTMLElement
-                      if (urlId) {
-                        const pinnedChat = pinnedContainer.querySelector(
-                          `a[href="https://chatgpt.com/c/${urlId}"]`
-                        )
-
-                        if (pinnedChat) {
-                          pinnedChat.remove()
-                        }
-                        await removePinChatFromStorage(profileId, urlId)
-                      }
-                    }
-                  )
-                }
-              }, 100)
-            })
-          }
-
-          // Check pinned status and display the appropriate button
-          const savedPinChats = await getPinChatsFromStorage(profileId)
-          if (urlId && savedPinChats.some(chat => chat.urlId === urlId)) {
-            chatOptionsMenu.prepend(unpinButton)
-          } else {
-            const pinButton: HTMLDivElement = createPinButton()
-            chatOptionsMenu.prepend(pinButton)
-            if (urlId && chatTitle) {
-              async function pinChatHandler(event: MouseEvent) {
-                event.stopPropagation()
-                await handlePinChat(
-                  urlId,
-                  chatTitle!,
-                  pinButton,
-                  chatOptionsMenu
-                )
-              }
-              pinButton.addEventListener('click', pinChatHandler)
-              // setupPinChatListener(urlId, pinButton, pinChatHandler, chatTitle);
-            }
-          }
-
-          // Handle pinning and unpinning
-
-          setupUnpinChatListener(
-            profileId,
-            urlId,
-            unpinButton,
-            unpinChatHandler
-          )
+      
+      console.log('[PinFlux] Chat link found:', { chatLink, chatUrl })
+      
+      // Extract urlId from both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
+      let urlId = ''
+      if (chatUrl) {
+        const urlSegments = chatUrl.split('/').filter(Boolean)
+        const cIndex = urlSegments.indexOf('c')
+        if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
+          urlId = urlSegments[cIndex + 1]
         }
       }
-    })
+      
+      console.log('[PinFlux] Extracted urlId:', urlId)
+      
+      const chatTitle = chatLink?.querySelector('span')?.textContent
+      if (target) {
+        // Small delay to ensure menu is rendered
+        setTimeout(async () => {
+          const chatOptionsMenu = document.querySelector(
+            'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
+          ) as HTMLDivElement
 
-    const conversationOptionsButton = document.querySelector(
-      '[data-testid="conversation-options-button"]'
-    ) as HTMLButtonElement
-    if (conversationOptionsButton) {
-      conversationOptionsButton.addEventListener('click', async () => {
-        const chatOptionsMenu = document.querySelector(
-          'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
-        ) as HTMLDivElement
+          if (chatOptionsMenu) {
+            console.log('[PinFlux] Chat options menu found, checking for existing buttons...')
+            
+            // Check if PIN/UNPIN button already exists
+            const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
+            const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
+            
+            console.log('[PinFlux] Existing buttons:', { existingPinButton, existingUnpinButton, urlId, chatTitle })
+            
+            if (!existingPinButton && !existingUnpinButton && urlId && chatTitle) {
+              // Check pinned status and display the appropriate button
+              const savedPinChats = await getPinChatsFromStorage(profileId)
+              if (savedPinChats.some(chat => chat.urlId === urlId)) {
+                const unpinBtn = createUnpinButton()
+                chatOptionsMenu.prepend(unpinBtn)
+                setupUnpinChatListener(profileId, urlId, unpinBtn, null)
+              } else {
+                const pinButton = createPinButton()
+                chatOptionsMenu.prepend(pinButton)
+                
+                async function pinChatHandler(event: MouseEvent) {
+                  event.stopPropagation()
+                  await handlePinChat(urlId, chatTitle!, pinButton, chatOptionsMenu)
+                }
+                pinButton.addEventListener('click', pinChatHandler)
+              }
+            }
 
-        if (chatOptionsMenu) {
-          const deleteButton = chatOptionsMenu.querySelector(
-            '[data-testid="delete-chat-menu-item"]'
-          )
-          if (deleteButton) {
-            deleteButton.addEventListener('click', async () => {
-              setTimeout(() => {
-                const deleteConversationConfirmButton = document.querySelector(
-                  '[data-testid="delete-conversation-confirm-button"]'
-                ) as HTMLButtonElement
+            const deleteButton = chatOptionsMenu.querySelector(
+              '[data-testid="delete-chat-menu-item"]'
+            )
 
-                if (deleteConversationConfirmButton) {
-                  deleteConversationConfirmButton.addEventListener(
-                    'click',
-                    async () => {
-                      const pinnedContainer = document.querySelector(
-                        '#pinnedContainer'
-                      ) as HTMLElement
-                      if (profileId) {
-                        const savedPinChats = await getPinChatsFromStorage(
-                          profileId
-                        )
-                        savedPinChats.forEach(async chat => {
+            if (deleteButton) {
+              deleteButton.addEventListener('click', async () => {
+                setTimeout(() => {
+                  const deleteConversationConfirmButton = document.querySelector(
+                    '[data-testid="delete-conversation-confirm-button"]'
+                  ) as HTMLButtonElement
+
+                  if (deleteConversationConfirmButton) {
+                    deleteConversationConfirmButton.addEventListener(
+                      'click',
+                      async () => {
+                        const pinnedContainer = document.querySelector(
+                          '#pinnedContainer'
+                        ) as HTMLElement
+                        if (urlId) {
                           const pinnedChat = pinnedContainer.querySelector(
-                            `a[href="https://chatgpt.com/c/${chat.urlId}"]`
+                            `a[href="https://chatgpt.com/c/${urlId}"]`
                           )
 
                           if (pinnedChat) {
                             pinnedChat.remove()
                           }
-                          await removePinChatFromStorage(profileId, chat.urlId)
-                        })
+                          await removePinChatFromStorage(profileId, urlId)
+                        }
                       }
-                    }
-                  )
-                }
-              }, 100)
-            })
+                    )
+                  }
+                }, 100)
+              })
+            }
           }
-        }
-      })
-    }
+        }, 50) // Small delay to ensure menu is rendered
+      }
+    })
+
+    // Use event delegation on document.body to catch conversation options button clicks
+    // This works even when navigating between chats in SPA
+    document.body.addEventListener('click', async (event: MouseEvent) => {
+      const conversationOptionsButton = (event.target as HTMLElement)?.closest(
+        '[data-testid="conversation-options-button"]'
+      ) as HTMLButtonElement
+      
+      if (!conversationOptionsButton) {
+        return
+      }
+      
+      console.log('[PinFlux] Conversation options button clicked!')
+      
+      // Wait a bit for the menu to render
+      setTimeout(async () => {
+        const chatOptionsMenu = document.querySelector(
+          'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
+        ) as HTMLDivElement
+
+        console.log('[PinFlux] Chat options menu found:', chatOptionsMenu)
+
+        if (chatOptionsMenu) {
+          // Get current conversation URL and extract urlId
+          const currentUrl = window.location.pathname
+          const urlSegments = currentUrl.split('/').filter(Boolean)
+          let urlId = ''
+          
+          // Support both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
+          const cIndex = urlSegments.indexOf('c')
+          if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
+            urlId = urlSegments[cIndex + 1]
+          }
+
+          console.log('[PinFlux] Extracted urlId from page:', urlId)
+
+            // Get chat title - try to find in sidebar first for accuracy
+            let chatTitle = 'Untitled'
+            
+            // First, try to find the link in the sidebar with matching urlId
+            const currentLink = historyElement.querySelector(`a[href*="/c/${urlId}"]`)
+            if (currentLink) {
+              const linkTitle = currentLink.querySelector('span')?.textContent?.trim()
+              if (linkTitle) {
+                chatTitle = linkTitle
+              }
+            }
+            
+            // If not found in sidebar, try document.title as fallback
+            if (!chatTitle || chatTitle === 'Untitled') {
+              const documentTitle = document.querySelector('title')?.textContent || ''
+              if (documentTitle) {
+                // Remove " | ChatGPT" suffix and split by " - " to get just the chat name
+                const titleParts = documentTitle.split('|')[0].trim().split(' - ')
+                // Take the first part (chat name) without project name
+                chatTitle = titleParts[0].trim() || 'Untitled'
+              }
+            }
+
+            // Check if PIN/UNPIN button already exists
+            const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
+            const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
+            
+            console.log('[PinFlux] Check existing buttons:', { existingPinButton, existingUnpinButton, urlId, chatTitle })
+            
+            if (!existingPinButton && !existingUnpinButton && urlId) {
+              console.log('[PinFlux] Adding PIN/UNPIN button...')
+              
+              // Check pinned status and display the appropriate button
+              const savedPinChats = await getPinChatsFromStorage(profileId)
+              if (savedPinChats.some(chat => chat.urlId === urlId)) {
+                console.log('[PinFlux] Chat is pinned, adding UNPIN button')
+                const unpinBtn = createUnpinButton()
+                chatOptionsMenu.prepend(unpinBtn)
+                setupUnpinChatListener(profileId, urlId, unpinBtn, null)
+              } else {
+                console.log('[PinFlux] Chat is not pinned, adding PIN button')
+                const pinButton = createPinButton()
+                chatOptionsMenu.prepend(pinButton)
+                
+                async function pinChatHandler(event: MouseEvent) {
+                  event.stopPropagation()
+                  await handlePinChat(urlId, chatTitle, pinButton, chatOptionsMenu)
+                }
+                pinButton.addEventListener('click', pinChatHandler)
+              }
+            } else {
+              console.log('[PinFlux] Button already exists or missing urlId, skipping...')
+            }
+
+            const deleteButton = chatOptionsMenu.querySelector(
+              '[data-testid="delete-chat-menu-item"]'
+            )
+            if (deleteButton) {
+              deleteButton.addEventListener('click', async () => {
+                setTimeout(() => {
+                  const deleteConversationConfirmButton = document.querySelector(
+                    '[data-testid="delete-conversation-confirm-button"]'
+                  ) as HTMLButtonElement
+
+                  if (deleteConversationConfirmButton) {
+                    deleteConversationConfirmButton.addEventListener(
+                      'click',
+                      async () => {
+                        const pinnedContainer = document.querySelector(
+                          '#pinnedContainer'
+                        ) as HTMLElement
+                        if (profileId) {
+                          const savedPinChats = await getPinChatsFromStorage(
+                            profileId
+                          )
+                          savedPinChats.forEach(async chat => {
+                            const pinnedChat = pinnedContainer.querySelector(
+                              `a[href="https://chatgpt.com/c/${chat.urlId}"]`
+                            )
+
+                            if (pinnedChat) {
+                              pinnedChat.remove()
+                            }
+                            await removePinChatFromStorage(profileId, chat.urlId)
+                          })
+                        }
+                      }
+                    )
+                  }
+                }, 100)
+              })
+            }
+          }
+        }, 50) // Small delay to ensure menu is rendered
+    })
   } catch (error) {
     console.error(error)
   }

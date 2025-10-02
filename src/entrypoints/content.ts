@@ -10,6 +10,7 @@ import '@/components/tutorial/tutorialAPI' // Load API for debugging
  */
 const urlPatternStrings = ['https://chatgpt.com/*']
 const chatPagePattern = new MatchPattern('https://chatgpt.com/c/*')
+const projectChatPattern = new MatchPattern('https://chatgpt.com/g/g-p-*/c/*')
 const urlMatchPatterns = urlPatternStrings.map(p => new MatchPattern(p))
 
 /**
@@ -26,9 +27,14 @@ async function waitForProfileAndConversationId(
     const profileId = await getProfileId()
     const path = window.location.pathname.replace(/\/+$/, '')
     const segments = path.split('/').filter(Boolean)
-    // Expecting /c/{conversationId} as the last two segments
+    
+    // Support two URL patterns:
+    // 1. Regular chat: /c/{conversationId}
+    // 2. Project chat: /g/g-p-{projectId}/c/{conversationId}
     let conversationId = ''
+    
     if (segments.length >= 2 && segments[segments.length - 2] === 'c') {
+      // Regular chat or project chat - conversationId is always after 'c'
       conversationId = segments[segments.length - 1]
     }
 
@@ -89,7 +95,7 @@ export default defineContentScript({
       }, 1000)
 
       // Initialize bookmarks on initial entry to chat page
-      if (chatPagePattern.includes(window.location.href)) {
+      if (chatPagePattern.includes(window.location.href) || projectChatPattern.includes(window.location.href)) {
         const result = await waitForProfileAndConversationId()
         if (result) {
           const { profileId, conversationId } = result
@@ -116,7 +122,7 @@ export default defineContentScript({
           }
 
           // Initialize bookmarks when navigating to a chat page
-          if (chatPagePattern.includes(newUrl)) {
+          if (chatPagePattern.includes(newUrl) || projectChatPattern.includes(newUrl)) {
             try {
               const result = await waitForProfileAndConversationId()
               if (!result) return

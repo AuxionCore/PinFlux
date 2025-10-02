@@ -224,28 +224,105 @@ export default function createPinnedContainerElement(): HTMLElement {
   // Initial check
   setTimeout(checkScrollNeed, 100);
 
-  function handleDragOver(event: DragEvent): void {
-    event.preventDefault();
-    const draggableDisplay = document.querySelector(
+  // Function to ensure draggableDisplay exists when dragging starts
+  function ensureDraggableDisplay(): HTMLDivElement {
+    let draggableDisplay = document.querySelector(
       "#draggableDisplay"
     ) as HTMLDivElement;
-    if (draggableDisplay) {
-      draggableDisplay.textContent = "Drop to pin";
+    
+    if (!draggableDisplay) {
+      draggableDisplay = document.createElement('div');
+      const draggableDisplayText = document.createElement('span');
+      
+      draggableDisplayText.textContent = 'Drag here to pin';
+      draggableDisplay.appendChild(draggableDisplayText);
+      
+      draggableDisplay.setAttribute('id', 'draggableDisplay');
+      draggableDisplayText.style.fontWeight = '500';
+      draggableDisplay.style.border = '2px dashed #dedede';
+      draggableDisplay.style.borderRadius = '8px';
+      draggableDisplay.style.zIndex = '1000';
+      draggableDisplay.style.backgroundColor = isDarkMode
+        ? 'rgba(40, 40, 40, 95)'
+        : 'rgba(230, 230, 230, 95)';
+      draggableDisplay.style.color = isDarkMode ? '#dedede' : '#000000';
+      draggableDisplay.style.display = 'flex';
+      draggableDisplay.style.flexDirection = 'column';
+      draggableDisplay.style.alignItems = 'center';
+      draggableDisplay.style.justifyContent = 'center';
+      draggableDisplay.style.position = 'absolute';
+      draggableDisplay.style.top = `${chatListContainer.scrollTop}px`;
+      draggableDisplay.style.left = '0';
+      draggableDisplay.style.width = '100%';
+      draggableDisplay.style.height = `${chatListContainer.clientHeight}px`;
+      draggableDisplay.style.pointerEvents = 'none';
+      
+      chatListContainer.appendChild(draggableDisplay);
+      
+      // Expand the container if needed
+      if (chatListContainer.offsetHeight < 70) {
+        requestAnimationFrame(() => {
+          chatListContainer.style.height = '70px';
+          draggableDisplay.style.height = '70px';
+          chatListContainer.style.transition = 'height 0.3s';
+          chatListContainer.style.borderStyle = 'dashed';
+        });
+      }
+    }
+    
+    return draggableDisplay;
+  }
+
+  function handleDragOver(event: DragEvent): void {
+    event.preventDefault();
+    
+    // Ensure draggableDisplay exists (create if needed)
+    const draggableDisplay = ensureDraggableDisplay();
+    
+    // Update text when hovering over the drop zone
+    const textSpan = draggableDisplay.querySelector('span');
+    if (textSpan) {
+      textSpan.textContent = "Drop to pin";
     }
   }
 
   async function handleDrop(event: DragEvent): Promise<void> {
     event.preventDefault();
+    event.stopPropagation(); // Prevent duplicate calls from nested elements
 
     pinnedContainer.style.backgroundColor = "transparent";
     pinnedContainer.style.transition = "all 0.3s";
     pinnedContainer.style.borderStyle = "none";
 
-    const chatLinkData = event.dataTransfer?.getData("text/plain");
+    // Try multiple data formats
+    const textPlain = event.dataTransfer?.getData("text/plain");
+    const textHtml = event.dataTransfer?.getData("text/html");
+    
+    const chatLinkData = textHtml || textPlain;
+    
     const chatHref = chatLinkData?.match(/href="([^"]+)"/)?.[1];
-    const urlId = chatHref?.split("/").slice(-1)[0];
-    const spanTextRegex = /<span[^>]*>(.*?)<\/span>/;
-    const chatTitle = chatLinkData?.match(spanTextRegex)?.[1];
+    
+    // Extract urlId from both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
+    let urlId = '';
+    if (chatHref) {
+      const urlSegments = chatHref.split('/').filter(Boolean);
+      const cIndex = urlSegments.indexOf('c');
+      if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
+        urlId = urlSegments[cIndex + 1];
+      }
+    }
+    
+    // Parse HTML to extract chat title more reliably
+    let chatTitle = '';
+    if (chatLinkData) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(chatLinkData, 'text/html');
+      const linkElement = doc.querySelector('a');
+      if (linkElement) {
+        // Get text content, removing extra whitespace
+        chatTitle = linkElement.textContent?.trim() || '';
+      }
+    }
 
     // Remove the draggable display element
     const draggableDisplay = document.querySelector(
@@ -259,25 +336,78 @@ export default function createPinnedContainerElement(): HTMLElement {
     chatListContainer.style.transition = "height 0.3s";
     chatListContainer.style.borderStyle = "none";
     chatListContainer.style.backgroundColor = "transparent";
-
+    
     if (typeof urlId === "string" && chatTitle) {
       await handlePinChat(urlId, chatTitle);
     }
   }
 
-  function handleDragLeave(): void {
+  function handleDragLeave(event: DragEvent): void {
+    // Check if we're leaving the entire pinned container area
+    const rect = pinnedContainer.getBoundingClientRect();
+    const x = event.clientX;
+    const y = event.clientY;
+    
+    // If mouse is outside the container bounds
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      const draggableDisplay = document.querySelector(
+        "#draggableDisplay"
+      ) as HTMLDivElement;
+
+      if (draggableDisplay) {
+        // Don't remove it! Just change the text back to "Drag here to pin"
+        const textSpan = draggableDisplay.querySelector('span');
+        if (textSpan) {
+          textSpan.textContent = "Drag here to pin";
+        }
+      }
+      
+      // Reset container styles but keep the draggableDisplay visible
+      pinnedContainer.style.backgroundColor = "transparent";
+      pinnedContainer.style.borderStyle = "none";
+    }
+  }
+
+  // Global cleanup function for drag operations
+  function cleanupDragDisplay(): void {
     const draggableDisplay = document.querySelector(
       "#draggableDisplay"
     ) as HTMLDivElement;
 
     if (draggableDisplay) {
-      draggableDisplay.textContent = "Drag here to pin";
+      draggableDisplay.remove();
+    }
+    
+    // Reset container styles
+    chatListContainer.style.borderStyle = "none";
+    chatListContainer.style.height = "auto";
+    pinnedContainer.style.backgroundColor = "transparent";
+    pinnedContainer.style.borderStyle = "none";
+  }
+
+  // Detect when dragging something in the sidebar area
+  function handleSidebarDragEnter(event: DragEvent): void {
+    const target = event.target as HTMLElement;
+    // Check if we're dragging a chat link from sidebar (but not from pinned board itself)
+    if (target.closest('[data-discover="true"]') && !target.closest('#chatListContainer')) {
+      ensureDraggableDisplay();
     }
   }
 
   chatListContainer.addEventListener("dragover", handleDragOver);
   chatListContainer.addEventListener("drop", handleDrop);
   chatListContainer.addEventListener("dragleave", handleDragLeave);
+  
+  // Also add listeners to pinnedContainer to catch external drags
+  pinnedContainer.addEventListener("dragover", handleDragOver);
+  pinnedContainer.addEventListener("drop", handleDrop);
+  pinnedContainer.addEventListener("dragleave", handleDragLeave);
+  
+  // Add global dragend listener to clean up if drag ends anywhere
+  document.addEventListener("dragend", cleanupDragDisplay);
+  
+  // Add dragenter listener on document to detect external drags early
+  document.addEventListener("dragenter", handleSidebarDragEnter);
 
   return sectionWrapper;
 }
