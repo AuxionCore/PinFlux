@@ -108,17 +108,25 @@ export default function createPinnedContainerElement(): HTMLElement {
   });
   
   // Show/hide arrow on hover - only when expanded
-  headerButton.addEventListener('mouseenter', () => {
+  // Apply to both header and entire section wrapper
+  const showArrow = () => {
     if (isExpanded) {
       arrowSvg.style.opacity = "1";
     }
-  });
+  };
   
-  headerButton.addEventListener('mouseleave', () => {
+  const hideArrow = () => {
     if (isExpanded) {
       arrowSvg.style.opacity = "0";
     }
-  });
+  };
+  
+  headerButton.addEventListener('mouseenter', showArrow);
+  headerButton.addEventListener('mouseleave', hideArrow);
+  
+  // Also add hover listeners to the entire section when expanded
+  sectionWrapper.addEventListener('mouseenter', showArrow);
+  sectionWrapper.addEventListener('mouseleave', hideArrow);
   
   // Assemble the structure
   sectionWrapper.appendChild(headerButton);

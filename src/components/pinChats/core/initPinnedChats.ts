@@ -45,21 +45,37 @@ export default async function initPinnedChats({
 
   const pinnedSectionWrapper = createPinnedContainerElement()
 
-  // Find the parent section wrapper that contains the history element
-  // This is the "Chats" section with class "group/sidebar-expando-section"
-  let targetParent = historyElement.parentElement;
+  // Strategy: Insert PinFlux Board BEFORE the Projects section
+  // Projects section has a heading with text "Projects"
+  let projectsSection: Element | null = null;
   
-  // Navigate up to find the section wrapper (if it exists)
-  while (targetParent && !targetParent.classList.contains('group/sidebar-expando-section')) {
-    targetParent = targetParent.parentElement;
+  // Find the Projects section by looking for its heading
+  const allSections = document.querySelectorAll('.group\\/sidebar-expando-section');
+  for (const section of allSections) {
+    const heading = section.querySelector('h2');
+    if (heading?.textContent?.includes('Projects')) {
+      projectsSection = section;
+      break;
+    }
   }
   
-  // If we found the section wrapper, insert before it; otherwise use the direct parent
-  const insertionParent = targetParent ? targetParent.parentElement : historyElement.parentElement;
-  const referenceNode = targetParent || historyElement;
-  
-  if (insertionParent) {
-    insertionParent.insertBefore(pinnedSectionWrapper, referenceNode);
+  // If Projects section found, insert before it
+  if (projectsSection && projectsSection.parentElement) {
+    projectsSection.parentElement.insertBefore(pinnedSectionWrapper, projectsSection);
+  } else {
+    // Fallback: Insert before Chats section (original behavior)
+    let targetParent = historyElement.parentElement;
+    
+    while (targetParent && !targetParent.classList.contains('group/sidebar-expando-section')) {
+      targetParent = targetParent.parentElement;
+    }
+    
+    const insertionParent = targetParent ? targetParent.parentElement : historyElement.parentElement;
+    const referenceNode = targetParent || historyElement;
+    
+    if (insertionParent) {
+      insertionParent.insertBefore(pinnedSectionWrapper, referenceNode);
+    }
   }
   
   const pinnedChats = pinnedSectionWrapper.querySelector(
