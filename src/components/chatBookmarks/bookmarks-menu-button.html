@@ -5,6 +5,12 @@
   title="Show bookmarks"
   class="btn relative btn-ghost text-token-text-primary"
 >
+  <!-- Indicator dot for when bookmarks exist -->
+  <span 
+    data-bookmarks-indicator 
+    class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full hidden"
+    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow: 0 0 6px rgba(99, 102, 241, 0.5);"
+  ></span>
   <div class="flex w-full items-center justify-center gap-1.5">
     <svg
       width="20"
@@ -20,11 +26,5 @@
       <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
     </svg>
     Bookmarks
-    <!-- Indicator dot for when bookmarks exist -->
-    <span 
-      data-bookmarks-indicator 
-      class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full hidden"
-      style="box-shadow: 0 0 4px rgba(59, 130, 246, 0.5);"
-    ></span>
   </div>
 </button>
