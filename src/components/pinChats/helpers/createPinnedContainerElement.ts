@@ -284,6 +284,14 @@ export default function createPinnedContainerElement(): HTMLElement {
   function handleDragOver(event: DragEvent): void {
     event.preventDefault();
     
+    // Check if we're in reorder mode (dragging a pinned chat to reorder)
+    const isReordering = document.body.hasAttribute('data-pinflux-reordering');
+    
+    // Don't show the overlay for reorder operations
+    if (isReordering) {
+      return;
+    }
+    
     // Ensure draggableDisplay exists (create if needed)
     const draggableDisplay = ensureDraggableDisplay();
     

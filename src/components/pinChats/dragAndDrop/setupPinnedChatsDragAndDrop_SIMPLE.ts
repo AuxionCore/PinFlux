@@ -102,6 +102,12 @@ export default function setupPinnedChatsDragAndDrop(
   }
 
   function setupElement(element: HTMLElement) {
+    // Skip if already setup
+    if (element.hasAttribute('data-drag-initialized')) {
+      return
+    }
+    element.setAttribute('data-drag-initialized', 'true')
+    
     console.log('🔥 Setting up element:', element.textContent?.trim())
     
     // הפוך לניתן לגרירה
@@ -109,6 +115,15 @@ export default function setupPinnedChatsDragAndDrop(
     
     element.addEventListener('dragstart', (e) => {
       console.log('🔥 DRAG START!', element.textContent?.trim())
+      
+      // Stop propagation to prevent handleDragStart from being triggered
+      e.stopPropagation()
+      
+      // Mark that we're in reorder mode
+      document.body.setAttribute('data-pinflux-reordering', 'true')
+      
+      // Remove any existing draggable display overlays (from unpinned chats)
+      document.getElementById('draggableDisplay')?.remove()
       
       // סגור כל תפריטי אפשרויות פתוחים
       closeAllOptionsMenus()
@@ -124,6 +139,10 @@ export default function setupPinnedChatsDragAndDrop(
     
     element.addEventListener('dragend', () => {
       console.log('🔥 DRAG END!')
+      
+      // Remove reorder mode marker
+      document.body.removeAttribute('data-pinflux-reordering')
+      
       if (draggedElement) {
         draggedElement.classList.remove('being-dragged')
         draggedElement = null
@@ -208,12 +227,22 @@ export default function setupPinnedChatsDragAndDrop(
   }
 
   // צפייה באלמנטים חדשים
-  const observer = new MutationObserver(() => {
-    console.log('🔥 New elements detected, re-initializing')
-    initElements()
+  const observer = new MutationObserver((mutations) => {
+    // Check if any actual nodes were added
+    const hasAddedNodes = mutations.some(mutation => 
+      Array.from(mutation.addedNodes).some(node => 
+        node.nodeType === Node.ELEMENT_NODE && 
+        (node as HTMLElement).tagName === 'A'
+      )
+    )
+    
+    if (hasAddedNodes) {
+      console.log('🔥 New chat elements detected')
+      initElements()
+    }
   })
   
-  observer.observe(pinnedChats, { childList: true })
+  observer.observe(pinnedChats, { childList: true, subtree: false })
 
   // התחלה
   initElements()

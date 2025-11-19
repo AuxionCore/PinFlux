@@ -5,13 +5,34 @@ import createDraggableDisplay from './createDraggableDisplay'
  * @param event - The drag event containing information about the dragged element
  */
 export default function handleDragStart(event: DragEvent): void {
-  const target = event.target as HTMLAnchorElement
-  const chatLink = target?.outerHTML || ''
+  const target = event.target as HTMLElement
+  // Find the actual anchor element (could be a child element)
+  const anchor = target.closest('a') as HTMLAnchorElement | null
+  
+  console.log('🔥 handleDragStart called', {
+    target: target.tagName,
+    anchor: anchor?.textContent?.trim(),
+    anchorId: anchor?.id,
+    hasDataAttr: anchor?.hasAttribute('data-pinflux-pinned-chat')
+  })
+  
+  // Check if the dragged element is inside the pinned chats container
+  const pinnedChatsContainer = document.querySelector('#chatListContainer')
+  if (pinnedChatsContainer && pinnedChatsContainer.contains(anchor)) {
+    // This is a pinned chat being reordered - don't show the "drop to pin" overlay
+    console.log('🔥 Dragging pinned chat - skipping overlay')
+    event.stopPropagation()
+    return
+  }
+  
+  const chatLink = anchor?.outerHTML || ''
   // Store the chat link data for transfer during drag operation
   event.dataTransfer?.setData('text/plain', chatLink)
 
   // Only show drag feedback for unpinned chats (those without an ID)
-  if (!target.id) {
+  // Check if it's a pinned chat by looking for the data attribute or ID
+  const isPinnedChat = anchor?.hasAttribute('data-pinflux-pinned-chat') || anchor?.id
+  if (!isPinnedChat) {
     const pinnedChats = document.querySelector(
       '#chatListContainer'
     ) as HTMLDivElement
