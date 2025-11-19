@@ -6,7 +6,7 @@ export default defineConfig({
   zip: {
     excludeSources: ["playwright-report/**", "e2e/**", "test-results/**"],
   },
-  webExt: {
+  runner: {
     disabled: true,
   },
   manifest: ({ browser }) => {
