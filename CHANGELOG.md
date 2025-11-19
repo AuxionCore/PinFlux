@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-11-19
+
+### Added
+- **Interactive Tutorial System**: Comprehensive step-by-step tutorial guiding users through all extension features
+  - Pin chats tutorial with three methods: sidebar menu, drag & drop, and keyboard shortcuts
+  - Bookmarks tutorial demonstrating message saving and organization
+  - Tutorial tooltips with navigation (Next, Previous, Skip, Finish)
+  - Smart tutorial state management and auto-start for new users
+  - Tutorial cleanup system preventing observer conflicts
+- **Drag & Drop Reordering**: Ability to reorder pinned chats within the pinned chats panel
+  - Visual drag feedback with custom draggable display
+  - Smooth reordering animations
+  - Persistent order saving
+- **Localization Expansion**: Added full support for Japanese and Korean languages
+  - Complete tutorial translations for ja and ko locales
+  - All UI strings translated including buttons, tooltips, and messages
+- **Projects Feature Support**: Full compatibility with ChatGPT's new "Projects" feature
+  - Pin chats functionality works seamlessly in project conversations
+  - Bookmarks system fully functional within project chats
+- **Collapsible Pinned Panel**: Added expand/collapse functionality for pinned chats panel
+  - Consistent with ChatGPT's native sidebar behavior
+  - State persistence across sessions
+- **Bookmark Indicator**: Visual indicator on bookmarks menu button when bookmarks exist
+  - Subtle blue dot notification
+  - Real-time updates when adding/removing bookmarks
+
+### Enhanced
+- **Tutorial Experience**: 
+  - Fixed unpin instructions to correctly reference three-dot menu instead of X button
+  - Global step counter showing progress across all features (e.g., 11/15)
+  - Automatic progression between tutorial features
+  - Debounced unpin detection to prevent false triggers
+  - Observer cleanup between steps preventing interference
+- **Notification Management**: Tutorial-aware notifications that don't interfere with tutorial flow
+- **UI Consistency**: Updated pinned chats panel styling to match ChatGPT's latest design changes
+  - Improved spacing and alignment
+  - Better visual integration with sidebar
+
+### Fixed
+- Tutorial system observer lifecycle management
+  - Observers now properly cleaned up between steps
+  - Menu observer scoped to correct tutorial step
+  - Drag guide cleanup in unpin step
+- Tutorial notification conflicts resolved with sessionStorage flags
+- Removed duplicate drag_drop tutorial feature
+- Improved pinned chats display positioning outside of main chat panel
+- Enhanced drag-and-drop visual feedback and reliability
+
 ## [2.1.0] - 2025-08-05
 
 ### Added

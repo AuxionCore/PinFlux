@@ -1,6 +1,6 @@
 {
   "name": "PinFlux",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "PinFlux is a browser extension that enhances your ChatGPT experience by allowing you to pin conversations, making it easier to revisit important discussions.",
   "private": true,
   "type": "module",
