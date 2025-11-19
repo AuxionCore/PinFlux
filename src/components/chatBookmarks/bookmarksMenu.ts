@@ -13,8 +13,8 @@ let isMenuInitialized = false
 
 // Function to update the bookmark indicator
 async function updateBookmarkIndicator() {
-  const indicator = document.querySelector('[data-bookmarks-indicator]')
-  if (!indicator) return
+  const icon = document.querySelector('[data-bookmarks-icon]') as SVGElement
+  if (!icon) return
 
   try {
     const profileId = await getProfileId()
@@ -26,20 +26,45 @@ async function updateBookmarkIndicator() {
     }
 
     if (!conversationId) {
-      indicator.classList.add('hidden')
+      icon.setAttribute('fill', 'none')
       return
     }
 
     const bookmarksData = await getBookmarksData(profileId, conversationId)
     
     if (bookmarksData.length > 0) {
-      indicator.classList.remove('hidden')
+      // Fill the bookmark icon with gradient
+      icon.setAttribute('fill', 'url(#bookmarkGradient)')
+      
+      // Add gradient definition if it doesn't exist
+      if (!document.getElementById('bookmarkGradient')) {
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+        gradient.setAttribute('id', 'bookmarkGradient')
+        gradient.setAttribute('x1', '0%')
+        gradient.setAttribute('y1', '0%')
+        gradient.setAttribute('x2', '100%')
+        gradient.setAttribute('y2', '100%')
+        
+        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+        stop1.setAttribute('offset', '0%')
+        stop1.setAttribute('style', 'stop-color:#6366f1;stop-opacity:1')
+        
+        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+        stop2.setAttribute('offset', '100%')
+        stop2.setAttribute('style', 'stop-color:#8b5cf6;stop-opacity:1')
+        
+        gradient.appendChild(stop1)
+        gradient.appendChild(stop2)
+        defs.appendChild(gradient)
+        icon.appendChild(defs)
+      }
     } else {
-      indicator.classList.add('hidden')
+      icon.setAttribute('fill', 'none')
     }
   } catch (error) {
     console.error('Error updating bookmark indicator:', error)
-    indicator.classList.add('hidden')
+    icon.setAttribute('fill', 'none')
   }
 }
 
