@@ -221,9 +221,31 @@ async function popupScript() {
       rateUsLink.title = rateUsTitle
     }
 
-    function setupTutorialButton() {
+    async function setupTutorialButton() {
       const tutorialBtn = document.getElementById(elements.startTutorialBtn)
       if (!tutorialBtn) return
+
+      // Check if there are any pinned chats
+      try {
+        const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+        if (tabs[0]?.id) {
+          const response = await browser.tabs.sendMessage(tabs[0].id, {
+            action: 'check-pinned-chats'
+          })
+          
+          // If there are pinned chats, hide the tutorial button
+          if (response && response.hasPinnedChats) {
+            const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
+            if (tutorialSection) {
+              tutorialSection.style.display = 'none'
+            }
+            return
+          }
+        }
+      } catch (error) {
+        // If we can't check (e.g., not on ChatGPT), keep the button visible
+        console.log('Could not check for pinned chats:', error)
+      }
 
       // Set button text
       const buttonText = tutorialBtn.querySelector('span')

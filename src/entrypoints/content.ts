@@ -71,6 +71,12 @@ export default defineContentScript({
           // Start tutorial with specified feature or from beginning
           tutorialManager.startTutorial(message.featureId, true)
           sendResponse({ success: true })
+        } else if (message.action === 'check-pinned-chats') {
+          // Check if there are any pinned chats
+          const pinnedChatsContainer = document.querySelector('#chatListContainer')
+          const pinnedChats = pinnedChatsContainer?.querySelectorAll('a[href*="/c/"]')
+          const hasPinnedChats = pinnedChats && pinnedChats.length > 0
+          sendResponse({ hasPinnedChats })
         }
         return true // Indicates we'll respond asynchronously
       })
