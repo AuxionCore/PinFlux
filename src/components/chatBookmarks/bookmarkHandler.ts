@@ -50,10 +50,14 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
     if (isCurrentlyBookmarked) {
       await deleteBookmark({ articleId: sectionId, profileId, conversationId })
       replaceBookmarkButton(section, addBookmarkButtonHtml)
+      // Dispatch event to update indicator
+      document.dispatchEvent(new CustomEvent('bookmarksChanged'))
     } else {
       // Initial save without custom name
       await saveBookmark({ articleId: sectionId, profileId, conversationId })
       replaceBookmarkButton(section, removeBookmarkButtonHtml)
+      // Dispatch event to update indicator
+      document.dispatchEvent(new CustomEvent('bookmarksChanged'))
       
       // Show floating input field for name change
       showFloatingBookmarkInput(container, sectionId, profileId, conversationId)

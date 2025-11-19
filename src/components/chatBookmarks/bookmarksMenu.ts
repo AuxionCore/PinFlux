@@ -12,6 +12,38 @@ import { showBookmarksTutorial } from '../tutorial/bookmarksTutorial'
 
 let isMenuInitialized = false
 
+// Function to update the bookmark indicator
+async function updateBookmarkIndicator() {
+  const indicator = document.querySelector('[data-bookmarks-indicator]')
+  if (!indicator) return
+
+  try {
+    const profileId = await getProfileId()
+    const path = window.location.pathname.replace(/\/+$/, '')
+    let conversationId = ''
+    const match = path.match(/\/c\/([\w-]+)/)
+    if (match) {
+      conversationId = match[1]
+    }
+
+    if (!conversationId) {
+      indicator.classList.add('hidden')
+      return
+    }
+
+    const bookmarksData = await getBookmarksData(profileId, conversationId)
+    
+    if (bookmarksData.length > 0) {
+      indicator.classList.remove('hidden')
+    } else {
+      indicator.classList.add('hidden')
+    }
+  } catch (error) {
+    console.error('Error updating bookmark indicator:', error)
+    indicator.classList.add('hidden')
+  }
+}
+
 export default async function initBookmarksMenu() {
   // Check if the button already exists on the page
   const existingButton = document.querySelector('[data-bookmarks-menu-button]')
@@ -104,6 +136,14 @@ export default async function initBookmarksMenu() {
     }
 
     console.log('Bookmarks menu initialized successfully')
+
+    // Update indicator on initialization
+    updateBookmarkIndicator()
+
+    // Listen for bookmarks changes to update indicator
+    document.addEventListener('bookmarksChanged', () => {
+      updateBookmarkIndicator()
+    })
 
     // Listen to button clicks
     menuButton.addEventListener('click', async (e: Event) => {
@@ -225,6 +265,9 @@ async function updateBookmarksList(dropdown: Element) {
       // Create item for each bookmark
       renderBookmarks(bookmarksList, bookmarksData)
     }
+    
+    // Update the indicator after updating the list
+    updateBookmarkIndicator()
   } catch (error) {
     console.error('Error updating bookmarks list:', error)
   }
