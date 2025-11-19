@@ -50,6 +50,27 @@ async function popupScript() {
       setVersion()
       if (showErrorToast) await setErrorToast()
       if (showWhatsNewToast) await setWhatsNewToast()
+      
+      // Don't show "New Feature" notification during tutorial
+      await checkAndHideNewFeatureNotification()
+    }
+    
+    async function checkAndHideNewFeatureNotification() {
+      try {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true })
+        if (!tab?.id) return
+        
+        const response = await browser.tabs.sendMessage(tab.id, { action: 'is-tutorial-active' })
+        if (response?.isActive) {
+          // Hide the "New Feature" notification if tutorial is active
+          const newFeatureToast = document.querySelector('[data-new-feature-toast]')
+          if (newFeatureToast) {
+            (newFeatureToast as HTMLElement).style.display = 'none'
+          }
+        }
+      } catch (error) {
+        // Ignore errors (e.g., if tab is not a ChatGPT page)
+      }
     }
 
     const shortcutsNotification = await browser.storage.sync.get(

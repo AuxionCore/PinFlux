@@ -77,6 +77,10 @@ export default defineContentScript({
           const pinnedChats = pinnedChatsContainer?.querySelectorAll('a[href*="/c/"]')
           const hasPinnedChats = pinnedChats && pinnedChats.length > 0
           sendResponse({ hasPinnedChats })
+        } else if (message.action === 'is-tutorial-active') {
+          // Check if tutorial is currently active
+          const isActive = tutorialManager.isActive()
+          sendResponse({ isActive })
         }
         return true // Indicates we'll respond asynchronously
       })

@@ -61,7 +61,7 @@ const addManagedEventListener = (element: Element, event: string, handler: Event
 
 // Clean up all managed resources
 const cleanupTutorialResources = () => {
-  console.log('Cleaning up tutorial feature resources')
+  console.log('🧹 Cleaning up tutorial feature resources')
   
   tutorialCleanup.observers.forEach(observer => observer.disconnect())
   tutorialCleanup.intervals.forEach(interval => clearInterval(interval))
@@ -74,7 +74,7 @@ const cleanupTutorialResources = () => {
   const dragGuide = document.getElementById('tutorial-drag-guide')
   if (dragGuide) {
     dragGuide.remove()
-    console.log('🧹 Removed drag & drop visual guide')
+    console.log('🗑️ Removed drag & drop visual guide')
   }
   
   const dragStyles = document.getElementById('drag-guide-styles')
@@ -277,6 +277,8 @@ export interface TutorialStep {
   prerequisite?: () => boolean
   action?: () => Promise<void>
   waitForUserAction?: boolean // If true, no Next button - waits for user interaction
+  subFeature?: string // Optional: identifies which sub-feature this step belongs to
+  subFeatureNameKey?: string // Optional: i18n key for the sub-feature display name
 }
 
 export interface TutorialFeature {
@@ -310,6 +312,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to click menu - no Next button
+        subFeature: 'sidebar_menu',
+        subFeatureNameKey: 'tutorialPinMethodSidebar',
         action: async () => {
           console.log('Step 1: Waiting for user to open options menu')
           
@@ -347,6 +351,11 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
                     if (menu) {
                       console.log('Menu detected, advancing to step 2')
                       menuAdvanced = true
+                      
+                      // Clean up observers immediately after advancing
+                      clearInterval(optionsObserver)
+                      menuObserver.disconnect()
+                      
                       const advanceEvent = new CustomEvent('tutorialAdvance')
                       document.dispatchEvent(advanceEvent)
                     }
@@ -376,10 +385,37 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
                     if (element.getAttribute('role') === 'menu' || element.querySelector('[role="menu"]')) {
                       addManagedTimeout(setTimeout(() => {
                         if (menuAdvanced) return
+                        
+                        // Double-check we're still on step 1 by checking the data attribute
+                        const tutorialTooltip = document.querySelector('.tutorial-tooltip')
+                        if (!tutorialTooltip) {
+                          console.log('⚠️ Tooltip not found, tutorial may be closed')
+                          return
+                        }
+                        
+                        const currentStepId = tutorialTooltip.getAttribute('data-tutorial-step-id')
+                        
+                        // Only advance if we're specifically on pin_step_1
+                        if (currentStepId !== 'pin_step_1') {
+                          console.log(`⚠️ Menu opened but not on pin_step_1 (current: ${currentStepId}), ignoring`)
+                          return
+                        }
+                        
                         const menu = document.querySelector('[role="menu"]')
                         if (menu) {
                           console.log('Menu detected via observer, advancing to step 2')
                           menuAdvanced = true
+                          
+                          // Clean up observers immediately after advancing
+                          clearInterval(optionsObserver)
+                          menuObserver.disconnect()
+                          
+                          // Remove from managed observers to prevent reactivation
+                          const observerIndex = tutorialCleanup.observers.indexOf(menuObserver)
+                          if (observerIndex > -1) {
+                            tutorialCleanup.observers.splice(observerIndex, 1)
+                          }
+                          
                           const advanceEvent = new CustomEvent('tutorialAdvance')
                           document.dispatchEvent(advanceEvent)
                         }
@@ -392,10 +428,13 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             
             menuObserver.observe(document.body, { childList: true, subtree: true })
             
-            // Cleanup after 30 seconds
+            // Fallback cleanup after 30 seconds in case menu never opens
             addManagedTimeout(setTimeout(() => {
-              clearInterval(optionsObserver)
-              menuObserver.disconnect()
+              if (!menuAdvanced) {
+                console.log('Menu detection timeout, cleaning up observers')
+                clearInterval(optionsObserver)
+                menuObserver.disconnect()
+              }
             }, 30000))
           }
           
@@ -410,6 +449,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to click Pin - no Next button
+        subFeature: 'sidebar_menu',
+        subFeatureNameKey: 'tutorialPinMethodSidebar',
         action: async () => {
           console.log('Step 2: Waiting for user to click Pin button')
           
@@ -466,6 +507,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         targetSelector: '#pinnedContainer',
         position: 'right',
         highlightElement: true,
+        subFeature: 'sidebar_menu',
+        subFeatureNameKey: 'tutorialPinMethodSidebar',
         action: async () => {
           // This step shows the success message after pinning
           console.log('Showing pinned chat location - step 3 active')
@@ -478,6 +521,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         targetSelector: '#pinnedContainer, #chatListContainer',
         position: 'right',
         highlightElement: false,
+        subFeature: 'drag_drop',
+        subFeatureNameKey: 'tutorialPinMethodDrag',
         action: async () => {
           console.log('Step 4: Explaining alternative drag-and-drop method')
         }
@@ -490,6 +535,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to drag - no Next button
+        subFeature: 'drag_drop',
+        subFeatureNameKey: 'tutorialPinMethodDrag',
         action: async () => {
           console.log('Step 5: Waiting for user to drag a chat to pin it')
           
@@ -656,6 +703,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         targetSelector: '#pinnedContainer, #chatListContainer',
         position: 'right',
         highlightElement: false,
+        subFeature: 'keyboard_shortcut',
+        subFeatureNameKey: 'tutorialPinMethodShortcut',
         action: async () => {
           console.log('Step 6: Explaining keyboard shortcut method')
         }
@@ -668,6 +717,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to click chat
+        subFeature: 'keyboard_shortcut',
+        subFeatureNameKey: 'tutorialPinMethodShortcut',
         action: async () => {
           console.log('Step 7: Waiting for user to click chat and navigate')
           
@@ -764,6 +815,8 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         position: 'right',
         highlightElement: false,
         waitForUserAction: true,
+        subFeature: 'keyboard_shortcut',
+        subFeatureNameKey: 'tutorialPinMethodShortcut',
         action: async () => {
           console.log('🚀 Step 8: Setting up shortcut detection for current chat')
           
@@ -1283,7 +1336,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         prerequisite: () => {
           const pinnedCount = document.querySelectorAll('[data-pinflux-pinned-chat]')?.length || 0
           console.log('🔍 Reorder step prerequisite check: found', pinnedCount, 'pinned chats')
-          return pinnedCount >= 1 // Changed from >= 2 to >= 1 to make testing easier
+          return pinnedCount >= 2 // Require at least 2 pinned chats to reorder
         },
         waitForUserAction: true,
         action: async () => {
@@ -1371,45 +1424,59 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             tutorialCleanup.observers.push(addListenersObserver)
             
             let reorderDetected = false // Flag to prevent duplicate detection
+            let mutationDebounce: NodeJS.Timeout | null = null
             
             reorderObserver = new MutationObserver((mutations) => {
               if (reorderDetected) return // Prevent duplicate detection
               
-              console.log('🔍 Mutation detected, checking for reorder...')
-              
-              // Check if the order has changed
-              const currentOrder = getChatsOrder()
-              console.log('📊 Current order:', currentOrder)
-              console.log('📊 Initial order:', initialOrder)
-              
-              // Compare orders - if different, reordering happened
-              if (currentOrder.length === initialOrder.length && 
-                  currentOrder.length > 0 &&
-                  JSON.stringify(currentOrder) !== JSON.stringify(initialOrder)) {
-                reorderDetected = true // Set flag to prevent duplicate
-                console.log('✅ Chat reordering detected via mutation observer!')
-                console.log('📊 Order changed from:', initialOrder)
-                console.log('📊 Order changed to:', currentOrder)
-                
-                // Clean up all observers and listeners
-                reorderObserver?.disconnect()
-                addListenersObserver?.disconnect()
-                clearInterval(reorderCheckInterval)
-                
-                addManagedTimeout(setTimeout(() => {
-                  const advanceEvent = new CustomEvent('tutorialAdvance')
-                  document.dispatchEvent(advanceEvent)
-                }, 500))
+              // Check if any mutation is actually a childList change (not just attributes)
+              const hasChildListChange = mutations.some(m => m.type === 'childList' && m.addedNodes.length === 0 && m.removedNodes.length === 0)
+              if (!hasChildListChange) {
+                // Only react to actual reordering (childList changes without additions/removals)
                 return
               }
+              
+              // Debounce to avoid checking too frequently
+              if (mutationDebounce) clearTimeout(mutationDebounce)
+              
+              mutationDebounce = setTimeout(() => {
+                if (reorderDetected) return
+                
+                console.log('🔍 Mutation detected, checking for reorder...')
+                
+                // Check if the order has changed
+                const currentOrder = getChatsOrder()
+                console.log('📊 Current order:', currentOrder)
+                console.log('📊 Initial order:', initialOrder)
+                
+                // Compare orders - if different, reordering happened
+                if (currentOrder.length === initialOrder.length && 
+                    currentOrder.length > 0 &&
+                    JSON.stringify(currentOrder) !== JSON.stringify(initialOrder)) {
+                  reorderDetected = true // Set flag to prevent duplicate
+                  console.log('✅ Chat reordering detected via mutation observer!')
+                  console.log('📊 Order changed from:', initialOrder)
+                  console.log('📊 Order changed to:', currentOrder)
+                  
+                  // Clean up all observers and listeners
+                  reorderObserver?.disconnect()
+                  addListenersObserver?.disconnect()
+                  clearInterval(reorderCheckInterval)
+                  if (mutationDebounce) clearTimeout(mutationDebounce)
+                  
+                  addManagedTimeout(setTimeout(() => {
+                    const advanceEvent = new CustomEvent('tutorialAdvance')
+                    document.dispatchEvent(advanceEvent)
+                  }, 500))
+                  return
+                }
+              }, 100) // Wait 100ms before checking
             })
             
             // Observe with more comprehensive options
             reorderObserver.observe(pinnedChatsContainer, {
               childList: true,
-              subtree: true,
-              attributes: true,
-              attributeOldValue: true
+              subtree: false // Don't watch deep changes
             })
             
             // Also add periodic check as fallback
@@ -1456,7 +1523,20 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         prerequisite: () => !!document.querySelector('[data-pinflux-pinned-chat]'),
         waitForUserAction: true,
         action: async () => {
-          console.log('🎯 Step 10: Setting up unpin detection for tutorial')
+          console.log('🎯 Step 11: Setting up unpin detection for tutorial')
+          
+          // Clean up drag guide from previous step
+          const dragGuide = document.getElementById('tutorial-drag-guide')
+          if (dragGuide) {
+            dragGuide.remove()
+            console.log('🗑️ Removed drag & drop visual guide from previous step')
+          }
+          
+          const dragStyles = document.getElementById('drag-guide-styles')
+          if (dragStyles) {
+            dragStyles.remove()
+            console.log('🧹 Removed drag guide styles from previous step')
+          }
           
           // Set up tooltip repositioning when menu opens
           let menuObserver: MutationObserver | null = null
@@ -1492,49 +1572,52 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             const initialPinnedCount = pinnedChatsContainer.querySelectorAll('[data-pinflux-pinned-chat]').length
             console.log(`📊 Initial pinned chats count: ${initialPinnedCount}`)
             
+            let hasAdvanced = false
+            
             unpinObserver = new MutationObserver((mutations) => {
+              if (hasAdvanced) return // Already advanced, ignore further mutations
+              
+              // Only check if actual nodes were removed from the pinned chats container
               for (const mutation of mutations) {
-                if (mutation.type === 'childList') {
-                  // Check for removed nodes
-                  mutation.removedNodes.forEach((removedNode) => {
-                    if (removedNode.nodeType === Node.ELEMENT_NODE) {
-                      const removedElement = removedNode as Element
-                      // Check if removed element is a pinned chat or contains one
-                      if (removedElement.hasAttribute?.('data-pinflux-pinned-chat') ||
-                          removedElement.querySelector?.('[data-pinflux-pinned-chat]')) {
-                        console.log('✅ Pinned chat removal detected via mutation observer!')
-                        unpinObserver?.disconnect()
-                        
-                        addManagedTimeout(setTimeout(() => {
-                          const advanceEvent = new CustomEvent('tutorialAdvance')
-                          document.dispatchEvent(advanceEvent)
-                        }, 500))
-                        return
+                if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+                  // Check if any removed node was a pinned chat
+                  let pinnedChatRemoved = false
+                  mutation.removedNodes.forEach((node) => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                      const element = node as Element
+                      if (element.hasAttribute('data-pinflux-pinned-chat') ||
+                          element.querySelector('[data-pinflux-pinned-chat]')) {
+                        pinnedChatRemoved = true
                       }
                     }
                   })
                   
-                  // Also check if total count decreased as fallback
-                  const currentPinnedCount = pinnedChatsContainer.querySelectorAll('[data-pinflux-pinned-chat]').length
-                  console.log(`📊 Current pinned chats count: ${currentPinnedCount}`)
-                  
-                  if (currentPinnedCount < initialPinnedCount) {
-                    console.log('✅ Chat unpin detected via count comparison! Moving to next step')
-                    unpinObserver?.disconnect()
+                  if (pinnedChatRemoved) {
+                    // Verify the count actually decreased
+                    const currentPinnedCount = pinnedChatsContainer.querySelectorAll('[data-pinflux-pinned-chat]').length
+                    console.log(`📊 Pinned chat removed! Checking count: ${currentPinnedCount} (initial: ${initialPinnedCount})`)
                     
-                    addManagedTimeout(setTimeout(() => {
-                      const advanceEvent = new CustomEvent('tutorialAdvance')
-                      document.dispatchEvent(advanceEvent)
-                    }, 500))
-                    return
+                    if (currentPinnedCount < initialPinnedCount) {
+                      console.log('✅ Chat unpin confirmed! Moving to next step')
+                      hasAdvanced = true
+                      unpinObserver?.disconnect()
+                      menuObserver?.disconnect()
+                      
+                      addManagedTimeout(setTimeout(() => {
+                        const advanceEvent = new CustomEvent('tutorialAdvance')
+                        document.dispatchEvent(advanceEvent)
+                      }, 500))
+                      return
+                    }
                   }
                 }
               }
             })
             
+            // Only watch for direct children changes, not deep subtree
             unpinObserver.observe(pinnedChatsContainer, {
               childList: true,
-              subtree: true
+              subtree: false
             })
             
             // Store observer for cleanup
@@ -1545,13 +1628,70 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             console.warn('⚠️ Pinned chats container not found for unpin detection')
           }
         }
+      }
+    ]
+  },
+  {
+    id: 'chat_bookmarks',
+    version: '1.0.0',
+    nameKey: 'tutorialBookmarksName',
+    descriptionKey: 'tutorialBookmarksDesc',
+    category: 'organization',
+    order: 2,
+    steps: [
+      {
+        id: 'bookmark_intro_step',
+        titleKey: 'tutorialBookmarkStep1Title',
+        messageKey: 'tutorialBookmarkStep1Message',
+        targetSelector: '[data-bookmark-button]',
+        position: 'left',
+        highlightElement: true,
+        prerequisite: () => {
+          // Check if we're on a chat page with messages that can be bookmarked
+          const isOnChatPage = /\/c\/[a-f0-9-]{8,}/.test(window.location.href)
+          const hasBookmarkButtons = !!document.querySelector('[data-bookmark-button]')
+          console.log('🔖 Bookmark intro prerequisite:', { isOnChatPage, hasBookmarkButtons })
+          return isOnChatPage && hasBookmarkButtons
+        }
       },
+      {
+        id: 'bookmark_menu_step',
+        titleKey: 'tutorialBookmarkStep2Title',
+        messageKey: 'tutorialBookmarkStep2Message',
+        targetSelector: '[data-bookmarks-menu-button]',
+        position: 'bottom',
+        highlightElement: true,
+        prerequisite: () => {
+          const hasMenuButton = !!document.querySelector('[data-bookmarks-menu-button]')
+          console.log('🔖 Bookmark menu prerequisite:', { hasMenuButton })
+          return hasMenuButton
+        }
+      },
+      {
+        id: 'bookmark_management_step',
+        titleKey: 'tutorialBookmarkStep3Title',
+        messageKey: 'tutorialBookmarkStep3Message',
+        targetSelector: '[data-bookmarks-menu-button]',
+        position: 'bottom',
+        highlightElement: false,
+        prerequisite: () => !!document.querySelector('[data-bookmarks-menu-button]')
+      }
+    ]
+  },
+  {
+    id: 'tutorial_completion',
+    version: '1.0.0',
+    nameKey: 'tutorialCompleteTitle',
+    descriptionKey: 'tutorialCompleteMessage',
+    category: 'core',
+    order: 999, // Last feature to show
+    steps: [
       {
         id: 'tutorial_complete_step',
         titleKey: 'tutorialCompleteTitle',
         messageKey: 'tutorialCompleteMessage',
-        targetSelector: 'nav[aria-label="Chat history"]',
-        position: 'right',
+        targetSelector: 'body',
+        position: 'center',
         highlightElement: false,
         waitForUserAction: false,
         action: async () => {
@@ -1564,53 +1704,6 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             document.dispatchEvent(closeEvent)
           }, 15000))
         }
-      }
-    ]
-  },
-  {
-    id: 'drag_drop',
-    version: '1.1.0',
-    nameKey: 'tutorialDragDropName',
-    descriptionKey: 'tutorialDragDropDesc',
-    category: 'organization',
-    order: 2,
-    steps: [
-      {
-        id: 'drag_step_1',
-        titleKey: 'tutorialDragStep1Title',
-        messageKey: 'tutorialDragStep1Message',
-        targetSelector: '[data-pinflux-pinned-chat]',
-        position: 'right',
-        highlightElement: true,
-        prerequisite: () => (document.querySelectorAll('[data-pinflux-pinned-chat]')?.length || 0) >= 2
-      }
-    ]
-  },
-  {
-    id: 'rename_chats',
-    version: '2.0.0',
-    nameKey: 'tutorialRenameName',
-    descriptionKey: 'tutorialRenameDesc',
-    category: 'management',
-    order: 3,
-    steps: [
-      {
-        id: 'rename_step_1',
-        titleKey: 'tutorialRenameStep1Title',
-        messageKey: 'tutorialRenameStep1Message',
-        targetSelector: '[data-pinflux-pinned-chat] button',
-        position: 'right',
-        highlightElement: true,
-        prerequisite: () => !!document.querySelector('[data-pinflux-pinned-chat]')
-      },
-      {
-        id: 'rename_step_2',
-        titleKey: 'tutorialRenameStep2Title',
-        messageKey: 'tutorialRenameStep2Message',
-        targetSelector: '[role="menuitem"]',
-        position: 'right',
-        highlightElement: true,
-        prerequisite: () => !!document.querySelector('[role="menuitem"]')
       }
     ]
   }

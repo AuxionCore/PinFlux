@@ -13,6 +13,13 @@ interface NotificationConfig {
 export async function showOneTimeNotification(
   config: NotificationConfig
 ): Promise<void> {
+  // Don't show notifications during tutorial
+  const tutorialActive = sessionStorage.getItem('pinflux_tutorial_active')
+  if (tutorialActive === 'true') {
+    console.log('🚫 Skipping notification - tutorial is active')
+    return
+  }
+  
   const storageKey = `notification_shown_${config.id}`
 
   try {

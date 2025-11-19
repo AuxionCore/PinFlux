@@ -59,6 +59,39 @@ export class TutorialManager {
   }
 
   /**
+   * Calculate current step number and total steps across all features
+   */
+  private getGlobalStepNumbers(): { currentGlobalStep: number; totalGlobalSteps: number } {
+    if (!this.state.currentFeature) {
+      return { currentGlobalStep: 1, totalGlobalSteps: 1 }
+    }
+
+    // Get all features in order
+    const sortedFeatures = TUTORIAL_FEATURES.sort((a, b) => a.order - b.order)
+    
+    // Calculate total steps across all features
+    let totalGlobalSteps = 0
+    for (const feature of sortedFeatures) {
+      totalGlobalSteps += feature.steps.length
+    }
+
+    // Calculate current global step
+    let currentGlobalStep = 0
+    for (const feature of sortedFeatures) {
+      if (feature.id === this.state.currentFeature.id) {
+        // Add steps from current feature up to current index
+        currentGlobalStep += this.state.currentStepIndex + 1
+        break
+      } else {
+        // Add all steps from completed features
+        currentGlobalStep += feature.steps.length
+      }
+    }
+
+    return { currentGlobalStep, totalGlobalSteps }
+  }
+
+  /**
    * Start tutorial for a specific feature or the next available one
    */
   async startTutorial(featureId?: string, userInitiated = false): Promise<void> {
@@ -105,6 +138,11 @@ export class TutorialManager {
 
     this.state.isActive = true
     this.state.currentStepIndex = 0
+    
+    // Mark tutorial as active in sessionStorage to prevent other notifications
+    sessionStorage.setItem('pinflux_tutorial_active', 'true')
+    console.log('✅ Tutorial marked as active in sessionStorage')
+    
     await this.showCurrentStep()
   }
 
@@ -120,9 +158,28 @@ export class TutorialManager {
       return
     }
 
-    // Check prerequisites
+    // Check prerequisites - if failed, try to skip to next valid step
     if (currentStep.prerequisite && !currentStep.prerequisite()) {
-      console.log(`Step ${currentStep.id} prerequisite not met, skipping`)
+      console.log(`Step ${currentStep.id} prerequisite not met, trying to skip`)
+      
+      // Try to find next step with met prerequisite in current feature
+      let foundValidStep = false
+      for (let i = this.state.currentStepIndex + 1; i < this.state.currentFeature.steps.length; i++) {
+        const nextStep = this.state.currentFeature.steps[i]
+        if (!nextStep.prerequisite || nextStep.prerequisite()) {
+          console.log(`Found valid step at index ${i}: ${nextStep.id}`)
+          this.state.currentStepIndex = i - 1 // Will be incremented by nextStep()
+          foundValidStep = true
+          break
+        }
+      }
+      
+      if (!foundValidStep) {
+        console.log('No more valid steps in this feature, finishing')
+        await this.finishCurrentFeature()
+        return
+      }
+      
       await this.nextStep()
       return
     }
@@ -162,6 +219,9 @@ export class TutorialManager {
    */
   private async createStepElements(step: TutorialStep, targetElement: HTMLElement | null): Promise<void> {
     this.cleanup()
+    
+    // Also clean up tutorial features resources (observers, intervals, etc.)
+    document.dispatchEvent(new CustomEvent('tutorialCleanup'))
 
     // Create overlay
     this.elements.overlay = this.createOverlay()
@@ -368,14 +428,19 @@ export class TutorialManager {
     // Create base tooltip element
     const tooltip = document.createElement('div')
     tooltip.className = 'tutorial-tooltip'
+    tooltip.setAttribute('data-tutorial-step-id', step.id) // Add step ID for identification
     console.log('Base tooltip div created')
     
     // Get step information
     const currentStep = this.state.currentFeature?.steps[this.state.currentStepIndex]
     const isLastStep = this.state.currentStepIndex >= (this.state.currentFeature?.steps.length || 1) - 1
     const isFirstStep = this.state.currentStepIndex === 0
-    const stepNumber = this.state.currentStepIndex + 1
-    const totalSteps = this.state.currentFeature?.steps.length || 1
+    
+    // Calculate global step numbers across all features
+    const { currentGlobalStep, totalGlobalSteps } = this.getGlobalStepNumbers()
+    const stepNumber = currentGlobalStep
+    const totalSteps = totalGlobalSteps
+    
     const waitForUserAction = currentStep?.waitForUserAction || false
     
     // Use simple fallback text if i18n fails
@@ -409,6 +474,22 @@ export class TutorialManager {
 
     console.log('Creating tooltip with data:', { stepNumber, totalSteps, title })
 
+    // Add sub-feature name to title if available
+    let displayTitle = title
+    if (step.subFeatureNameKey) {
+      // Try to get localized sub-feature name
+      let subFeatureName = 'Sub-feature' // fallback
+      try {
+        const localizedSubFeature = await this.getLocalizedMessage(step.subFeatureNameKey)
+        if (localizedSubFeature && localizedSubFeature !== step.subFeatureNameKey) {
+          subFeatureName = localizedSubFeature
+        }
+      } catch (error) {
+        console.log('Could not get localized sub-feature name:', error)
+      }
+      displayTitle = `<span class="tutorial-sub-feature">${subFeatureName}</span><br/>${title}`
+    }
+
     // Set the HTML content
     tooltip.innerHTML = `
       <div class="tutorial-tooltip-content">
@@ -425,7 +506,7 @@ export class TutorialManager {
           <button class="tutorial-close-btn" aria-label="Close tutorial">×</button>
         </div>
         <div class="tutorial-tooltip-body">
-          <h3 class="tutorial-tooltip-title">${title}</h3>
+          <h3 class="tutorial-tooltip-title">${displayTitle}</h3>
           <p class="tutorial-tooltip-message">${message}</p>
         </div>
         <div class="tutorial-tooltip-footer">
@@ -455,16 +536,16 @@ export class TutorialManager {
   private addTooltipStyles(tooltip: HTMLElement): void {
     tooltip.style.cssText = `
       position: fixed;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(139, 92, 246, 0.95) 100%);
+      backdrop-filter: blur(10px);
       border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
       z-index: 10000;
       max-width: 320px;
       opacity: 0;
       transform: translateY(-10px) scale(0.95);
       transition: all 0.3s ease;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
     `
 
@@ -548,11 +629,23 @@ export class TutorialManager {
           font-weight: 600;
           color: #ffffff;
         }
+        .tutorial-sub-feature {
+          display: inline-block;
+          font-size: 12px;
+          font-weight: 600;
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.25);
+          padding: 3px 10px;
+          border-radius: 6px;
+          margin-bottom: 8px;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
         .tutorial-tooltip-message {
           margin: 0;
           font-size: 14px;
-          line-height: 1.5;
-          color: rgba(255, 255, 255, 0.9);
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.95);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         .tutorial-tooltip-footer {
           padding: 16px;
@@ -664,7 +757,7 @@ export class TutorialManager {
         skipBtn.addEventListener('click', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          console.log('Skip button clicked')
+          console.log('Skip button clicked - skipping current feature')
           this.skipFeature()
         })
       }
@@ -901,10 +994,57 @@ export class TutorialManager {
   }
 
   /**
-   * Skip current feature
+   * Skip current sub-feature and move to next sub-feature (or next main feature if no more sub-features)
    */
   async skipFeature(): Promise<void> {
-    await this.finishCurrentFeature()
+    if (!this.state.currentFeature) return
+
+    const currentStep = this.state.currentFeature.steps[this.state.currentStepIndex]
+    const currentSubFeature = currentStep?.subFeature
+
+    console.log(`Skipping sub-feature: ${currentSubFeature || 'none'}`)
+
+    // If current step has a sub-feature, find the next step with a different sub-feature
+    if (currentSubFeature) {
+      // Find the next step that belongs to a different sub-feature
+      let nextStepIndex = this.state.currentStepIndex + 1
+      while (nextStepIndex < this.state.currentFeature.steps.length) {
+        const nextStep = this.state.currentFeature.steps[nextStepIndex]
+        if (nextStep.subFeature !== currentSubFeature) {
+          // Found a different sub-feature - move to it
+          console.log(`Moving to next sub-feature: ${nextStep.subFeature}`)
+          this.cleanup()
+          this.state.currentStepIndex = nextStepIndex
+          await this.showCurrentStep()
+          return
+        }
+        nextStepIndex++
+      }
+    }
+
+    // If we didn't find another sub-feature, we've reached the end of this feature
+    // Mark feature as completed and move to next main feature
+    if (!this.state.completedFeatures.includes(this.state.currentFeature.id)) {
+      this.state.completedFeatures.push(this.state.currentFeature.id)
+      await this.saveProgress()
+    }
+
+    this.cleanup()
+
+    // Find next feature
+    const nextFeature = TUTORIAL_FEATURES
+      .sort((a, b) => a.order - b.order)
+      .find(f => !this.state.completedFeatures.includes(f.id))
+
+    if (nextFeature) {
+      // Move to next feature
+      this.state.currentFeature = nextFeature
+      this.state.currentStepIndex = 0
+      await this.showCurrentStep()
+    } else {
+      // No more features - end tutorial
+      this.stopTutorial()
+    }
   }
 
   /**
@@ -915,6 +1055,17 @@ export class TutorialManager {
     this.state.isActive = false
     this.state.currentFeature = null
     this.state.currentStepIndex = 0
+    
+    // Remove tutorial active flag from sessionStorage
+    sessionStorage.removeItem('pinflux_tutorial_active')
+    console.log('✅ Tutorial marked as inactive in sessionStorage')
+  }
+
+  /**
+   * Check if tutorial is currently active
+   */
+  isActive(): boolean {
+    return this.state.isActive
   }
 
   /**
@@ -931,22 +1082,18 @@ export class TutorialManager {
 
     this.cleanup()
 
-    // If user initiated, stop here
-    if (this.state.userInitiated) {
-      this.stopTutorial()
-      return
-    }
-
-    // Otherwise, continue to next feature
+    // Continue to next feature (regardless of how tutorial was started)
     const nextFeature = TUTORIAL_FEATURES
       .sort((a, b) => a.order - b.order)
       .find(f => !this.state.completedFeatures.includes(f.id))
 
     if (nextFeature) {
+      console.log(`Moving to next feature: ${nextFeature.id}`)
       this.state.currentFeature = nextFeature
       this.state.currentStepIndex = 0
       await this.showCurrentStep()
     } else {
+      console.log('All tutorial features completed')
       this.stopTutorial()
     }
   }

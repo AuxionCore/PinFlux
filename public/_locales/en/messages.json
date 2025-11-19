@@ -342,7 +342,7 @@
     "description": "Title for unpin tutorial step"
   },
   "tutorialUnpinStepMessage": {
-    "message": "Hover over any pinned chat and click the unpin button (✖) to remove it from your pinned collection",
+    "message": "Hover over any pinned chat, click the three dots (⋯) menu, and select 'Unpin' to remove it from your pinned collection",
     "description": "Message for unpin tutorial step"
   },
   "tutorialCompleteTitle": {
@@ -352,5 +352,37 @@
   "tutorialCompleteMessage": {
     "message": "Congratulations! You've mastered all PinFlux features. You can now pin, reorder, and unpin chats with ease. This dialog will close automatically in 15 seconds.",
     "description": "Message for tutorial completion step"
+  },
+  "tutorialPinMethodSidebar": {
+    "message": "Pin from Sidebar Menu",
+    "description": "Sub-feature name for pinning via sidebar menu"
+  },
+  "tutorialPinMethodDrag": {
+    "message": "Pin by Dragging",
+    "description": "Sub-feature name for pinning via drag and drop"
+  },
+  "tutorialPinMethodShortcut": {
+    "message": "Pin with Keyboard Shortcut",
+    "description": "Sub-feature name for pinning via keyboard shortcut"
+  },
+  "tutorialPinMethodTopMenu": {
+    "message": "Pin from Top Menu",
+    "description": "Sub-feature name for pinning from top-right menu"
+  },
+  "tutorialPinTopMenuTitle": {
+    "message": "Pin from Top Menu",
+    "description": "Title for pinning from top menu step"
+  },
+  "tutorialPinTopMenuMessage": {
+    "message": "You can also pin the current chat using the Pin button in the top-right menu of the chat window!",
+    "description": "Message for pinning from top menu step"
+  },
+  "tutorialNoPinnedChatsTitle": {
+    "message": "No Pinned Chats Yet",
+    "description": "Title when skipping manage section due to no pinned chats"
+  },
+  "tutorialNoPinnedChatsMessage": {
+    "message": "You skipped all pinning methods, so there are no pinned chats to demonstrate management features. We recommend pinning a chat first to see these features in action. You can restart the tutorial anytime from the extension popup!",
+    "description": "Message when skipping manage section due to no pinned chats"
   }
 }
