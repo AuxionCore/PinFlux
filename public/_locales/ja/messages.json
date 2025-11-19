@@ -334,7 +334,7 @@
     "description": "Title for unpin tutorial step"
   },
   "tutorialUnpinStepMessage": {
-    "message": "ピン留めされたチャットにマウスを合わせ、ピン解除ボタン（✖）をクリックしてピン留めコレクションから削除",
+    "message": "ピン留めされたチャットにカーソルを合わせ、三点（⋯）メニューをクリックし、「ピン留め解除」を選択してコレクションから削除",
     "description": "Message for unpin tutorial step"
   },
   "tutorialCompleteTitle": {
@@ -352,5 +352,17 @@
   "tutorialReorderStepMessage": {
     "message": "ピン留めされたチャットをクリックしてドラッグし、並び替えます。あなたに最適な順序に配置してください！",
     "description": "Message for reorder tutorial step"
+  },
+  "tutorialPinMethodSidebar": {
+    "message": "サイドバーメニューからピン留め",
+    "description": "Sub-feature name for pinning via sidebar menu"
+  },
+  "tutorialPinMethodDrag": {
+    "message": "ドラッグしてピン留め",
+    "description": "Sub-feature name for pinning via drag and drop"
+  },
+  "tutorialPinMethodShortcut": {
+    "message": "キーボードショートカットでピン留め",
+    "description": "Sub-feature name for pinning via keyboard shortcut"
   }
 }

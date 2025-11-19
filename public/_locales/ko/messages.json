@@ -334,7 +334,7 @@
     "description": "Title for unpin tutorial step"
   },
   "tutorialUnpinStepMessage": {
-    "message": "고정된 채팅에 마우스를 올리고 고정 해제 버튼(✖)을 클릭하여 고정 컬렉션에서 제거합니다",
+    "message": "고정된 채팅에 마우스를 올리고 점 세 개（⋯）메뉴를 클릭한 다음 '고정 해제'를 선택하여 고정 컬렉션에서 제거합니다",
     "description": "Message for unpin tutorial step"
   },
   "tutorialCompleteTitle": {
@@ -352,5 +352,17 @@
   "tutorialReorderStepMessage": {
     "message": "고정된 채팅을 클릭하고 드래그하여 순서를 변경합니다. 가장 적합한 순서로 배치하세요!",
     "description": "Message for reorder tutorial step"
+  },
+  "tutorialPinMethodSidebar": {
+    "message": "사이드바 메뉴에서 고정",
+    "description": "Sub-feature name for pinning via sidebar menu"
+  },
+  "tutorialPinMethodDrag": {
+    "message": "드래그하여 고정",
+    "description": "Sub-feature name for pinning via drag and drop"
+  },
+  "tutorialPinMethodShortcut": {
+    "message": "키보드 단축키로 고정",
+    "description": "Sub-feature name for pinning via keyboard shortcut"
   }
 }
