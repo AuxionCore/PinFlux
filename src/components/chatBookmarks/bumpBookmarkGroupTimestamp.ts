@@ -13,21 +13,14 @@ export default async function bumpBookmarkGroupTimestamp(
     const relevantKey = allKeys.find(key => key.startsWith(matchingKey))
 
     if (!relevantKey) {
-      console.log(
-        `No bookmarks found for conversation ${conversationId}, skipping bump.`
-      )
       return
     }
 
     const bookmarks = result[relevantKey]
-    console.log(`bookmarks for ${conversationId}:`, bookmarks)
 
     const dateStr = getCompactDateString()
 
     if (relevantKey.endsWith(dateStr)) {
-      console.log(
-        `No need to update timestamp for ${conversationId}, already set to today.`
-      )
       return
     }
 

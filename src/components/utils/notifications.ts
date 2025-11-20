@@ -16,7 +16,6 @@ export async function showOneTimeNotification(
   // Don't show notifications during tutorial
   const tutorialActive = sessionStorage.getItem('pinflux_tutorial_active')
   if (tutorialActive === 'true') {
-    console.log('🚫 Skipping notification - tutorial is active')
     return
   }
   

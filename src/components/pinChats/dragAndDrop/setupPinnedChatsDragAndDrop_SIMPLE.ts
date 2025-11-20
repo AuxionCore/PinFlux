@@ -5,11 +5,9 @@ export default function setupPinnedChatsDragAndDrop(
   pinnedChats: HTMLElement,
   profileId: string
 ) {
-  console.log('🔥 Starting SIMPLE drag and drop setup')
   
   // Prevent multiple instances
   if (pinnedChats.hasAttribute('data-drag-setup')) {
-    console.log('🔥 Drag and drop already setup for this container')
     return
   }
   pinnedChats.setAttribute('data-drag-setup', 'true')
@@ -47,9 +45,7 @@ export default function setupPinnedChatsDragAndDrop(
     }
     `
     document.head.appendChild(style)
-    console.log('🔥 Added simple CSS')
   } else {
-    console.log('🔥 CSS already exists, skipping')
   }  function closeAllOptionsMenus() {
     // חפש ותסגור כל תפריטי אפשרויות פתוחים
     const openMenus = document.querySelectorAll('[data-testid="conversation-turn-action-menu"], .options-menu, #chatOptionsMenu')
@@ -67,7 +63,6 @@ export default function setupPinnedChatsDragAndDrop(
       }
     })
     
-    console.log('🔥 Closed all options menus')
   }
 
   // הוסף מאזין גלובלי למקש ESC לסגירת תפריטים
@@ -108,14 +103,10 @@ export default function setupPinnedChatsDragAndDrop(
     }
     element.setAttribute('data-drag-initialized', 'true')
     
-    console.log('🔥 Setting up element:', element.textContent?.trim())
-    
     // הפוך לניתן לגרירה
     element.draggable = true
     
     element.addEventListener('dragstart', (e) => {
-      console.log('🔥 DRAG START!', element.textContent?.trim())
-      
       // Stop propagation to prevent handleDragStart from being triggered
       e.stopPropagation()
       
@@ -138,7 +129,6 @@ export default function setupPinnedChatsDragAndDrop(
     })
     
     element.addEventListener('dragend', () => {
-      console.log('🔥 DRAG END!')
       
       // Remove reorder mode marker
       document.body.removeAttribute('data-pinflux-reordering')
@@ -163,7 +153,6 @@ export default function setupPinnedChatsDragAndDrop(
 
   pinnedChats.addEventListener('drop', (e) => {
     e.preventDefault()
-    console.log('🔥 DROP!')
     
     removeDropIndicator()
     
@@ -178,7 +167,6 @@ export default function setupPinnedChatsDragAndDrop(
       pinnedChats.appendChild(draggedElement)
     }
     
-    console.log('🔥 Moved element!')
     saveOrder()
   })
 
@@ -212,7 +200,6 @@ export default function setupPinnedChatsDragAndDrop(
     try {
       const elements = [...pinnedChats.children].filter(el => el.tagName === 'A') as HTMLElement[]
       const order = elements.map(el => el.id).filter(id => id)
-      console.log('🔥 Saving order:', order)
       await updatePinChatsOrder(profileId, order)
     } catch (error) {
       console.error('🔥 Save error:', error)
@@ -222,7 +209,6 @@ export default function setupPinnedChatsDragAndDrop(
   // הגדרת כל האלמנטים הקיימים
   function initElements() {
     const links = pinnedChats.querySelectorAll('a[href*="/c/"]')
-    console.log('🔥 Found', links.length, 'links to setup')
     links.forEach(link => setupElement(link as HTMLElement))
   }
 
@@ -237,7 +223,6 @@ export default function setupPinnedChatsDragAndDrop(
     )
     
     if (hasAddedNodes) {
-      console.log('🔥 New chat elements detected')
       initElements()
     }
   })
@@ -246,5 +231,4 @@ export default function setupPinnedChatsDragAndDrop(
 
   // התחלה
   initElements()
-  console.log('🔥 Simple drag and drop setup complete!')
 }

@@ -37,7 +37,6 @@ export class TutorialManager {
     // Listen for automatic tutorial advancement
     document.addEventListener('tutorialAdvance', () => {
       if (this.state.isActive) {
-        console.log('Auto-advancing tutorial from menu interaction')
         this.nextStep()
       }
     })
@@ -52,7 +51,6 @@ export class TutorialManager {
     // Listen for tutorial close requests
     document.addEventListener('tutorialClose', () => {
       if (this.state.isActive) {
-        console.log('Closing tutorial from auto-close event')
         this.stopTutorial()
       }
     })
@@ -95,8 +93,6 @@ export class TutorialManager {
    * Start tutorial for a specific feature or the next available one
    */
   async startTutorial(featureId?: string, userInitiated = false): Promise<void> {
-    console.log('Starting tutorial, cleaning up any previous state')
-    
     // Clean up any previous tutorial state
     this.cleanup()
     
@@ -115,7 +111,6 @@ export class TutorialManager {
       
       // If user manually started a specific tutorial, allow re-running even if completed
       if (userInitiated && this.state.completedFeatures.includes(featureId)) {
-        console.log(`Restarting completed tutorial: ${featureId}`)
       }
     } else {
       // Find next available feature (ignore completed status if user initiated)
@@ -128,7 +123,6 @@ export class TutorialManager {
         if (userInitiated && TUTORIAL_FEATURES.length > 0) {
           this.state.currentFeature = TUTORIAL_FEATURES[0]
         } else {
-          console.log('All tutorials completed')
           return
         }
       } else {
@@ -141,7 +135,6 @@ export class TutorialManager {
     
     // Mark tutorial as active in sessionStorage to prevent other notifications
     sessionStorage.setItem('pinflux_tutorial_active', 'true')
-    console.log('✅ Tutorial marked as active in sessionStorage')
     
     await this.showCurrentStep()
   }
@@ -160,14 +153,11 @@ export class TutorialManager {
 
     // Check prerequisites - if failed, try to skip to next valid step
     if (currentStep.prerequisite && !currentStep.prerequisite()) {
-      console.log(`Step ${currentStep.id} prerequisite not met, trying to skip`)
-      
       // Try to find next step with met prerequisite in current feature
       let foundValidStep = false
       for (let i = this.state.currentStepIndex + 1; i < this.state.currentFeature.steps.length; i++) {
         const nextStep = this.state.currentFeature.steps[i]
         if (!nextStep.prerequisite || nextStep.prerequisite()) {
-          console.log(`Found valid step at index ${i}: ${nextStep.id}`)
           this.state.currentStepIndex = i - 1 // Will be incremented by nextStep()
           foundValidStep = true
           break
@@ -175,7 +165,6 @@ export class TutorialManager {
       }
       
       if (!foundValidStep) {
-        console.log('No more valid steps in this feature, finishing')
         await this.finishCurrentFeature()
         return
       }
@@ -196,7 +185,6 @@ export class TutorialManager {
       
       // Wait a bit before retry
       await new Promise(resolve => setTimeout(resolve, 500))
-      console.log(`Target element ${currentStep.targetSelector} not found, retry ${i + 1}/${maxRetries}`)
     }
 
     if (!targetElement && currentStep.targetSelector !== 'body') {
@@ -206,12 +194,6 @@ export class TutorialManager {
     }
 
     await this.createStepElements(currentStep, targetElement)
-    console.log('Step created successfully:', {
-      stepId: currentStep.id,
-      stepIndex: this.state.currentStepIndex,
-      isFirstStep: this.state.currentStepIndex === 0,
-      targetSelector: currentStep.targetSelector
-    })
   }
 
   /**
@@ -236,11 +218,8 @@ export class TutorialManager {
     }
 
     // Create tooltip
-    console.log('Attempting to create tooltip for step:', step.id)
-    
     // Prevent concurrent tooltip creation
     if (this.isCreatingTooltip) {
-      console.log('Tooltip creation already in progress, waiting...')
       await new Promise(resolve => {
         const checkInterval = setInterval(() => {
           if (!this.isCreatingTooltip) {
@@ -262,13 +241,10 @@ export class TutorialManager {
     
     while (!tooltipCreated && attempts < maxAttempts) {
       attempts++
-      console.log(`Tooltip creation attempt ${attempts}/${maxAttempts}`)
-      
       try {
         this.elements.tooltip = await this.createTooltip(step, targetElement)
         
         if (this.elements.tooltip && this.elements.tooltip instanceof HTMLElement) {
-          console.log('Tooltip created successfully, appending to DOM')
           document.body.appendChild(this.elements.tooltip)
           tooltipCreated = true
         } else {
@@ -276,7 +252,6 @@ export class TutorialManager {
           this.elements.tooltip = null
           
           if (attempts < maxAttempts) {
-            console.log('Retrying tooltip creation in 100ms...')
             await new Promise(resolve => setTimeout(resolve, 100))
           }
         }
@@ -292,7 +267,6 @@ export class TutorialManager {
       console.error('Failed to create tooltip after all attempts, step:', step.id)
       
       // Try to create a simple fallback tooltip
-      console.log('Attempting to create simple fallback tooltip')
       try {
         const fallbackTooltip = document.createElement('div')
         fallbackTooltip.className = 'tutorial-tooltip'
@@ -319,7 +293,6 @@ export class TutorialManager {
         `
         this.elements.tooltip = fallbackTooltip
         document.body.appendChild(this.elements.tooltip)
-        console.log('Simple fallback tooltip created successfully')
       } catch (fallbackError) {
         console.error('Even simple fallback tooltip creation failed:', fallbackError)
         return
@@ -347,7 +320,6 @@ export class TutorialManager {
         // Execute action but don't automatically proceed to next step
         // Let user control navigation with Next button
         await step.action()
-        console.log('Action completed for step:', step.id)
       } catch (error) {
         console.warn('Action failed, continuing tutorial:', error)
       }
@@ -423,13 +395,10 @@ export class TutorialManager {
    * Create tooltip with step content
    */
   private async createTooltip(step: TutorialStep, targetElement: HTMLElement | null): Promise<HTMLElement> {
-    console.log('createTooltip called for step:', step.id)
-    
     // Create base tooltip element
     const tooltip = document.createElement('div')
     tooltip.className = 'tutorial-tooltip'
     tooltip.setAttribute('data-tutorial-step-id', step.id) // Add step ID for identification
-    console.log('Base tooltip div created')
     
     // Get step information
     const currentStep = this.state.currentFeature?.steps[this.state.currentStepIndex]
@@ -466,13 +435,8 @@ export class TutorialManager {
       if (localizedPrev && localizedPrev !== 'tutorialPrevButton') prevText = localizedPrev
       if (localizedSkip && localizedSkip !== 'tutorialSkipButton') skipText = localizedSkip
       if (localizedFinish && localizedFinish !== 'tutorialFinishButton') finishText = localizedFinish
-      
-      console.log('Using localized text')
     } catch (i18nError) {
-      console.log('Using fallback text due to i18n error:', i18nError)
     }
-
-    console.log('Creating tooltip with data:', { stepNumber, totalSteps, title })
 
     // Add sub-feature name to title if available
     let displayTitle = title
@@ -485,7 +449,6 @@ export class TutorialManager {
           subFeatureName = localizedSubFeature
         }
       } catch (error) {
-        console.log('Could not get localized sub-feature name:', error)
       }
       displayTitle = `<span class="tutorial-sub-feature">${subFeatureName}</span><br/>${title}`
     }
@@ -520,13 +483,10 @@ export class TutorialManager {
         </div>
       </div>
     `
-    console.log('Tooltip HTML content set')
 
     // Add styles
     this.addTooltipStyles(tooltip)
-    console.log('Tooltip styles added')
     
-    console.log('Tooltip created successfully, returning element')
     return tooltip
   }
 
@@ -714,20 +674,10 @@ export class TutorialManager {
       const prevBtn = tooltip.querySelector('.tutorial-prev-btn')
       const skipBtn = tooltip.querySelector('.tutorial-skip-btn')
 
-      console.log('Setting up tooltip events:', {
-        closeBtn: !!closeBtn,
-        nextBtn: !!nextBtn,
-        prevBtn: !!prevBtn,
-        skipBtn: !!skipBtn,
-        currentStep: this.state.currentStepIndex,
-        tooltipHTML: tooltip.innerHTML.substring(0, 200)
-      })
-
       if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          console.log('Close button clicked')
           this.stopTutorial()
         })
       }
@@ -736,7 +686,6 @@ export class TutorialManager {
         nextBtn.addEventListener('click', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          console.log('Next button clicked')
           this.nextStep()
         })
       }
@@ -745,19 +694,14 @@ export class TutorialManager {
         prevBtn.addEventListener('click', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          console.log('Previous button clicked, current step:', this.state.currentStepIndex)
           this.prevStep()
         })
-        console.log('Previous button event listener attached')
-      } else {
-        console.log('Previous button not found in DOM')
       }
       
       if (skipBtn) {
         skipBtn.addEventListener('click', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          console.log('Skip button clicked - skipping current feature')
           this.skipFeature()
         })
       }
@@ -915,8 +859,6 @@ export class TutorialManager {
         tooltip.style.top = `${Math.max(20, newTop)}px`
         tooltip.style.left = `${Math.max(20, newLeft)}px`
         tooltip.style.transform = 'none'
-        
-        console.log('Updated tooltip position to avoid overlap')
       }
     } else {
       // Regular repositioning
@@ -932,7 +874,6 @@ export class TutorialManager {
       // Try browser.i18n first
       if (typeof browser !== 'undefined' && browser.i18n && browser.i18n.getMessage) {
         const message = (browser.i18n.getMessage as any)(key)
-        console.log(`Translation for ${key}:`, message)
         return message || key
       }
       
@@ -941,7 +882,6 @@ export class TutorialManager {
           (globalThis as any).chrome.i18n && 
           (globalThis as any).chrome.i18n.getMessage) {
         const message = (globalThis as any).chrome.i18n.getMessage(key)
-        console.log(`Translation (Chrome) for ${key}:`, message)
         return message || key
       }
       
@@ -971,7 +911,6 @@ export class TutorialManager {
    * Move to next step
    */
   async nextStep(): Promise<void> {
-    console.log('nextStep called, current step:', this.state.currentStepIndex)
     if (!this.state.currentFeature) return
     
     this.state.currentStepIndex++
@@ -982,14 +921,9 @@ export class TutorialManager {
    * Move to previous step
    */
   async prevStep(): Promise<void> {
-    console.log('prevStep called, current step:', this.state.currentStepIndex)
-    
     if (this.state.currentStepIndex > 0) {
       this.state.currentStepIndex--
-      console.log('Moving to previous step:', this.state.currentStepIndex)
       await this.showCurrentStep()
-    } else {
-      console.log('Already at first step, cannot go back')
     }
   }
 
@@ -1002,8 +936,6 @@ export class TutorialManager {
     const currentStep = this.state.currentFeature.steps[this.state.currentStepIndex]
     const currentSubFeature = currentStep?.subFeature
 
-    console.log(`Skipping sub-feature: ${currentSubFeature || 'none'}`)
-
     // If current step has a sub-feature, find the next step with a different sub-feature
     if (currentSubFeature) {
       // Find the next step that belongs to a different sub-feature
@@ -1012,7 +944,6 @@ export class TutorialManager {
         const nextStep = this.state.currentFeature.steps[nextStepIndex]
         if (nextStep.subFeature !== currentSubFeature) {
           // Found a different sub-feature - move to it
-          console.log(`Moving to next sub-feature: ${nextStep.subFeature}`)
           this.cleanup()
           this.state.currentStepIndex = nextStepIndex
           await this.showCurrentStep()
@@ -1058,7 +989,6 @@ export class TutorialManager {
     
     // Remove tutorial active flag from sessionStorage
     sessionStorage.removeItem('pinflux_tutorial_active')
-    console.log('✅ Tutorial marked as inactive in sessionStorage')
   }
 
   /**
@@ -1088,12 +1018,10 @@ export class TutorialManager {
       .find(f => !this.state.completedFeatures.includes(f.id))
 
     if (nextFeature) {
-      console.log(`Moving to next feature: ${nextFeature.id}`)
       this.state.currentFeature = nextFeature
       this.state.currentStepIndex = 0
       await this.showCurrentStep()
     } else {
-      console.log('All tutorial features completed')
       this.stopTutorial()
     }
   }
@@ -1102,8 +1030,6 @@ export class TutorialManager {
    * Clean up tutorial elements
    */
   private cleanup(): void {
-    console.log('Cleaning up tutorial elements and handlers')
-    
     // Remove keyboard handler if exists
     if (this.elements.tooltip && (this.elements.tooltip as any).keyHandler) {
       document.removeEventListener('keydown', (this.elements.tooltip as any).keyHandler)
@@ -1159,8 +1085,6 @@ export class TutorialManager {
     
     // Reset elements
     this.elements = {}
-    
-    console.log('Tutorial cleanup completed')
   }
 
   /**

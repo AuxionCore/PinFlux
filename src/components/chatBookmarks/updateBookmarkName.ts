@@ -22,7 +22,6 @@ export default async function updateBookmarkName({
     if (bookmarkIndex !== -1) {
       bookmarks[bookmarkIndex].customName = customName || null
       await browser.storage.sync.set({ [key]: bookmarks })
-      console.log('Bookmark name updated successfully')
     } else {
       console.warn('Bookmark not found for update')
     }

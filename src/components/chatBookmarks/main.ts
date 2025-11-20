@@ -36,7 +36,6 @@ export default async function initBookmarks({
     return
   }
 
-  console.log(`initBookmarks conversationId=${conversationId}`)
 
   // Initialize bookmarks menu - this will happen on every new page
   await initBookmarksMenu()
@@ -61,18 +60,15 @@ export default async function initBookmarks({
 
       // Don't process the same article twice
       if (markdown.dataset.bookmarkProcessed) {
-        console.log('Article already processed, skipping')
         return
       }
       
       // Simple check that the article is not in streaming mode
       const isStreaming = article.querySelector('.result-streaming')
       if (isStreaming) {
-        console.log('Article still streaming, skipping')
         return // Don't try again
       }
 
-      console.log('Processing article for bookmark buttons')
       markdown.dataset.bookmarkProcessed = 'true'
       
       const children = Array.from(markdown.children)
@@ -181,7 +177,6 @@ export default async function initBookmarks({
         
         // Only process if we have new articles or haven't processed this conversation yet
         if (currentArticleCount > lastProcessedArticleCount) {
-          console.log('Speech button is active - response completed, adding bookmark buttons')
           
           // Set flag to prevent recursive calls
           isProcessingArticles = true
@@ -191,7 +186,6 @@ export default async function initBookmarks({
           setTimeout(() => {
             const allArticles = document.querySelectorAll<HTMLElement>('article')
             if (allArticles.length > 0) {
-              console.log('Processing articles after response completion:', allArticles.length)
               addButtonsToArticles(allArticles)
             }
             // Reset flag after processing

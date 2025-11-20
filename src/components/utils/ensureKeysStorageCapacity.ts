@@ -118,7 +118,6 @@ export default async function ensureKeysStorageCapacity() {
   
   try {
     await browser.storage.sync.remove(keysToRemove)
-    console.log(`Removed ${keysToRemove.length} bookmark keys to maintain storage capacity (checked ${checkedKeys} keys total)`)
   } catch (error) {
     console.error('Failed to remove old bookmark keys:', error)
   }

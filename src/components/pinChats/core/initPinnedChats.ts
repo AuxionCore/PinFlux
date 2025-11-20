@@ -13,8 +13,6 @@ export default async function initPinnedChats({
   // Check if PinFlux section already exists to prevent duplicates
   const existingSection = document.querySelector('[data-pinflux-section="true"]');
   if (existingSection) {
-    console.log('PinFlux Board already exists, skipping initialization');
-    
     // Just update the pinned chats content if needed
     const pinnedChats = existingSection.querySelector('#chatListContainer') as HTMLDivElement;
     if (pinnedChats) {

@@ -182,12 +182,8 @@ export default async function initContentScript(): Promise<void> {
         return
       }
       
-      console.log('[PinFlux] Sidebar menu button clicked:', target)
-      
       const chatLink = target?.closest('a') as HTMLAnchorElement | null
       const chatUrl = chatLink?.getAttribute('href') as string
-      
-      console.log('[PinFlux] Chat link found:', { chatLink, chatUrl })
       
       // Extract urlId from both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
       let urlId = ''
@@ -199,8 +195,6 @@ export default async function initContentScript(): Promise<void> {
         }
       }
       
-      console.log('[PinFlux] Extracted urlId:', urlId)
-      
       const chatTitle = chatLink?.querySelector('span')?.textContent
       if (target) {
         // Small delay to ensure menu is rendered
@@ -210,13 +204,9 @@ export default async function initContentScript(): Promise<void> {
           ) as HTMLDivElement
 
           if (chatOptionsMenu) {
-            console.log('[PinFlux] Chat options menu found, checking for existing buttons...')
-            
             // Check if PIN/UNPIN button already exists
             const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
             const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
-            
-            console.log('[PinFlux] Existing buttons:', { existingPinButton, existingUnpinButton, urlId, chatTitle })
             
             if (!existingPinButton && !existingUnpinButton && urlId && chatTitle) {
               // Check pinned status and display the appropriate button
@@ -287,15 +277,11 @@ export default async function initContentScript(): Promise<void> {
         return
       }
       
-      console.log('[PinFlux] Conversation options button clicked!')
-      
       // Wait a bit for the menu to render
       setTimeout(async () => {
         const chatOptionsMenu = document.querySelector(
           'div[data-radix-menu-content][role="menu"][aria-orientation="vertical"]'
         ) as HTMLDivElement
-
-        console.log('[PinFlux] Chat options menu found:', chatOptionsMenu)
 
         if (chatOptionsMenu) {
           // Get current conversation URL and extract urlId
@@ -308,8 +294,6 @@ export default async function initContentScript(): Promise<void> {
           if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
             urlId = urlSegments[cIndex + 1]
           }
-
-          console.log('[PinFlux] Extracted urlId from page:', urlId)
 
             // Get chat title - try to find in sidebar first for accuracy
             let chatTitle = 'Untitled'
@@ -338,20 +322,15 @@ export default async function initContentScript(): Promise<void> {
             const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
             const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
             
-            console.log('[PinFlux] Check existing buttons:', { existingPinButton, existingUnpinButton, urlId, chatTitle })
-            
             if (!existingPinButton && !existingUnpinButton && urlId) {
-              console.log('[PinFlux] Adding PIN/UNPIN button...')
               
               // Check pinned status and display the appropriate button
               const savedPinChats = await getPinChatsFromStorage(profileId)
               if (savedPinChats.some(chat => chat.urlId === urlId)) {
-                console.log('[PinFlux] Chat is pinned, adding UNPIN button')
                 const unpinBtn = createUnpinButton()
                 chatOptionsMenu.prepend(unpinBtn)
                 setupUnpinChatListener(profileId, urlId, unpinBtn, null)
               } else {
-                console.log('[PinFlux] Chat is not pinned, adding PIN button')
                 const pinButton = createPinButton()
                 chatOptionsMenu.prepend(pinButton)
                 
@@ -361,8 +340,6 @@ export default async function initContentScript(): Promise<void> {
                 }
                 pinButton.addEventListener('click', pinChatHandler)
               }
-            } else {
-              console.log('[PinFlux] Button already exists or missing urlId, skipping...')
             }
 
             const deleteButton = chatOptionsMenu.querySelector(

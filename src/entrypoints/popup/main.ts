@@ -265,7 +265,6 @@ async function popupScript() {
         }
       } catch (error) {
         // If we can't check (e.g., not on ChatGPT), keep the button visible
-        console.log('Could not check for pinned chats:', error)
       }
 
       // Set button text

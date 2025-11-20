@@ -54,7 +54,6 @@ function setupVersionInfo() {
   document.querySelectorAll('.link').forEach(link => {
     link.addEventListener('click', (e) => {
       const href = link.getAttribute('href')
-      console.log(`Changelog link clicked: ${href}`)
     })
   })
 
@@ -67,7 +66,6 @@ function setupVersionInfo() {
           // Show temporary tooltip
           showTooltip(badge as HTMLElement, 'Copied!')
         }).catch(() => {
-          console.log('Could not copy version number')
         })
       }
     })

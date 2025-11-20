@@ -9,18 +9,10 @@ export default function handleDragStart(event: DragEvent): void {
   // Find the actual anchor element (could be a child element)
   const anchor = target.closest('a') as HTMLAnchorElement | null
   
-  console.log('🔥 handleDragStart called', {
-    target: target.tagName,
-    anchor: anchor?.textContent?.trim(),
-    anchorId: anchor?.id,
-    hasDataAttr: anchor?.hasAttribute('data-pinflux-pinned-chat')
-  })
-  
   // Check if the dragged element is inside the pinned chats container
   const pinnedChatsContainer = document.querySelector('#chatListContainer')
   if (pinnedChatsContainer && pinnedChatsContainer.contains(anchor)) {
     // This is a pinned chat being reordered - don't show the "drop to pin" overlay
-    console.log('🔥 Dragging pinned chat - skipping overlay')
     event.stopPropagation()
     return
   }

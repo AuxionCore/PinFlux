@@ -33,34 +33,11 @@ async function updateBookmarkIndicator() {
     const bookmarksData = await getBookmarksData(profileId, conversationId)
     
     if (bookmarksData.length > 0) {
-      // Fill the bookmark icon with gradient
-      icon.setAttribute('fill', 'url(#bookmarkGradient)')
-      
-      // Add gradient definition if it doesn't exist
-      if (!document.getElementById('bookmarkGradient')) {
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
-        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
-        gradient.setAttribute('id', 'bookmarkGradient')
-        gradient.setAttribute('x1', '0%')
-        gradient.setAttribute('y1', '0%')
-        gradient.setAttribute('x2', '100%')
-        gradient.setAttribute('y2', '100%')
-        
-        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
-        stop1.setAttribute('offset', '0%')
-        stop1.setAttribute('style', 'stop-color:#6366f1;stop-opacity:1')
-        
-        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
-        stop2.setAttribute('offset', '100%')
-        stop2.setAttribute('style', 'stop-color:#8b5cf6;stop-opacity:1')
-        
-        gradient.appendChild(stop1)
-        gradient.appendChild(stop2)
-        defs.appendChild(gradient)
-        icon.appendChild(defs)
-      }
+      // Fill the bookmark icon with white when there are bookmarks
+      icon.setAttribute('fill', 'white')
     } else {
-      icon.setAttribute('fill', 'none')
+      // Fill the bookmark icon with purple when empty
+      icon.setAttribute('fill', '#8b5cf6')
     }
   } catch (error) {
     console.error('Error updating bookmark indicator:', error)
@@ -72,11 +49,9 @@ export default async function initBookmarksMenu() {
   // Check if the button already exists on the page
   const existingButton = document.querySelector('[data-bookmarks-menu-button]')
   if (existingButton) {
-    console.log('Bookmarks menu button already exists')
     return
   }
   
-  console.log('Initializing bookmarks menu...')
   
   const header = document.getElementById('page-header')
   if (!header) {
@@ -102,7 +77,6 @@ export default async function initBookmarksMenu() {
     for (const selector of alternatives) {
       foundElement = document.querySelector(selector)
       if (foundElement) {
-        console.log(`Found alternative element: ${selector}`)
         break
       }
     }
@@ -118,9 +92,7 @@ export default async function initBookmarksMenu() {
     bookmarksContainer.innerHTML = bookmarksMenuButtonHtml + bookmarksDropdownHtml
 
     foundElement.appendChild(bookmarksContainer)
-    console.log('Bookmarks menu added to alternative container')
   } else {
-    console.log('Found conversation-header-actions')
     
     // Create container for bookmarks menu
     const bookmarksContainer = document.createElement('div')
@@ -129,9 +101,6 @@ export default async function initBookmarksMenu() {
 
     // Add to the beginning of the actions area
     actionsDiv.insertBefore(bookmarksContainer, actionsDiv.firstChild)
-    console.log('Bookmarks menu added to conversation-header-actions')
-    console.log('Menu HTML:', bookmarksMenuButtonHtml.substring(0, 100))
-    console.log('Dropdown HTML:', bookmarksDropdownHtml.substring(0, 100))
   }
 
   // Add the name change popup
@@ -144,13 +113,6 @@ export default async function initBookmarksMenu() {
     const menuButton = document.querySelector('[data-bookmarks-menu-button]')
     const dropdown = document.querySelector('#bookmarks-dropdown')
 
-    console.log('Looking for elements after timeout:', {
-      menuButton: !!menuButton,
-      dropdown: !!dropdown,
-      allButtons: document.querySelectorAll('[data-bookmarks-menu-button]').length,
-      allDropdowns: document.querySelectorAll('#bookmarks-dropdown').length
-    })
-
     if (!menuButton || !dropdown) {
       console.error('Menu button or dropdown not found after timeout', {
         menuButton: !!menuButton,
@@ -159,7 +121,6 @@ export default async function initBookmarksMenu() {
       return
     }
 
-    console.log('Bookmarks menu initialized successfully')
 
     // Update indicator on initialization
     updateBookmarkIndicator()
@@ -476,5 +437,4 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
 
 function showNamePopup(sectionId: string, currentName: string, callback: (name: string) => void) {
   // Will use the simpler function from bookmarkHandler
-  console.log('Edit bookmark functionality - will be implemented with inline popup')
 }
