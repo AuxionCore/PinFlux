@@ -27,20 +27,24 @@ async function updateBookmarkIndicator() {
 
     if (!conversationId) {
       icon.setAttribute('fill', 'none')
+      icon.setAttribute('stroke', 'white')
       return
     }
 
     const bookmarksData = await getBookmarksData(profileId, conversationId)
     
     if (bookmarksData.length > 0) {
-      // Fill the bookmark icon with white when there are bookmarks
+      // White border with white fill when there are bookmarks
+      icon.setAttribute('stroke', 'white')
       icon.setAttribute('fill', 'white')
     } else {
-      // Fill the bookmark icon with purple when empty
-      icon.setAttribute('fill', '#8b5cf6')
+      // White border without fill when empty
+      icon.setAttribute('stroke', 'white')
+      icon.setAttribute('fill', 'none')
     }
   } catch (error) {
     console.error('Error updating bookmark indicator:', error)
+    icon.setAttribute('stroke', 'white')
     icon.setAttribute('fill', 'none')
   }
 }
