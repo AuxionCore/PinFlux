@@ -246,25 +246,51 @@ async function popupScript() {
       const tutorialBtn = document.getElementById(elements.startTutorialBtn)
       if (!tutorialBtn) return
 
-      // Check if there are any pinned chats
+      // Check if we're on ChatGPT and if there are any pinned chats
       try {
         const tabs = await browser.tabs.query({ active: true, currentWindow: true })
-        if (tabs[0]?.id) {
-          const response = await browser.tabs.sendMessage(tabs[0].id, {
-            action: 'check-pinned-chats'
-          })
-          
-          // If there are pinned chats, hide the tutorial button
-          if (response && response.hasPinnedChats) {
-            const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
-            if (tutorialSection) {
-              tutorialSection.style.display = 'none'
-            }
-            return
+        if (!tabs[0]?.id || !tabs[0]?.url) {
+          // No active tab, hide tutorial button
+          const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
+          if (tutorialSection) {
+            tutorialSection.style.display = 'none'
           }
+          return
+        }
+
+        // Check if we're on ChatGPT
+        const url = tabs[0].url
+        const isChatGPT = url.includes('chatgpt.com') || url.includes('chat.openai.com')
+        
+        if (!isChatGPT) {
+          // Not on ChatGPT, hide tutorial button
+          const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
+          if (tutorialSection) {
+            tutorialSection.style.display = 'none'
+          }
+          return
+        }
+
+        // We're on ChatGPT, check if there are pinned chats
+        const response = await browser.tabs.sendMessage(tabs[0].id, {
+          action: 'check-pinned-chats'
+        })
+        
+        // If there are pinned chats, hide the tutorial button
+        if (response && response.hasPinnedChats) {
+          const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
+          if (tutorialSection) {
+            tutorialSection.style.display = 'none'
+          }
+          return
         }
       } catch (error) {
-        // If we can't check (e.g., not on ChatGPT), keep the button visible
+        // If we can't communicate with the page (not ChatGPT or content script not loaded), hide the button
+        const tutorialSection = tutorialBtn.closest('.tutorial-section') as HTMLElement
+        if (tutorialSection) {
+          tutorialSection.style.display = 'none'
+        }
+        return
       }
 
       // Set button text
