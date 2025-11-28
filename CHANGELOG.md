@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2025-11-29
+
+### Enhanced
+- **Tutorial Icon**: Replaced trash icon with book icon for better tutorial representation
+- **Tutorial Button Logic**: Tutorial "Start Tutorial" button now only appears on ChatGPT website when no pinned chats exist
+
+### Fixed
+- **Bookmark Indicator Colors**: Changed to white border with white fill when bookmarks exist, white border without fill when empty
+- **PinFlux Board Header**: Removed gray hover background on "PinFlux Board" header to match native ChatGPT list behavior
+- **Website Statistics**: Updated to show 4.3★ rating and 3,000+ active users
+
+### Removed
+- **Console Logs**: Removed all console.log statements from codebase (233 statements) while preserving console.error and console.warn
+
 ## [2.2.0] - 2025-11-19
 
 ### Added
