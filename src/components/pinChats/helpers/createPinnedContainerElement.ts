@@ -135,7 +135,13 @@ export default function createPinnedContainerElement(): HTMLElement {
   const style = document.createElement("style");
   // Style the scrollbar for pinned chats: color, width, etc.
   style.textContent = `
-          #chatListContainer {
+          /* Prevent hover background on PinFlux Board header */
+        [data-pinflux-section] .__menu-item.hoverable:hover {
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+
+        #chatListContainer {
           max-height: 150px;
           overflow: hidden; /* Start with hidden */
           --scroll-thumb: #e0e0e0; 
