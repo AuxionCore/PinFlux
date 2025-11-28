@@ -459,8 +459,9 @@ export class TutorialManager {
         <div class="tutorial-tooltip-header">
           <div class="tutorial-tooltip-brand">
             <div class="tutorial-tooltip-logo">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7ZM9 8V17H11V8H9ZM13 8V17H15V8H13Z" fill="#6366f1"/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
               </svg>
             </div>
             <span class="tutorial-tooltip-brand-text">PINFLUX TUTORIAL</span>
@@ -533,17 +534,15 @@ export class TutorialManager {
         .tutorial-tooltip-logo {
           width: 20px;
           height: 20px;
-          color: #ffffff;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2px;
+          flex-shrink: 0;
+          color: #ffffff;
         }
         .tutorial-tooltip-logo svg {
-          width: 14px;
-          height: 14px;
+          width: 18px;
+          height: 18px;
         }
         .tutorial-tooltip-brand-text {
           font-size: 12px;
