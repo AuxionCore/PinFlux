@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2025-11-29
+
+### Added
+- **Firefox Add-ons Support**: PinFlux is now officially available on Firefox Add-ons store
+- **Dual Browser Installation**: Website now features separate install buttons for both Chrome Web Store and Firefox Add-ons
+
+### Enhanced
+- **Website Design**: Updated gradient colors to prettier purple tones (#6366f1, #8b5cf6, #a855f7) matching the PinFlux logo
+- **Browser Icons**: Added Chrome and Firefox SVG icons to installation buttons for better visual clarity
+- **Cross-Browser Description**: Updated meta descriptions to reflect support for both Chrome and Firefox browsers
+
+### Fixed
+- **Firefox Manifest Validation**: Resolved Firefox Add-ons validation errors
+  - Added proper `gecko.id` (pinflux@auxioncore.com) for Firefox extension identification
+  - Implemented `data_collection_permissions` with `required: ["none"]` declaration
+  - All Firefox Add-ons validation tests now pass successfully
+
 ## [2.2.1] - 2025-11-29
 
 ### Enhanced

@@ -28,6 +28,9 @@ export default defineConfig({
       browser_specific_settings?: {
         gecko: {
           id: string;
+          data_collection_permissions?: {
+            required: string[];
+          };
         };
       };
       key?: string;
@@ -49,7 +52,10 @@ export default defineConfig({
     if (isFirefox) {
       baseManifest.browser_specific_settings = {
         gecko: {
-          id: "",
+          id: "pinflux@auxioncore.com",
+          data_collection_permissions: {
+            required: ["none"],
+          },
         },
       };
     }

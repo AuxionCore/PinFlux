@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-site-verification" content="google7cd60b7b88085688" />
     <title>PinFlux - Supercharge Your ChatGPT Experience</title>
-    <meta name="description" content="Pin important ChatGPT conversations, bookmark key messages, and organize your AI sessions with PinFlux - the free, open-source Chrome extension.">
+    <meta name="description" content="Pin important ChatGPT conversations, bookmark key messages, and organize your AI sessions with PinFlux - the free, open-source browser extension for Chrome and Firefox.">
     <meta name="keywords" content="ChatGPT, extension, pin, bookmark, organize, AI, productivity, Chrome">
     <link rel="icon" type="image/png" href="assets/icon/32.png">
     
@@ -33,7 +33,7 @@
         font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
         line-height: 1.6;
         color: #2d3748;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       }
 
       .container {
@@ -65,7 +65,7 @@
         align-items: center;
         font-size: 1.5rem;
         font-weight: 700;
-        color: #667eea;
+        color: #8b5cf6;
       }
 
       .logo img {
@@ -88,11 +88,11 @@
       }
 
       .nav-links a:hover {
-        color: #667eea;
+        color: #8b5cf6;
       }
 
       .cta-button {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
         color: white;
         padding: 0.8rem 1.5rem;
         border-radius: 50px;
@@ -142,7 +142,7 @@
 
       .btn-primary {
         background: white;
-        color: #667eea;
+        color: #8b5cf6;
         padding: 1rem 2rem;
         border-radius: 50px;
         text-decoration: none;
@@ -150,6 +150,9 @@
         font-size: 1.1rem;
         transition: all 0.3s;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .btn-primary:hover {
@@ -171,7 +174,27 @@
 
       .btn-secondary:hover {
         background: white;
-        color: #667eea;
+        color: #8b5cf6;
+      }
+
+      .btn-firefox {
+        background: white;
+        color: #ff6611;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-firefox:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 102, 17, 0.3);
       }
 
       /* Features Section */
@@ -531,7 +554,18 @@
             Transform chaos into clarity with PinFlux.
           </p>
           <div class="hero-buttons">
-            <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">🚀 Get PinFlux Free</a>
+            <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728z"/>
+              </svg>
+              Install for Chrome
+            </a>
+            <a href="https://addons.mozilla.org/en-US/firefox/addon/pinflux/" class="btn-firefox">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.824 7.287c.008 0 .004 0 0 0zm-2.8-1.4c.006 0 .003 0 0 0zm16.754 2.161c-.505-1.215-1.53-2.528-2.333-2.943.654 1.283 1.033 2.57 1.177 3.53l.002.02c-1.314-3.278-3.544-4.6-5.366-7.477-.091-.147-.184-.292-.273-.446a3.545 3.545 0 01-.13-.24 2.118 2.118 0 01-.172-.46.03.03 0 00-.027-.03.038.038 0 00-.021 0l-.006.001a.037.037 0 00-.01.005L15.624 0c-2.585 1.515-3.657 4.168-3.932 5.856a6.197 6.197 0 00-2.305.587.297.297 0 00-.147.37c.057.162.24.24.396.17a5.364 5.364 0 012.305-.587 6.68 6.68 0 00-.496 2.705c0 6.772 5.48 12.25 12.25 12.25s12.25-5.478 12.25-12.25c0-5.162-3.202-9.573-7.724-11.315z"/>
+              </svg>
+              Install for Firefox
+            </a>
             <a href="#features" class="btn-secondary">Learn More</a>
           </div>
         </div>
@@ -742,7 +776,18 @@
         <h2>Ready to Transform Your ChatGPT Experience?</h2>
         <p>Join our growing community of users who have discovered the power of organized conversations</p>
         <div class="hero-buttons">
-          <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">🚀 Install from Chrome Store</a>
+          <a href="https://chromewebstore.google.com/detail/pinflux-pin-chatgpt-chats/molpfdakehebpkaecfdpndakphebjjpp" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 16.364a4.364 4.364 0 1 1 0-8.728 4.364 4.364 0 0 1 0 8.728z"/>
+            </svg>
+            Install for Chrome
+          </a>
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/pinflux/" class="btn-firefox">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8.824 7.287c.008 0 .004 0 0 0zm-2.8-1.4c.006 0 .003 0 0 0zm16.754 2.161c-.505-1.215-1.53-2.528-2.333-2.943.654 1.283 1.033 2.57 1.177 3.53l.002.02c-1.314-3.278-3.544-4.6-5.366-7.477-.091-.147-.184-.292-.273-.446a3.545 3.545 0 01-.13-.24 2.118 2.118 0 01-.172-.46.03.03 0 00-.027-.03.038.038 0 00-.021 0l-.006.001a.037.037 0 00-.01.005L15.624 0c-2.585 1.515-3.657 4.168-3.932 5.856a6.197 6.197 0 00-2.305.587.297.297 0 00-.147.37c.057.162.24.24.396.17a5.364 5.364 0 012.305-.587 6.68 6.68 0 00-.496 2.705c0 6.772 5.48 12.25 12.25 12.25s12.25-5.478 12.25-12.25c0-5.162-3.202-9.573-7.724-11.315z"/>
+            </svg>
+            Install for Firefox
+          </a>
           <a href="https://github.com/AuxionCore/PinFlux" class="btn-secondary">⭐ View on GitHub</a>
         </div>
       </div>
