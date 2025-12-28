@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.3] - 2025-12-28
+
+### Fixed
+- **Bookmarks Dropdown Display**: Fixed critical bug where bookmarks dropdown was displayed in a very small area and not opening correctly
+  - Changed dropdown positioning from `absolute` to `fixed` for proper modal-like behavior
+  - Implemented dynamic positioning calculation that adjusts based on button location
+  - Dropdown now intelligently positions below or above button based on available viewport space
+  - Added automatic repositioning on scroll and window resize events
+  - Enhanced shadow and z-index (9999) for better visibility and layering
+  - Ensured dropdown stays within viewport boundaries with 8px margins
+  - Added ESC key support for closing the dropdown
+
 ## [2.2.2] - 2025-11-29
 
 ### Added
