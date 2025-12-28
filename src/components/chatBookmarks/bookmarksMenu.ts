@@ -137,7 +137,7 @@ export default async function initBookmarksMenu() {
     // Listen to button clicks
     menuButton.addEventListener('click', async (e: Event) => {
       e.stopPropagation()
-      await toggleBookmarksMenu(dropdown)
+      await toggleBookmarksMenu(dropdown, menuButton as HTMLElement)
     })
 
     // Listen for menu closing when clicking outside
@@ -147,6 +147,22 @@ export default async function initBookmarksMenu() {
         dropdown.classList.add('hidden')
       }
     })
+
+    // Listen for ESC key to close dropdown
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden')
+      }
+    })
+
+    // Update dropdown position on scroll and resize
+    const updateDropdownPosition = () => {
+      if (!dropdown.classList.contains('hidden')) {
+        positionDropdown(dropdown as HTMLElement, menuButton as HTMLElement)
+      }
+    }
+    window.addEventListener('scroll', updateDropdownPosition, true)
+    window.addEventListener('resize', updateDropdownPosition)
 
     // Menu event listeners
     dropdown.addEventListener('click', async (e: Event) => {
@@ -184,11 +200,54 @@ export default async function initBookmarksMenu() {
   }, 100)
 }
 
-async function toggleBookmarksMenu(dropdown: Element) {
+function positionDropdown(dropdown: HTMLElement, button: HTMLElement) {
+  const buttonRect = button.getBoundingClientRect()
+  const dropdownWidth = 384 // w-96 = 24rem = 384px
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  
+  // Calculate horizontal position
+  // Try to align with right edge of button
+  let left = buttonRect.right - dropdownWidth
+  
+  // If that goes off the left edge, align with left edge of button
+  if (left < 8) {
+    left = buttonRect.left
+  }
+  
+  // If that goes off the right edge, position at right edge of viewport
+  if (left + dropdownWidth > viewportWidth - 8) {
+    left = viewportWidth - dropdownWidth - 8
+  }
+  
+  // Ensure we don't go off left edge
+  left = Math.max(8, left)
+  
+  // Calculate vertical position
+  let top = buttonRect.bottom + 8 // 8px gap below button
+  
+  // Check if dropdown would go off bottom of viewport
+  const dropdownHeight = Math.min(384, dropdown.scrollHeight) // max-h-96
+  if (top + dropdownHeight > viewportHeight - 8) {
+    // Position above button instead
+    top = buttonRect.top - dropdownHeight - 8
+    
+    // If still off screen, position at top of viewport
+    if (top < 8) {
+      top = 8
+    }
+  }
+  
+  dropdown.style.left = `${left}px`
+  dropdown.style.top = `${top}px`
+}
+
+async function toggleBookmarksMenu(dropdown: Element, button: HTMLElement) {
   const isHidden = dropdown.classList.contains('hidden')
   
   if (isHidden) {
     await updateBookmarksList(dropdown)
+    positionDropdown(dropdown as HTMLElement, button)
     dropdown.classList.remove('hidden')
   } else {
     dropdown.classList.add('hidden')
