@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2.3] - 2026-01-08
 
 ### Fixed
+- **Pin Button Duplicates**: Fixed issue where pin/unpin buttons were displayed multiple times in chat options menu
+  - Added logic to remove existing pin/unpin buttons before adding new ones
+  - Prevents duplicate buttons when reopening chat options menu
+  - Improved button initialization and cleanup
+
+## [2.2.2] - 2025-12-28
+
+### Fixed
 - **Bookmarks Dropdown Display**: Fixed critical bug where bookmarks dropdown was displayed in a very small area and not opening correctly
   - Changed dropdown positioning from `absolute` to `fixed` for proper modal-like behavior
   - Implemented dynamic positioning calculation that adjusts based on button location
@@ -17,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ensured dropdown stays within viewport boundaries with 8px margins
   - Added ESC key support for closing the dropdown
 
-## [2.2.2] - 2025-11-29
+## [2.2.2-firefox] - 2025-11-29
 
 ### Added
 - **Firefox Add-ons Support**: PinFlux is now officially available on Firefox Add-ons store
