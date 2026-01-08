@@ -204,11 +204,14 @@ export default async function initContentScript(): Promise<void> {
           ) as HTMLDivElement
 
           if (chatOptionsMenu) {
-            // Check if PIN/UNPIN button already exists
+            // Remove any existing PIN/UNPIN buttons first to prevent duplicates
             const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
             const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
             
-            if (!existingPinButton && !existingUnpinButton && urlId && chatTitle) {
+            if (existingPinButton) existingPinButton.remove()
+            if (existingUnpinButton) existingUnpinButton.remove()
+            
+            if (urlId && chatTitle) {
               // Check pinned status and display the appropriate button
               const savedPinChats = await getPinChatsFromStorage(profileId)
               if (savedPinChats.some(chat => chat.urlId === urlId)) {
@@ -318,12 +321,14 @@ export default async function initContentScript(): Promise<void> {
               }
             }
 
-            // Check if PIN/UNPIN button already exists
+            // Remove any existing PIN/UNPIN buttons first to prevent duplicates
             const existingPinButton = chatOptionsMenu.querySelector('[data-pinflux-pin-button]')
             const existingUnpinButton = chatOptionsMenu.querySelector('[data-pinflux-unpin-button]')
             
-            if (!existingPinButton && !existingUnpinButton && urlId) {
-              
+            if (existingPinButton) existingPinButton.remove()
+            if (existingUnpinButton) existingUnpinButton.remove()
+            
+            if (urlId) {
               // Check pinned status and display the appropriate button
               const savedPinChats = await getPinChatsFromStorage(profileId)
               if (savedPinChats.some(chat => chat.urlId === urlId)) {
