@@ -92,19 +92,27 @@ export default async function initBookmarksMenu() {
     
     // Use the found element
     const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.className = 'relative'
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml + bookmarksDropdownHtml
+    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
 
     foundElement.appendChild(bookmarksContainer)
+    
+    // Append dropdown to body to prevent layout issues
+    if (!document.getElementById('bookmarks-dropdown')) {
+      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
+    }
   } else {
     
-    // Create container for bookmarks menu
+    // Create container for bookmarks menu button
     const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.className = 'relative'
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml + bookmarksDropdownHtml
+    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
 
     // Add to the beginning of the actions area
     actionsDiv.insertBefore(bookmarksContainer, actionsDiv.firstChild)
+    
+    // Append dropdown to body to prevent layout issues
+    if (!document.getElementById('bookmarks-dropdown')) {
+      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
+    }
   }
 
   // Add the name change popup
@@ -142,8 +150,7 @@ export default async function initBookmarksMenu() {
 
     // Listen for menu closing when clicking outside
     document.addEventListener('click', (e: Event) => {
-      const bookmarksContainer = (menuButton as Element).closest('.relative')
-      if (!bookmarksContainer || !bookmarksContainer.contains(e.target as Node)) {
+      if (!menuButton.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
         dropdown.classList.add('hidden')
       }
     })
