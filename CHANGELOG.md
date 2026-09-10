@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-09-10
+
+### Fixed
+- **Bookmark Icons Missing After ChatGPT UI Redesign**: ChatGPT redesigned its conversation DOM and bookmark icons no longer appeared next to sections
+  - Updated selectors to support the new `<section data-testid="conversation-turn-...">` structure while keeping `<article>` as a fallback
+  - Section IDs are still derived from the conversation turn so existing bookmarks keep working
+  - Added deduplication guards for ChatGPT's virtualized list (turns unmount/remount on scroll)
+- **Bookmark Edit/Delete Buttons Disappearing**: Bookmark names containing `<` characters (e.g. `/apps/<domain>`) broke the item HTML and hid the edit/remove buttons
+  - Bookmark names are now HTML-escaped before being rendered into the dropdown
+
+### Enhanced
+- **Bookmarks Dropdown Redesign**: Redesigned the bookmarks menu with a clean monochrome style matching ChatGPT's black-and-white interface
+  - Card-style bookmark items with a bookmark icon and hover highlight
+  - Improved search field, empty states, and action buttons
+  - Full dark mode support matching ChatGPT's dark theme
+
 ## [2.2.4] - 2026-02-02
 
 ### Fixed

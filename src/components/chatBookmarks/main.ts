@@ -5,23 +5,48 @@ import getConversationBookmarksIds from './getConversationBookmarksIds'
 import removeBookmarkButtonHtml from './remove-bookmark-button.html?raw'
 import initBookmarksMenu from './bookmarksMenu'
 
-async function waitForArticles(
+/**
+ * ChatGPT redesigned its conversation DOM. Responses are no longer wrapped in
+ * <article> elements - each turn is now a
+ * <section data-testid="conversation-turn-..."> containing a
+ * [data-message-author-role="assistant"] block with the `.markdown.prose`
+ * content inside. We keep <article> as a fallback for older versions.
+ */
+const TURN_CONTAINER_SELECTOR =
+  'section[data-testid^="conversation-turn-"], article'
+
+function getTurnContainers(): HTMLElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>(TURN_CONTAINER_SELECTOR)
+  ).filter(el => el.querySelector('.markdown.prose'))
+}
+
+function isTurnStreaming(turn: HTMLElement): boolean {
+  return !!turn.querySelector('.result-streaming, .result-thinking')
+}
+
+function isAnyTurnStreaming(): boolean {
+  return !!document.querySelector(
+    'button[data-testid="stop-response-button"], button[aria-label="Stop streaming"], [data-testid="composer-stop-button"]'
+  )
+}
+
+async function waitForTurnContainers(
   maxRetries = 10,
   delayMs = 500
-): Promise<NodeListOf<HTMLElement> | null> {
+): Promise<HTMLElement[] | null> {
   for (let i = 0; i < maxRetries; i++) {
-    const articles = document.querySelectorAll<HTMLElement>('article')
-    if (articles.length > 0) return articles
+    const turns = getTurnContainers()
+    if (turns.length > 0) return turns
     await new Promise(resolve => setTimeout(resolve, delayMs))
   }
-  console.warn('waitForArticles: Reached max retries, no articles found.')
+  console.warn('waitForTurnContainers: Reached max retries, no turn containers found.')
   return null
 }
 
 let bookmarkClickListenerAdded = false
 let observer: MutationObserver | null = null
 let isProcessingArticles = false
-let lastProcessedArticleCount = 0
 let observerTimeout: NodeJS.Timeout | null = null
 
 export default async function initBookmarks({
@@ -46,26 +71,29 @@ export default async function initBookmarks({
   )
 
   /**
-   * Creating bookmark buttons by dividing into sections within an article
+   * Creating bookmark buttons by dividing into sections within a turn
    */
-  const addButtonsToSections = (article: HTMLElement) => {
+  const addButtonsToSections = (turnContainer: HTMLElement) => {
     try {
-      // Additional check that the article still exists in the DOM
-      if (!document.contains(article)) {
+      // Additional check that the turn still exists in the DOM
+      if (!document.contains(turnContainer)) {
         return
       }
 
-      const markdown = article.querySelector<HTMLElement>('.markdown.prose')
+      const markdown = turnContainer.querySelector<HTMLElement>('.markdown.prose')
       if (!markdown) return
 
-      // Don't process the same article twice
-      if (markdown.dataset.bookmarkProcessed) {
+      // Don't process the same turn twice. Also handles ChatGPT's virtualized
+      // list, which can re-create DOM nodes when scrolling.
+      if (
+        markdown.dataset.bookmarkProcessed ||
+        markdown.querySelector('.bookmark-section, [data-bookmark-button]')
+      ) {
         return
       }
       
-      // Simple check that the article is not in streaming mode
-      const isStreaming = article.querySelector('.result-streaming')
-      if (isStreaming) {
+      // Skip turns that are still streaming
+      if (isTurnStreaming(turnContainer)) {
         return // Don't try again
       }
 
@@ -90,9 +118,11 @@ export default async function initBookmarks({
         for (const el of elements) wrapper.appendChild(el)
         container.appendChild(wrapper)
 
-        // Unique section identifier with prefix
-        const articleId = article.dataset.testid || ''
-        const sectionId = `${articleId}-${index}`
+        // Unique section identifier: prefer the closest conversation turn
+        const turnTestId =
+          markdown.closest<HTMLElement>('[data-testid^="conversation-turn-"]')
+            ?.dataset.testid || turnContainer.dataset.testid || ''
+        const sectionId = `${turnTestId}-${index}`
         wrapper.id = sectionId
 
         const isBookmarked = bookmarkIds.includes(sectionId)
@@ -131,18 +161,18 @@ export default async function initBookmarks({
   }
 
   /**
-   * Handle all articles
+   * Handle all turns
    */
-  const addButtonsToArticles = (articles: Iterable<HTMLElement>) => {
-    for (const article of articles) {
-      addButtonsToSections(article)
+  const addButtonsToArticles = (turns: Iterable<HTMLElement>) => {
+    for (const turn of turns) {
+      addButtonsToSections(turn)
     }
   }
 
-  // Handle existing articles
-  const initialArticles = await waitForArticles()
-  if (initialArticles) {
-    addButtonsToArticles(initialArticles)
+  // Handle existing turns
+  const initialTurns = await waitForTurnContainers()
+  if (initialTurns) {
+    addButtonsToArticles(initialTurns)
   }
 
   // Add click listener only once
@@ -168,31 +198,35 @@ export default async function initBookmarks({
     // Throttle the observer - only check every 500ms
     if (observerTimeout) clearTimeout(observerTimeout)
     observerTimeout = setTimeout(() => {
-      // Check if audio button appears (sign that response is completed)
+      // Don't process while a response is still streaming
+      if (isAnyTurnStreaming()) return
+
+      // Check if the "Read aloud" button is ready (only appears once a
+      // response has finished generating)
       const speechButton = document.querySelector('[data-testid="composer-speech-button"]')
       const speechButtonContainer = document.querySelector('[data-testid="composer-speech-button-container"]')
+      const speechReady = !!speechButton && !!speechButtonContainer && !speechButton.hasAttribute('disabled')
+      if ((speechButton || speechButtonContainer) && !speechReady) return
+
+      // Only process when there are new, unprocessed turns
+      const hasUnprocessed = getTurnContainers().some(turn => {
+        const md = turn.querySelector<HTMLElement>('.markdown.prose')
+        return !!md && !md.dataset.bookmarkProcessed
+      })
+      if (!hasUnprocessed) return
+
+      // Set flag to prevent recursive calls
+      isProcessingArticles = true
       
-      if (speechButton && speechButtonContainer && !speechButton.hasAttribute('disabled')) {
-        const currentArticleCount = document.querySelectorAll('article').length
-        
-        // Only process if we have new articles or haven't processed this conversation yet
-        if (currentArticleCount > lastProcessedArticleCount) {
-          
-          // Set flag to prevent recursive calls
-          isProcessingArticles = true
-          lastProcessedArticleCount = currentArticleCount
-          
-          // Short delay to ensure content is stable
-          setTimeout(() => {
-            const allArticles = document.querySelectorAll<HTMLElement>('article')
-            if (allArticles.length > 0) {
-              addButtonsToArticles(allArticles)
-            }
-            // Reset flag after processing
-            isProcessingArticles = false
-          }, 300)
+      // Short delay to ensure content is stable
+      setTimeout(() => {
+        const allTurns = getTurnContainers()
+        if (allTurns.length > 0) {
+          addButtonsToArticles(allTurns)
         }
-      }
+        // Reset flag after processing
+        isProcessingArticles = false
+      }, 300)
     }, 500)
   })
 

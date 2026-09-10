@@ -322,12 +322,21 @@ async function updateBookmarksList(dropdown: Element) {
   }
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function renderBookmarks(bookmarksList: Element, bookmarksData: any[]) {
   bookmarksList.innerHTML = ''
   bookmarksData.forEach(bookmark => {
     const itemHtml = bookmarkItemHtml
       .replace(/\{\{sectionId\}\}/g, bookmark.sectionId)
-      .replace(/\{\{displayName\}\}/g, bookmark.displayName)
+      .replace(/\{\{displayName\}\}/g, escapeHtml(bookmark.displayName || ''))
     
     bookmarksList.insertAdjacentHTML('beforeend', itemHtml)
   })
