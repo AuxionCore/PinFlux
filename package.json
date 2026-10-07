@@ -24,14 +24,13 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
-    "submit": "webstore upload --source .output/chrome-mv3.zip --auto-publish",
+    "submit": "node scripts/submit.mjs",
     "publish": "npm run build && npm run zip && npm run submit",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
-    "chrome-webstore-upload-cli": "^3.5.0",
     "typescript": "^5.8.3",
     "wxt": "^0.20.6"
   }
