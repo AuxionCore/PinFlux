@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-10-07
+
+### Fixed
+- **Wide Code Blocks Stretching The Conversation**: A response containing a wide code block expanded the whole conversation layout instead of scrolling inside its own block
+  - The bookmark content wrapper is a `flex-1` item, which by default refuses to shrink below its content width; added `min-w-0` so it can shrink within the flex row
+- **Bookmarks Added To Non-Assistant Turns**: Bookmark discovery now prefers `[data-message-author-role="assistant"] .markdown.prose`, so only ChatGPT replies get bookmark sections
+  - Falls back to the unscoped `.markdown.prose` selector if that attribute ever disappears, so a ChatGPT DOM change can't remove bookmarks entirely
+
+Thanks to [@gwindlord](https://github.com/gwindlord) for reporting and fixing both issues in [#8](https://github.com/AuxionCore/PinFlux/pull/8).
+
 ## [2.3.0] - 2026-09-10
 
 ### Fixed
