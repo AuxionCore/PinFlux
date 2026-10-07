@@ -18,7 +18,13 @@ const ASSISTANT_MARKDOWN_SELECTOR =
   '[data-message-author-role="assistant"] .markdown.prose'
 
 function getAssistantMarkdown(turn: HTMLElement): HTMLElement | null {
-  return turn.querySelector<HTMLElement>(ASSISTANT_MARKDOWN_SELECTOR)
+  // Prefer the assistant-scoped match so we don't wrap user turns. Fall back to
+  // the bare selector: ChatGPT renames these attributes, and losing bookmarks
+  // entirely is worse than an occasional extra wrapper.
+  return (
+    turn.querySelector<HTMLElement>(ASSISTANT_MARKDOWN_SELECTOR) ??
+    turn.querySelector<HTMLElement>('.markdown.prose')
+  )
 }
 
 function getTurnContainers(): HTMLElement[] {
