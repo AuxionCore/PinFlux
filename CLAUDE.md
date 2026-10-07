@@ -15,6 +15,31 @@ into `chatgpt.com`:
 Built with [WXT](https://wxt.dev) + TypeScript. **Zero runtime dependencies** — everything is
 hand-written DOM manipulation. Keep it that way unless there's a strong reason not to.
 
+## How work happens here
+
+**Every change starts with a GitHub issue and lands through a pull request. No direct commits to
+`main`** — not for a one-line fix, not for a typo, not for a release.
+
+```
+issue  ->  branch  ->  commits  ->  PR  ->  review  ->  merge to main
+```
+
+1. **Open an issue first**, before writing code: `gh issue create`. Describe the symptom and the
+   expected behavior, not just the fix. Label it `bug`, `enhancement` or `documentation` — those
+   labels already exist. If the work came from someone else's report or PR, that issue or PR is the
+   starting point; don't open a duplicate.
+2. **Branch off `main`**, named `fix/<short-slug>` or `feat/<short-slug>`:
+   `git switch -c fix/bookmark-wrapper main`.
+3. **Commit to that branch.** Conventional-commit prefixes (`fix:`, `feat:`, `docs:`, `chore:`).
+   Reference the issue in the body, not the subject.
+4. **Open the PR**: `gh pr create --base main --fill`, and put `Closes #<n>` in the body so the
+   issue closes on merge. Run the full code-change checklist below **before** opening it.
+5. **Merge with `--no-ff`** once it's green and verified, then delete the branch.
+
+`main` has no branch protection configured, so nothing mechanically stops a direct push. The
+discipline is the only thing holding — follow it even when a change feels too small to deserve it,
+because "too small to branch" is exactly the change that ships a broken selector.
+
 ## Commands
 
 ```bash
@@ -107,6 +132,7 @@ old string and will be orphaned otherwise.
 
 ## Checklist for any code change
 
+0. There is an open issue for this, and you are on a branch off `main` — not on `main` itself.
 1. `npm run compile` — must be clean.
 2. `npm run build`, load `.output/chrome-mv3/` unpacked, and exercise the change on a real
    conversation. Check a **long** chat (ChatGPT virtualizes turns — nodes unmount and remount on
@@ -133,6 +159,11 @@ that gap.
 Version lives in **`package.json` only** — WXT derives the manifest version from it. There is no
 version string in `wxt.config.ts`.
 
+A release is a change like any other: it gets its own issue (`Release vX.Y.Z`, labelled
+`documentation`) and its own `release/vX.Y.Z` branch, and it reaches `main` through a PR. The tag
+is created **after** the merge, on the merge commit on `main` — never on the branch, or it points
+at a commit that isn't in the released history.
+
 1. `npm version <x.y.z> --no-git-tag-version` (patch for fixes, minor for features). This updates
    `package-lock.json` too — commit both.
 2. **`CHANGELOG.md`** — new section at the top, Keep a Changelog format, `## [x.y.z] - YYYY-MM-DD`,
@@ -143,8 +174,8 @@ version string in `wxt.config.ts`.
    "Latest" entries. Phrase these entries for end users, not developers.
 4. `npm run compile && npm run build`, and confirm `.output/chrome-mv3/manifest.json` carries the
    new version.
-5. Commit as `Release vX.Y.Z: <summary>`, then `git tag -a vX.Y.Z`.
-6. `git push origin main && git push origin vX.Y.Z`.
+5. Commit as `Release vX.Y.Z: <summary>` on the release branch, open the PR, and merge it.
+6. On the merged `main`: `git tag -a vX.Y.Z` and `git push origin vX.Y.Z`.
 7. `npm run zip && npm run zip:firefox`, then publish a GitHub Release on the tag and attach
    `pinflux-X.Y.Z-chrome.zip`, `-firefox.zip` and `-sources.zip`.
 8. `npm run submit` to push to the Chrome Web Store — **this auto-publishes**, so only run it when
@@ -153,11 +184,11 @@ version string in `wxt.config.ts`.
 
 ## Things that will bite you
 
-- **Pushing to `main` deploys the public website.** `.github/workflows/static.yml` publishes
-  `website/` to GitHub Pages on every push to `main`. A code-only commit is harmless, but know that
-  the site redeploys.
-- **`main` is the release branch** and is pushed to directly. There's also a `dev` branch; check
-  which one a change belongs on before committing.
+- **Merging to `main` deploys the public website.** `.github/workflows/static.yml` publishes
+  `website/` to GitHub Pages on every push to `main`, which a PR merge is. A code-only change is
+  harmless, but know that the site redeploys.
+- **`main` is the release branch.** There's also an older `dev` branch and a few stale `feature/*`
+  branches; new work branches off `main`, not off those.
 - `CONTRIBUTING.md` still points at the old `Yedidya10/chatgpt_pinChats` repo URLs. The repo is now
   `AuxionCore/PinFlux`.
 - `.output/` is gitignored but not cleaned between builds, so it accumulates zips from old versions.
@@ -165,14 +196,17 @@ version string in `wxt.config.ts`.
 - `console.log`/`warn`/`error` are the debugging story — there's no error reporting. Leave the
   existing warnings in place; they're how DOM breakage gets noticed.
 
-## Merging a pull request
+## Reviewing and merging a pull request
 
-Contributors can't test against every ChatGPT state, so review a PR for the failure mode, not just
-the happy path:
+Applies to your own PRs and to outside contributions alike. Nobody can test against every ChatGPT
+state, so review for the failure mode, not just the happy path:
 
 1. `gh pr diff <n>` and check it against the selector rules above — a new hard-required selector is
    the single most common way an otherwise-correct PR takes the extension down.
 2. `gh pr checkout <n> && npm run compile && npm run build`, then exercise it in a real tab.
-3. Merge with `--no-ff` so the contributor's commit keeps its authorship.
-4. Push follow-up fixes as **separate commits on `main`** rather than rewriting their work, and
-   credit them in the changelog and the GitHub Release.
+3. Merge with `--no-ff` so the contributor's commit keeps its authorship, and confirm the PR body
+   says `Closes #<n>` so the issue closes with it.
+4. For an outside contribution, don't rewrite their commits. Land the PR as-is and push any
+   follow-up fix as its **own** PR, crediting them in the changelog and the GitHub Release — that's
+   how #8 and the `getAssistantMarkdown` fallback were handled in v2.3.1.
+5. Delete the branch after merging.
