@@ -34,11 +34,24 @@ issue  ->  branch  ->  commits  ->  PR  ->  review  ->  merge to main
    Reference the issue in the body, not the subject.
 4. **Open the PR**: `gh pr create --base main --fill`, and put `Closes #<n>` in the body so the
    issue closes on merge. Run the full code-change checklist below **before** opening it.
-5. **Merge with `--no-ff`** once it's green and verified, then delete the branch.
+5. **Merge with `--no-ff`** once it's green and verified.
+6. **Delete the branch.** The repo has *Automatically delete head branches* enabled, so a merge
+   through the GitHub UI or `gh pr merge --delete-branch` removes the remote branch for you. Your
+   local copy is not touched — finish with `git switch main && git pull && git fetch --prune` and
+   `git branch -d <branch>`. A branch whose issue is closed has no reason to exist; the work lives
+   in `main`'s history.
 
-`main` has no branch protection configured, so nothing mechanically stops a direct push. The
-discipline is the only thing holding — follow it even when a change feels too small to deserve it,
-because "too small to branch" is exactly the change that ships a broken selector.
+A repository ruleset enforces this on the default branch, so it isn't just convention:
+
+- A pull request is required before merging. **0 approvals** are required, so you can merge your
+  own PR — but a PR is not optional, however small the change.
+- Approvals are dismissed when new commits are pushed, and review threads must be resolved.
+- Branch deletion and non-fast-forward pushes to `main` are blocked.
+- There are no bypass actors. **The rule applies to administrators too** — an emergency fix means
+  editing the ruleset in repo settings, not forcing a push.
+- `require_extra_approval_for_unattributed_changes` is on: a PR carrying commits whose author email
+  isn't linked to a GitHub account needs an approval even though the normal requirement is zero.
+  Outside contributions often land in this state (#8 did), so expect to approve those explicitly.
 
 ## Commands
 
@@ -187,10 +200,8 @@ at a commit that isn't in the released history.
 - **Merging to `main` deploys the public website.** `.github/workflows/static.yml` publishes
   `website/` to GitHub Pages on every push to `main`, which a PR merge is. A code-only change is
   harmless, but know that the site redeploys.
-- **`main` is the release branch.** There's also an older `dev` branch and a few stale `feature/*`
-  branches; new work branches off `main`, not off those.
-- `CONTRIBUTING.md` still points at the old `Yedidya10/chatgpt_pinChats` repo URLs. The repo is now
-  `AuxionCore/PinFlux`.
+- **`main` is the only long-lived branch.** The old `dev`, `feature/*` and `v.*` branches were
+  deleted once they were fully merged — everything branches off `main` now.
 - `.output/` is gitignored but not cleaned between builds, so it accumulates zips from old versions.
   Don't attach the wrong one to a release.
 - `console.log`/`warn`/`error` are the debugging story — there's no error reporting. Leave the
@@ -209,4 +220,5 @@ state, so review for the failure mode, not just the happy path:
 4. For an outside contribution, don't rewrite their commits. Land the PR as-is and push any
    follow-up fix as its **own** PR, crediting them in the changelog and the GitHub Release — that's
    how #8 and the `getAssistantMarkdown` fallback were handled in v2.3.1.
-5. Delete the branch after merging.
+5. Confirm the branch is gone afterwards. The remote one is deleted automatically on merge; prune
+   your local copy with `git fetch --prune` and `git branch -d <branch>`.
