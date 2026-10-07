@@ -5,8 +5,10 @@
 // happily upload a two-year-old release. Resolving the name from the version
 // keeps that from happening.
 //
-// Credentials come from .env.submit (written by `wxt submit init`) — this
-// script passes no secrets of its own. Extra flags are forwarded, so
+// Credentials come from .env.submit — this script passes no secrets of its
+// own. Note that `wxt submit init` cannot generate that file: its refresh
+// token step uses Google's out-of-band OAuth flow, removed in 2022. See
+// CHROME_STORE_SETUP.md. Extra flags are forwarded, so
 // `npm run submit -- --dry-run` checks auth without uploading.
 
 import { spawn } from 'node:child_process'
@@ -30,7 +32,8 @@ if (!existsSync(zip)) {
 
 if (!existsSync(join(root, '.env.submit'))) {
   console.error(
-    'Missing .env.submit — run `npx wxt@latest submit init` to create it.'
+    `Missing .env.submit — copy .env.submit.example and fill it in.
+See CHROME_STORE_SETUP.md (do not use \`wxt submit init\`, it is broken upstream).`
   )
   process.exit(1)
 }
