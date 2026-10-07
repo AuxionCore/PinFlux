@@ -36,9 +36,17 @@ issue  ->  branch  ->  commits  ->  PR  ->  review  ->  merge to main
    issue closes on merge. Run the full code-change checklist below **before** opening it.
 5. **Merge with `--no-ff`** once it's green and verified, then delete the branch.
 
-`main` has no branch protection configured, so nothing mechanically stops a direct push. The
-discipline is the only thing holding — follow it even when a change feels too small to deserve it,
-because "too small to branch" is exactly the change that ships a broken selector.
+A repository ruleset enforces this on the default branch, so it isn't just convention:
+
+- A pull request is required before merging. **0 approvals** are required, so you can merge your
+  own PR — but a PR is not optional, however small the change.
+- Approvals are dismissed when new commits are pushed, and review threads must be resolved.
+- Branch deletion and non-fast-forward pushes to `main` are blocked.
+- There are no bypass actors. **The rule applies to administrators too** — an emergency fix means
+  editing the ruleset in repo settings, not forcing a push.
+- `require_extra_approval_for_unattributed_changes` is on: a PR carrying commits whose author email
+  isn't linked to a GitHub account needs an approval even though the normal requirement is zero.
+  Outside contributions often land in this state (#8 did), so expect to approve those explicitly.
 
 ## Commands
 
