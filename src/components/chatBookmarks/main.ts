@@ -14,11 +14,17 @@ import initBookmarksMenu from './bookmarksMenu'
  */
 const TURN_CONTAINER_SELECTOR =
   'section[data-testid^="conversation-turn-"], article'
+const ASSISTANT_MARKDOWN_SELECTOR =
+  '[data-message-author-role="assistant"] .markdown.prose'
+
+function getAssistantMarkdown(turn: HTMLElement): HTMLElement | null {
+  return turn.querySelector<HTMLElement>(ASSISTANT_MARKDOWN_SELECTOR)
+}
 
 function getTurnContainers(): HTMLElement[] {
   return Array.from(
     document.querySelectorAll<HTMLElement>(TURN_CONTAINER_SELECTOR)
-  ).filter(el => el.querySelector('.markdown.prose'))
+  ).filter(el => getAssistantMarkdown(el))
 }
 
 function isTurnStreaming(turn: HTMLElement): boolean {
@@ -80,7 +86,7 @@ export default async function initBookmarks({
         return
       }
 
-      const markdown = turnContainer.querySelector<HTMLElement>('.markdown.prose')
+      const markdown = getAssistantMarkdown(turnContainer)
       if (!markdown) return
 
       // Don't process the same turn twice. Also handles ChatGPT's virtualized
@@ -112,7 +118,7 @@ export default async function initBookmarks({
 
         // Create content wrapper
         const wrapper = document.createElement('div')
-        wrapper.classList.add('bookmark-section', 'flex-1')
+        wrapper.classList.add('bookmark-section', 'flex-1', 'min-w-0')
 
         elements[0].before(container)
         for (const el of elements) wrapper.appendChild(el)
@@ -210,7 +216,7 @@ export default async function initBookmarks({
 
       // Only process when there are new, unprocessed turns
       const hasUnprocessed = getTurnContainers().some(turn => {
-        const md = turn.querySelector<HTMLElement>('.markdown.prose')
+        const md = getAssistantMarkdown(turn)
         return !!md && !md.dataset.bookmarkProcessed
       })
       if (!hasUnprocessed) return
