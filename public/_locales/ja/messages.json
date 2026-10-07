@@ -364,5 +364,25 @@
   "tutorialPinMethodShortcut": {
     "message": "キーボードショートカットでピン留め",
     "description": "Sub-feature name for pinning via keyboard shortcut"
+  },
+  "tutorialPinMethodTopMenu": {
+    "message": "トップメニューからピン留め",
+    "description": "Sub-feature name for pinning from top-right menu"
+  },
+  "tutorialPinTopMenuTitle": {
+    "message": "トップメニューからピン留め",
+    "description": "Title for pinning from top menu step"
+  },
+  "tutorialPinTopMenuMessage": {
+    "message": "チャット画面右上のメニューにあるピン留めボタンからも、現在のチャットをピン留めできます！",
+    "description": "Message for pinning from top menu step"
+  },
+  "tutorialNoPinnedChatsTitle": {
+    "message": "ピン留めされたチャットがありません",
+    "description": "Title when skipping manage section due to no pinned chats"
+  },
+  "tutorialNoPinnedChatsMessage": {
+    "message": "ピン留めの方法をすべてスキップしたため、管理機能を紹介できるピン留め済みのチャットがありません。まずチャットをピン留めしてから、これらの機能をご確認ください。チュートリアルは拡張機能のポップアップからいつでも再開できます！",
+    "description": "Message when skipping manage section due to no pinned chats"
   }
 }

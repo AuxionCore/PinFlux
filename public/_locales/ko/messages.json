@@ -364,5 +364,25 @@
   "tutorialPinMethodShortcut": {
     "message": "키보드 단축키로 고정",
     "description": "Sub-feature name for pinning via keyboard shortcut"
+  },
+  "tutorialPinMethodTopMenu": {
+    "message": "상단 메뉴에서 고정",
+    "description": "Sub-feature name for pinning from top-right menu"
+  },
+  "tutorialPinTopMenuTitle": {
+    "message": "상단 메뉴에서 고정",
+    "description": "Title for pinning from top menu step"
+  },
+  "tutorialPinTopMenuMessage": {
+    "message": "채팅 창 오른쪽 상단 메뉴의 고정 버튼으로도 현재 채팅을 고정할 수 있습니다!",
+    "description": "Message for pinning from top menu step"
+  },
+  "tutorialNoPinnedChatsTitle": {
+    "message": "아직 고정된 채팅이 없습니다",
+    "description": "Title when skipping manage section due to no pinned chats"
+  },
+  "tutorialNoPinnedChatsMessage": {
+    "message": "모든 고정 방법을 건너뛰어서 관리 기능을 보여드릴 고정된 채팅이 없습니다. 먼저 채팅을 고정한 후 이 기능들을 확인해 보시기 바랍니다. 튜토리얼은 확장 프로그램 팝업에서 언제든지 다시 시작할 수 있습니다!",
+    "description": "Message when skipping manage section due to no pinned chats"
   }
 }
