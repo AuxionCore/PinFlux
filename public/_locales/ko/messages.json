@@ -392,5 +392,37 @@
   "unpinFromPinFlux": {
     "message": "PinFlux에서 고정 해제",
     "description": "Menu item that removes a chat from the PinFlux Board"
+  },
+  "tutorialCompleteMessageBookmarksOnly": {
+    "message": "축하합니다! PinFlux의 모든 기능을 마스터했습니다. 이제 답변의 섹션을 북마크하고 바로 다시 돌아갈 수 있습니다. 이 대화상자는 15초 후 자동으로 닫힙니다.",
+    "description": "Tutorial completion message for users without pinned chats"
+  },
+  "pinningDeprecationTitle": {
+    "message": "고정 기능이 ChatGPT로 이동합니다",
+    "description": "Popup notice title: PinFlux pinned chats are being retired"
+  },
+  "pinningDeprecationMessage": {
+    "message": "ChatGPT에 고정 기능이 기본으로 제공되어 PinFlux의 채팅 고정은 $DATE$에 종료됩니다. 아래 각 채팅을 열고 ChatGPT 메뉴에서 \"채팅 고정\"을 선택해 계속 고정하세요.",
+    "description": "Popup notice before the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningEndedMessage": {
+    "message": "PinFlux의 채팅 고정은 ChatGPT 기본 고정 기능으로 대체되어 $DATE$에 종료되었습니다. 목록은 그대로 저장되어 있습니다. 아래 각 채팅을 열고 ChatGPT 메뉴에서 \"채팅 고정\"을 선택하세요.",
+    "description": "Popup notice after the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningDeprecationListTitle": {
+    "message": "PinFlux에 고정한 채팅",
+    "description": "Heading above the list of the user's PinFlux pinned chats"
   }
 }

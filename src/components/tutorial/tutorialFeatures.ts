@@ -1569,18 +1569,53 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
   }
 ]
 
+// Pinned chats are retired in favor of ChatGPT's native pinning (#23). Users
+// without pinning get the tutorial minus the pinning feature, and a completion
+// message that doesn't promise it.
+const PINNING_FEATURE_IDS = new Set(['pin_chats'])
+let pinningEnabled = true
+let featuresWithoutPinning: TutorialFeature[] | null = null
+
+export function setTutorialPinningEnabled(enabled: boolean): void {
+  pinningEnabled = enabled
+}
+
+/**
+ * The tutorial features to offer this user. Use this rather than
+ * TUTORIAL_FEATURES directly. The filtered list is built once, so feature
+ * objects keep a stable identity across calls.
+ */
+export function getTutorialFeatures(): TutorialFeature[] {
+  if (pinningEnabled) return TUTORIAL_FEATURES
+  featuresWithoutPinning ??= TUTORIAL_FEATURES.filter(
+    feature => !PINNING_FEATURE_IDS.has(feature.id)
+  ).map(feature =>
+    feature.id === 'tutorial_completion'
+      ? {
+          ...feature,
+          descriptionKey: 'tutorialCompleteMessageBookmarksOnly',
+          steps: feature.steps.map(step => ({
+            ...step,
+            messageKey: 'tutorialCompleteMessageBookmarksOnly',
+          })),
+        }
+      : feature
+  )
+  return featuresWithoutPinning
+}
+
 /**
  * Get features by category
  */
 export function getFeaturesByCategory(category: string): TutorialFeature[] {
-  return TUTORIAL_FEATURES.filter(feature => feature.category === category)
+  return getTutorialFeatures().filter(feature => feature.category === category)
 }
 
 /**
  * Get feature by ID
  */
 export function getFeatureById(id: string): TutorialFeature | undefined {
-  return TUTORIAL_FEATURES.find(feature => feature.id === id)
+  return getTutorialFeatures().find(feature => feature.id === id)
 }
 
 /**
@@ -1589,7 +1624,7 @@ export function getFeatureById(id: string): TutorialFeature | undefined {
 export function getAvailableSteps(): TutorialStep[] {
   const availableSteps: TutorialStep[] = []
   
-  for (const feature of TUTORIAL_FEATURES) {
+  for (const feature of getTutorialFeatures()) {
     for (const step of feature.steps) {
       // Check if prerequisite is met (or no prerequisite exists)
       if (!step.prerequisite || step.prerequisite()) {
@@ -1608,7 +1643,7 @@ export function getAvailableSteps(): TutorialStep[] {
  * Get next available feature tutorial
  */
 export function getNextFeatureTutorial(completedFeatures: string[]): TutorialFeature | undefined {
-  return TUTORIAL_FEATURES
+  return getTutorialFeatures()
     .sort((a, b) => a.order - b.order)
     .find(feature => !completedFeatures.includes(feature.id))
 }

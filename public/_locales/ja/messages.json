@@ -392,5 +392,37 @@
   "unpinFromPinFlux": {
     "message": "PinFluxのピン留めを解除",
     "description": "Menu item that removes a chat from the PinFlux Board"
+  },
+  "tutorialCompleteMessageBookmarksOnly": {
+    "message": "おめでとうございます！PinFluxの全機能をマスターしました。返信のセクションをブックマークして、すぐにそこへ戻れるようになりました。このダイアログは15秒後に自動的に閉じられます。",
+    "description": "Tutorial completion message for users without pinned chats"
+  },
+  "pinningDeprecationTitle": {
+    "message": "ピン留めはChatGPTへ移行します",
+    "description": "Popup notice title: PinFlux pinned chats are being retired"
+  },
+  "pinningDeprecationMessage": {
+    "message": "ChatGPTにピン留め機能が搭載されたため、PinFluxのピン留めは$DATE$に終了します。下の各チャットを開き、ChatGPTのメニューから「チャットをピン留め」を選んでピン留めを続けてください。",
+    "description": "Popup notice before the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningEndedMessage": {
+    "message": "PinFluxのピン留めは、ChatGPT標準のピン留めに置き換えられ$DATE$に終了しました。リストは保存されています。下の各チャットを開き、ChatGPTのメニューから「チャットをピン留め」を選んでください。",
+    "description": "Popup notice after the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningDeprecationListTitle": {
+    "message": "PinFluxでピン留めしたチャット",
+    "description": "Heading above the list of the user's PinFlux pinned chats"
   }
 }

@@ -1,3 +1,8 @@
+import {
+  isPinningAvailable,
+  markLegacyUserOnUpdate,
+} from '@/components/utils/pinningAvailability'
+
 /**
  * Background script for the PinFlux extension
  * Handles extension installation/update events, message passing, and keyboard commands
@@ -7,6 +12,9 @@ export default defineBackground({
   main() {
     // Handle extension installation and updates
     browser.runtime.onInstalled.addListener(async details => {
+      // Existing users keep pinned chats until the sunset (#23)
+      await markLegacyUserOnUpdate(details)
+
       // Show shortcuts notification after updating from version 2.0.0
       if (details.reason === 'update' && details.previousVersion === '2.0.0') {
         browser.storage.sync.set({ showShortcutsNotification: true })
@@ -36,6 +44,8 @@ export default defineBackground({
     // Handle keyboard shortcuts
     browser.commands.onCommand.addListener(async command => {
       if (command === 'pin-current-chat') {
+        if (!(await isPinningAvailable())) return
+
         const [tab] = await browser.tabs.query({
           active: true,
           currentWindow: true,

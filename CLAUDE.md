@@ -172,7 +172,7 @@ old string and will be orphaned otherwise.
 All user-facing strings go through `browser.i18n.getMessage()` and live in
 `public/_locales/{en,ja,ko}/messages.json`. Add the key to **all three** files, not just `en`.
 
-Current state: all three locales have the same 93 keys. Keep it that way.
+Current state: all three locales have the same 98 keys. Keep it that way.
 
 ## Release checklist
 
@@ -204,6 +204,14 @@ at a commit that isn't in the released history.
    Firefox is uploaded manually to AMO with the firefox + sources zips.
 
 ## Things that will bite you
+
+- **Pinned chats switch themselves off on 2027-01-01.** They're retired in favor of ChatGPT's
+  native pinning (#23): `PINNING_SUNSET` in
+  [`pinningAvailability.ts`](src/components/utils/pinningAvailability.ts) hides all pinning UI
+  from that date with no release, and new installs of 2.4+ never get it. Existing users (updated
+  from <2.4, or with a pin list in `storage.sync`) keep it until then. Pin data is never deleted,
+  and the popup keeps listing it for re-pinning natively. Gate any new pinning UI on
+  `isPinningAvailable()`.
 
 - **Merging to `main` deploys the public website.** `.github/workflows/static.yml` publishes
   `website/` to GitHub Pages on every push to `main`, which a PR merge is. A code-only change is

@@ -1,4 +1,4 @@
-import { TutorialStep, TutorialFeature, TUTORIAL_FEATURES, getAvailableSteps } from './tutorialFeatures'
+import { TutorialStep, TutorialFeature, getTutorialFeatures, getAvailableSteps } from './tutorialFeatures'
 
 interface TutorialState {
   isActive: boolean
@@ -65,7 +65,7 @@ export class TutorialManager {
     }
 
     // Get all features in order
-    const sortedFeatures = TUTORIAL_FEATURES.sort((a, b) => a.order - b.order)
+    const sortedFeatures = [...getTutorialFeatures()].sort((a, b) => a.order - b.order)
     
     // Calculate total steps across all features
     let totalGlobalSteps = 0
@@ -102,7 +102,7 @@ export class TutorialManager {
     this.state.userInitiated = userInitiated
     
     if (featureId) {
-      const feature = TUTORIAL_FEATURES.find(f => f.id === featureId)
+      const feature = getTutorialFeatures().find(f => f.id === featureId)
       if (!feature) {
         console.error(`Tutorial feature ${featureId} not found`)
         return
@@ -114,14 +114,14 @@ export class TutorialManager {
       }
     } else {
       // Find next available feature (ignore completed status if user initiated)
-      const nextFeature = TUTORIAL_FEATURES
+      const nextFeature = getTutorialFeatures()
         .sort((a, b) => a.order - b.order)
         .find(f => userInitiated || !this.state.completedFeatures.includes(f.id))
       
       if (!nextFeature) {
         // If user initiated and no uncompleted features, start with first feature
-        if (userInitiated && TUTORIAL_FEATURES.length > 0) {
-          this.state.currentFeature = TUTORIAL_FEATURES[0]
+        if (userInitiated && getTutorialFeatures().length > 0) {
+          this.state.currentFeature = getTutorialFeatures()[0]
         } else {
           return
         }
@@ -962,7 +962,7 @@ export class TutorialManager {
     this.cleanup()
 
     // Find next feature
-    const nextFeature = TUTORIAL_FEATURES
+    const nextFeature = getTutorialFeatures()
       .sort((a, b) => a.order - b.order)
       .find(f => !this.state.completedFeatures.includes(f.id))
 
@@ -1012,7 +1012,7 @@ export class TutorialManager {
     this.cleanup()
 
     // Continue to next feature (regardless of how tutorial was started)
-    const nextFeature = TUTORIAL_FEATURES
+    const nextFeature = getTutorialFeatures()
       .sort((a, b) => a.order - b.order)
       .find(f => !this.state.completedFeatures.includes(f.id))
 
@@ -1159,7 +1159,7 @@ export class TutorialManager {
    * Get available features for manual tutorial selection
    */
   getAvailableFeatures(): TutorialFeature[] {
-    return TUTORIAL_FEATURES.filter(feature => {
+    return getTutorialFeatures().filter(feature => {
       return feature.steps.some(step => {
         if (step.prerequisite && !step.prerequisite()) return false
         if (step.targetSelector === 'body') return true
