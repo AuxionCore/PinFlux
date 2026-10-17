@@ -38,10 +38,13 @@ See CHROME_STORE_SETUP.md (do not use \`wxt submit init\`, it is broken upstream
   process.exit(1)
 }
 
-const wxt = process.platform === 'win32' ? 'wxt.cmd' : 'wxt'
+// Run wxt's JS entry with node rather than node_modules/.bin/wxt.cmd: since
+// CVE-2024-27980, Node refuses to spawn a .cmd without a shell (EINVAL), and
+// going through cmd.exe would re-parse the forwarded arguments.
+const wxt = join(root, 'node_modules', 'wxt', 'bin', 'wxt.mjs')
 
 spawn(
-  join(root, 'node_modules', '.bin', wxt),
-  ['submit', '--chrome-zip', zip, ...process.argv.slice(2)],
+  process.execPath,
+  [wxt, 'submit', '--chrome-zip', zip, ...process.argv.slice(2)],
   { stdio: 'inherit' }
 ).on('exit', code => process.exit(code ?? 1))
