@@ -1,5 +1,6 @@
 import initContentScript from '@/components/pinChats/main'
 import initBookmarks from '@/components/chatBookmarks/main'
+import initBookmarksMenu from '@/components/chatBookmarks/bookmarksMenu'
 import getProfileId from '@/components/utils/getProfileId'
 import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkGroupTimestamp'
 import { tutorialManager } from '@/components/tutorial/tutorialManager'
@@ -148,6 +149,9 @@ export default defineContentScript({
             } catch (err) {
               console.error('Failed to initialize bookmarks:', err)
             }
+          } else {
+            // Not a conversation (new chat, settings, …): removes the button
+            initBookmarksMenu()
           }
         } catch (err) {
           console.error('Error in locationchange event handler:', err)

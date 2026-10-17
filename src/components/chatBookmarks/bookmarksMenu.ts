@@ -65,6 +65,7 @@ const LEGACY_HEADER_ACTIONS_SELECTORS = [
 
 function mountBookmarksMenuButton(): boolean {
   const container = document.createElement('div')
+  container.setAttribute('data-pinflux-bookmarks-menu', '')
   container.innerHTML = bookmarksMenuButtonHtml
 
   const actions2026 = document.querySelector(HEADER_ACTIONS_SELECTOR_2026)
@@ -99,6 +100,18 @@ function mountBookmarksMenuButton(): boolean {
 }
 
 const MENU_BUTTON_SELECTOR = '[data-bookmarks-menu-button]'
+
+// Bookmarks belong to a conversation. The new-chat page has the same header
+// but nothing to bookmark yet; it becomes /c/<id> once the first message is
+// sent, and the button mounts then.
+function isConversationPage(): boolean {
+  return /\/c\/[\w-]+/.test(window.location.pathname)
+}
+
+function removeBookmarksMenu(): void {
+  document.querySelector('[data-pinflux-bookmarks-menu]')?.remove()
+  document.querySelector('#bookmarks-dropdown')?.classList.add('hidden')
+}
 
 function getMenuButton(): HTMLElement | null {
   return document.querySelector<HTMLElement>(MENU_BUTTON_SELECTOR)
@@ -187,6 +200,10 @@ function setUpMenuListenersOnce(dropdown: Element) {
  * Safe to call repeatedly. Returns false when the header isn't rendered yet.
  */
 export default function initBookmarksMenu(): boolean {
+  if (!isConversationPage()) {
+    removeBookmarksMenu()
+    return false
+  }
   if (getMenuButton()) return true
   if (!mountBookmarksMenuButton()) return false
 
@@ -229,6 +246,8 @@ export async function waitForBookmarksMenu(
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
     if (initBookmarksMenu()) return
+    // Left the conversation before the header showed up: nothing to wait for
+    if (!isConversationPage()) return
     await new Promise(resolve => setTimeout(resolve, intervalMs))
   }
   console.warn(
