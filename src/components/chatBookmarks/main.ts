@@ -3,7 +3,7 @@ import addBookmarkButtonHtml from './add-bookmark-button.html?raw'
 import handleBookmarkButtonClick from './bookmarkHandler'
 import getConversationBookmarksIds from './getConversationBookmarksIds'
 import removeBookmarkButtonHtml from './remove-bookmark-button.html?raw'
-import initBookmarksMenu from './bookmarksMenu'
+import initBookmarksMenu, { waitForBookmarksMenu } from './bookmarksMenu'
 import migrateBookmarkId from './migrateBookmarkId'
 import styleBookmarkButton from './styleBookmarkButton'
 
@@ -104,7 +104,9 @@ async function waitForTurnContainers(
     if (turns.length > 0) return turns
     await new Promise(resolve => setTimeout(resolve, delayMs))
   }
-  console.warn('waitForTurnContainers: Reached max retries, no turn containers found.')
+  console.warn(
+    '[PinFlux] No conversation turns yet; bookmarks will be added as they render.'
+  )
   return null
 }
 
@@ -126,8 +128,8 @@ export default async function initBookmarks({
   }
 
 
-  // Initialize bookmarks menu - this will happen on every new page
-  await initBookmarksMenu()
+  // The header may not be rendered yet; don't hold up the section buttons
+  waitForBookmarksMenu()
 
   const bookmarkIds: string[] = await getConversationBookmarksIds(
     profileId,
@@ -288,6 +290,10 @@ export default async function initBookmarks({
     // Throttle the observer - only check every 500ms
     if (observerTimeout) clearTimeout(observerTimeout)
     observerTimeout = setTimeout(() => {
+      // ChatGPT re-renders the header (and drops our button) on its own
+      // schedule; put it back. No-op while it's there or the header isn't.
+      initBookmarksMenu()
+
       // Don't process while a response is still streaming
       if (isAnyTurnStreaming()) return
 
