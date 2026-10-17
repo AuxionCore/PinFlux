@@ -6,8 +6,7 @@
 // keeps that from happening.
 //
 // Credentials come from .env.submit — this script passes no secrets of its
-// own. Note that `wxt submit init` cannot generate that file: its refresh
-// token step uses Google's out-of-band OAuth flow, removed in 2022. See
+// own. That file targets Chrome Web Store API v2 with a service account; see
 // CHROME_STORE_SETUP.md. Extra flags are forwarded, so
 // `npm run submit -- --dry-run` checks auth without uploading.
 
@@ -33,7 +32,7 @@ if (!existsSync(zip)) {
 if (!existsSync(join(root, '.env.submit'))) {
   console.error(
     `Missing .env.submit — copy .env.submit.example and fill it in.
-See CHROME_STORE_SETUP.md (do not use \`wxt submit init\`, it is broken upstream).`
+See CHROME_STORE_SETUP.md (\`wxt submit init\` also works, on Node 24+).`
   )
   process.exit(1)
 }
