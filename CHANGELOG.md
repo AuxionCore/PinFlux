@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-10-17
+
+### Fixed
+- **Pinned Chats And Bookmarks Missing After ChatGPT's Oct 2026 Redesign**: ChatGPT replaced its app shell and every DOM anchor PinFlux relied on disappeared, so both features vanished silently ([#22](https://github.com/AuxionCore/PinFlux/issues/22))
+  - Profile ID: ChatGPT stopped writing the `cache/user-*` localStorage key, so `getProfileId()` polled forever; it now reads `precise_location_identity` / `codex.browser.appThemes.v1`, falling back to `/api/auth/session`, and returns the same ID so existing data still matches ([#21](https://github.com/AuxionCore/PinFlux/issues/21))
+  - New anchors for turns (`[data-turn-key]`), replies (`[data-markdown-text-style="assistant-message"]`), streaming (`[data-talvt-turn-state]`), the titlebar, the sidebar and the row/titlebar menus; every 2025 selector is kept as a fallback
+  - Polls that waited forever (profile ID, sidebar) now log a `console.warn` instead of failing silently
+- **Pinned Board Disappearing / Pin Crash**: React re-renders of the new sidebar dropped the board and pinning threw on `null.prepend`; the board now restores itself, and pinning/unpinning work while it is unmounted
+- **Duplicate Pinned Chats**: Overlapping board renders (e.g. returning from settings) appended every pin twice; renders now read storage first and swap the list atomically
+- **Bookmarks Menu Not Mounting**: The menu bailed out when `#page-header` was missing and only tried once; it now waits for the titlebar, re-mounts after header re-renders, and shows only inside a conversation
+- **Deleting A Chat Unpinned Everything**: Deleting the current chat from the header menu removed every pinned chat instead of just that one
+- **ChatGPT Menus Removed On Escape**: The drag-and-drop Escape handler deleted every `[role="menu"]` on the page, including ChatGPT's own React menus; it now only closes PinFlux's menu, and ChatGPT menus are closed via Escape instead of being removed
+- **Stacked Listeners**: Bookmarks menu listeners and the pinned-chats setup were re-registered on every navigation (one "remove bookmark" click ran several times); both are now set up once per page
+- **Tutorial Starting Twice**: Auto-start and the popup's start message were handled in two places
+
+### Added
+- **Legacy Bookmark Migration**: Bookmarks saved under the old `conversation-turn-N-<section>` IDs are re-keyed to the message-UUID format (`msg-<id>-<section>`) as their turns render, keeping the original as `legacyId`; the mapping (`fallback-turn-k` → `conversation-turn-2k+2`) was verified against real saved bookmarks
+- **Theme Variables**: `themeStyles.ts` builds PinFlux's `--pf-*` colors on ChatGPT's 2026 theme tokens, so injected UI follows light/dark and custom accent themes
+- **i18n**: New strings in en, ja and ko (98 keys each)
+
+### Enhanced
+- **Theme Detection**: `isDarkMode` is now a live check of `html[data-theme]` / `html.dark` instead of a constant read once at load; the dropdown, dialogs, rename input, bookmark button and notifications no longer rely on `dark:` utilities the 2026 stylesheet ignores
+- **Native Look**: Menu items copy the classes of a live native item, and the bookmarks button copies the native toolbar button; sidebar classes come from `sidebarTheme.ts`, one set per ChatGPT generation
+- **Menu Labels**: "Pin to PinFlux" / "Unpin from PinFlux", distinct from ChatGPT's own "Pin"
+- **Toolchain**: WXT 0.20.6 → 0.21.4 with `vite` and `typescript` as explicit dev dependencies; stricter generated tsconfig (`noUncheckedIndexedAccess`, `verbatimModuleSyntax`); `npm audit` is clean ([#19](https://github.com/AuxionCore/PinFlux/issues/19))
+
+### Deprecated
+- **PinFlux Pinned Chats**: Retired in favor of ChatGPT's native pinning ([#23](https://github.com/AuxionCore/PinFlux/issues/23))
+  - New installs of 2.4.0+ no longer get pinning, and the tutorial skips it
+  - Existing users (updated from <2.4.0, or with a pin list in `storage.sync`) keep it until **2027-01-01**, when `PINNING_SUNSET` hides all pinning UI automatically
+  - The popup shows existing users a retirement notice with their pins as links to re-pin natively; pin data is never deleted
+
+### Known Issues
+- Dragging a native sidebar chat into the board doesn't work in the 2026 UI (ChatGPT sets `draggable="false"` on its links)
+- No delete-chat menu anchor exists in the 2026 UI, so a deleted chat's pin stays until it is unpinned
+
 ## [2.3.1] - 2026-10-07
 
 ### Fixed
