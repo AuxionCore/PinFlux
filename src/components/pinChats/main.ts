@@ -12,8 +12,8 @@ import handlePinChat from '@/components/pinChats/core/handlePinChat'
 import pinCurrentConversation from '@/components/pinChats/core/pinCurrentConversation'
 import { showTooltipOnce } from '@/components/pinChats/helpers/showTooltipOnce'
 import { showOneTimeNotification } from '@/components/utils/notifications'
-import { tutorialManager } from '@/components/tutorial/tutorialManager'
 import { matchNativeMenuItem } from '@/components/pinChats/helpers/sidebarTheme'
+import { isPinningAvailable } from '@/components/utils/pinningAvailability'
 
 import {
   getPinChatsFromStorage,
@@ -112,6 +112,10 @@ async function setUpPinnedChats(): Promise<void> {
   let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null
 
   try {
+    // Retired in favor of ChatGPT's native pinning (#23): new users never get
+    // it, existing users keep it until PINNING_SUNSET. Data stays in storage.
+    if (!(await isPinningAvailable())) return
+
     const profileId = await getProfileId()
     const historyElement = await getHistoryElement()
 
@@ -143,19 +147,9 @@ async function setUpPinnedChats(): Promise<void> {
       }
     }, 1000)
 
-    // Check if tutorial should auto-start for new users
-    setTimeout(async () => {
-      try {
-        if (await tutorialManager.shouldAutoStart()) {
-          // Wait a bit more for the UI to fully load
-          setTimeout(() => {
-            tutorialManager.startTutorial()
-          }, 2000)
-        }
-      } catch (error) {
-        console.error('Failed to check tutorial auto-start:', error)
-      }
-    }, 1500)
+    // Tutorial auto-start and the popup's start-tutorial message are handled
+    // in content.ts, for every user. They used to be duplicated here, which
+    // started the tutorial twice.
 
     browser.runtime.onMessage.addListener(async message => {
       if (message.action === 'pin-current-chat') {
@@ -163,13 +157,6 @@ async function setUpPinnedChats(): Promise<void> {
           await pinCurrentConversation()
         } catch (error) {
           console.error('Failed to pin current conversation:', error)
-        }
-      } else if (message.action === 'start-tutorial') {
-        // Handle tutorial start request from popup
-        try {
-          await tutorialManager.startTutorial(message.featureId, true)
-        } catch (error) {
-          console.error('Failed to start tutorial:', error)
         }
       }
     })

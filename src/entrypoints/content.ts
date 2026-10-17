@@ -6,6 +6,8 @@ import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkG
 import { tutorialManager } from '@/components/tutorial/tutorialManager'
 import '@/components/tutorial/tutorialAPI' // Load API for debugging
 import ensureThemeStyles from '@/components/utils/themeStyles'
+import { isPinningAvailable } from '@/components/utils/pinningAvailability'
+import { setTutorialPinningEnabled } from '@/components/tutorial/tutorialFeatures'
 
 /**
  * URL patterns that the content script should match against
@@ -68,6 +70,10 @@ export default defineContentScript({
   async main(ctx) {
     try {
       ensureThemeStyles()
+
+      // Before anything can start the tutorial: users without pinned chats
+      // (#23) get it without the pinning feature
+      setTutorialPinningEnabled(await isPinningAvailable())
 
       // Set up message listener for tutorial actions
       browser.runtime.onMessage.addListener((message, sender, sendResponse) => {

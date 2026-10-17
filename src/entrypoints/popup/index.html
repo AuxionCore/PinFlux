@@ -123,6 +123,16 @@
         </div>
       </div>
     </main>
+    <!-- Pinned chats are retired in favor of ChatGPT's native pinning (#23).
+         Filled and shown by setupPinningNotice() for existing users only. -->
+    <section id="pinningNotice" class="pinning-notice" hidden>
+      <h2 id="pinningNoticeTitle" class="pinning-notice-title"></h2>
+      <p id="pinningNoticeMessage" class="pinning-notice-message"></p>
+      <div id="pinningNoticePins" hidden>
+        <h3 id="pinningNoticeListTitle" class="pinning-notice-list-title"></h3>
+        <ul id="pinningNoticeList" class="pinning-notice-list"></ul>
+      </div>
+    </section>
     <section class="tutorial-section">
       <button id="startTutorialBtn" class="tutorial-button">
         <svg class="tutorial-icon" viewBox="0 0 24 24" fill="currentColor">

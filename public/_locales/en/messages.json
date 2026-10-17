@@ -392,5 +392,37 @@
   "unpinFromPinFlux": {
     "message": "Unpin from PinFlux",
     "description": "Menu item that removes a chat from the PinFlux Board"
+  },
+  "tutorialCompleteMessageBookmarksOnly": {
+    "message": "Congratulations! You've mastered all PinFlux features. You can now bookmark sections of any reply and jump straight back to them. This dialog will close automatically in 15 seconds.",
+    "description": "Tutorial completion message for users without pinned chats"
+  },
+  "pinningDeprecationTitle": {
+    "message": "Pinned chats are moving to ChatGPT",
+    "description": "Popup notice title: PinFlux pinned chats are being retired"
+  },
+  "pinningDeprecationMessage": {
+    "message": "ChatGPT now has built-in pinning, so PinFlux's pinned chats will be retired on $DATE$. Open each chat below and choose \"Pin chat\" in ChatGPT's own menu to keep it pinned.",
+    "description": "Popup notice before the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningEndedMessage": {
+    "message": "PinFlux's pinned chats were retired on $DATE$ in favor of ChatGPT's built-in pinning. Your list is still saved: open each chat below and choose \"Pin chat\" in ChatGPT's menu.",
+    "description": "Popup notice after the pinning sunset date",
+    "placeholders": {
+      "DATE": {
+        "content": "$1",
+        "description": "Localized date the feature is retired"
+      }
+    }
+  },
+  "pinningDeprecationListTitle": {
+    "message": "Your PinFlux pins",
+    "description": "Heading above the list of the user's PinFlux pinned chats"
   }
 }

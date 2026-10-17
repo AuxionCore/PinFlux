@@ -1,4 +1,10 @@
 import {
+  PINNING_SUNSET,
+  getAllStoredPins,
+  isLegacyPinningUser,
+  isPastPinningSunset,
+} from '@/components/utils/pinningAvailability'
+import {
   showFeatureSurveyNotification,
   showPinShortcutTooltip,
 } from '@/components/pinChats/helpers/showTooltipOnce'
@@ -42,6 +48,7 @@ async function popupScript() {
       setClosePopupButton()
       setGeneralEventListeners()
       setupTutorialButton()
+      await setupPinningNotice()
       if (import.meta.env.CHROME) {
         setBrowserSpecificEventListeners()
         setFeedbackLink()
@@ -315,6 +322,68 @@ async function popupScript() {
           console.error('Failed to start tutorial:', error)
         }
       })
+    }
+
+    /**
+     * Pinned chats are retired in favor of ChatGPT's native pinning (#23).
+     * Existing users see when, plus their pins as links to open and re-pin
+     * natively. Kept after the sunset too: the pins are still in storage.
+     */
+    async function setupPinningNotice() {
+      const notice = document.getElementById('pinningNotice')
+      if (!notice) return
+
+      try {
+        if (!(await isLegacyPinningUser())) return
+
+        // The same chat can be pinned in more than one profile
+        const pins = [
+          ...new Map(
+            (await getAllStoredPins()).map(pin => [pin.urlId, pin])
+          ).values(),
+        ]
+        const ended = isPastPinningSunset()
+        if (ended && pins.length === 0) return
+
+        const date = PINNING_SUNSET.toLocaleDateString(
+          browser.i18n.getUILanguage(),
+          { dateStyle: 'long' }
+        )
+        document.getElementById('pinningNoticeTitle')!.textContent =
+          browser.i18n.getMessage('pinningDeprecationTitle')
+        document.getElementById('pinningNoticeMessage')!.textContent =
+          browser.i18n.getMessage(
+            ended ? 'pinningEndedMessage' : 'pinningDeprecationMessage',
+            [date]
+          )
+
+        if (pins.length > 0) {
+          document.getElementById('pinningNoticeListTitle')!.textContent =
+            browser.i18n.getMessage('pinningDeprecationListTitle')
+          const list = document.getElementById('pinningNoticeList')!
+          for (const pin of pins) {
+            const url = `https://chatgpt.com/c/${pin.urlId}`
+            const link = document.createElement('a')
+            link.href = url
+            link.dir = 'auto'
+            // Titles are user-controlled: textContent, never innerHTML
+            link.textContent = pin.title || url
+            link.title = pin.title || url
+            link.addEventListener('click', event => {
+              event.preventDefault()
+              openTab(url)
+            })
+            const item = document.createElement('li')
+            item.append(link)
+            list.append(item)
+          }
+          document.getElementById('pinningNoticePins')!.hidden = false
+        }
+
+        notice.hidden = false
+      } catch (error) {
+        console.error('Failed to set up pinning notice:', error)
+      }
     }
 
     async function openTab(url: string): Promise<void> {
