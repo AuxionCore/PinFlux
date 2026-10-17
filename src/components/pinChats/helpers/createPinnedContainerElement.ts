@@ -1,8 +1,11 @@
-import { isDarkMode } from "@/components/utils/styleScheme";
+import { getSidebarClasses } from "./sidebarTheme";
+import { DARK_THEME_SELECTOR, isDarkMode } from "@/components/utils/styleScheme";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
 
 // Function to create the container for pinned chats
 export default function createPinnedContainerElement(): HTMLElement {
+  const classes = getSidebarClasses();
+
   // Load saved expanded state (default: true)
   let isExpanded = true;
   try {
@@ -16,27 +19,27 @@ export default function createPinnedContainerElement(): HTMLElement {
 
   // Create the main wrapper with the expandable section structure
   const sectionWrapper: HTMLDivElement = document.createElement("div");
-  sectionWrapper.className = isExpanded 
-    ? "group/sidebar-expando-section mb-[var(--sidebar-expanded-section-margin-bottom)]" 
-    : "group/sidebar-expando-section mb-[var(--sidebar-collapsed-section-margin-bottom)]";
+  sectionWrapper.className = isExpanded
+    ? classes.sectionExpanded
+    : classes.sectionCollapsed;
   sectionWrapper.setAttribute("data-pinflux-section", "true"); // Marker for re-init detection
   
   // Create the header with title (similar to "Chats" section)
   const headerButton: HTMLDivElement = document.createElement("div");
   headerButton.setAttribute("tabindex", "0");
   headerButton.setAttribute("data-fill", "");
-  headerButton.className = "group __menu-item hoverable";
+  headerButton.className = classes.headerButton;
   headerButton.setAttribute("aria-expanded", isExpanded.toString());
   headerButton.setAttribute("aria-label", isExpanded ? "Collapse PinFlux Board section" : "Expand PinFlux Board section");
   headerButton.setAttribute("data-no-hover-bg", "true");
   headerButton.setAttribute("data-no-contents-gap", "true");
   
   const headerContent: HTMLDivElement = document.createElement("div");
-  headerContent.className = "text-token-text-tertiary flex w-full items-center justify-start gap-0.5";
+  headerContent.className = classes.headerContent;
   
   const pinnedContainerTitle: HTMLHeadingElement = document.createElement("h2");
   pinnedContainerTitle.textContent = "PinFlux Board";
-  pinnedContainerTitle.className = "__menu-label";
+  pinnedContainerTitle.className = classes.headerTitle;
   pinnedContainerTitle.setAttribute("data-no-spacing", "true");
   
   // Create the SVG arrow
@@ -84,9 +87,9 @@ export default function createPinnedContainerElement(): HTMLElement {
     arrowSvg.style.opacity = isExpanded ? "0" : "1";
     
     // Update section wrapper class
-    sectionWrapper.className = isExpanded 
-      ? "group/sidebar-expando-section mb-[var(--sidebar-expanded-section-margin-bottom)]" 
-      : "group/sidebar-expando-section mb-[var(--sidebar-collapsed-section-margin-bottom)]";
+    sectionWrapper.className = isExpanded
+      ? classes.sectionExpanded
+      : classes.sectionCollapsed;
     
     // Save state to localStorage
     try {
@@ -161,15 +164,10 @@ export default function createPinnedContainerElement(): HTMLElement {
           display: none;
         }
 
-        ${
-          isDarkMode &&
-          `
-          #chatListContainer {
-            --scroll-thumb: #303030;
-            --scroll-thumb-hover: #505050;
-            --scroll-thumb-active: #707070;
-          }
-        `
+        ${DARK_THEME_SELECTOR} #chatListContainer {
+          --scroll-thumb: #303030;
+          --scroll-thumb-hover: #505050;
+          --scroll-thumb-active: #707070;
         }
 
         /* Show scrollbar on hover only when scrollable */
@@ -203,7 +201,9 @@ export default function createPinnedContainerElement(): HTMLElement {
         }
       
     `;
-  document.head.appendChild(style);
+  // The board is rebuilt whenever ChatGPT re-renders it away; add the sheet once
+  style.id = "pinflux-board-styles";
+  if (!document.getElementById(style.id)) document.head.appendChild(style);
 
   // Function to check if scrolling is needed
   function checkScrollNeed(): void {
@@ -256,10 +256,10 @@ export default function createPinnedContainerElement(): HTMLElement {
       draggableDisplay.style.border = '2px dashed #dedede';
       draggableDisplay.style.borderRadius = '8px';
       draggableDisplay.style.zIndex = '1000';
-      draggableDisplay.style.backgroundColor = isDarkMode
+      draggableDisplay.style.backgroundColor = isDarkMode()
         ? 'rgba(40, 40, 40, 95)'
         : 'rgba(230, 230, 230, 95)';
-      draggableDisplay.style.color = isDarkMode ? '#dedede' : '#000000';
+      draggableDisplay.style.color = isDarkMode() ? '#dedede' : '#000000';
       draggableDisplay.style.display = 'flex';
       draggableDisplay.style.flexDirection = 'column';
       draggableDisplay.style.alignItems = 'center';

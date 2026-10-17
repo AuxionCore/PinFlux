@@ -1,3 +1,5 @@
+import initPinnedChats from '@/components/pinChats/core/initPinnedChats'
+import { closeNativeMenu } from '@/components/pinChats/helpers/sidebarTheme'
 import getProfileId from '@/components/utils/getProfileId'
 import createPinnedChat from '@/components/pinChats/core/createPinnedChat'
 import getHistoryElement from '@/components/pinChats/core/getHistoryElement'
@@ -53,18 +55,20 @@ export default async function handlePinChat(
   // Check if the chat is already pinned
   if (urlId && !savedChats.some(chat => chat.urlId === urlId)) {
     pinButton?.remove()
-    chatOptionsMenu?.remove()
+    closeNativeMenu(chatOptionsMenu)
 
-    const pinnedChatsList = document.querySelector(
+    let pinnedChatsList = document.querySelector<HTMLDivElement>(
       '#chatListContainer'
-    ) as HTMLDivElement
-    const newPinnedChat = createPinnedChat(
-      chatTitle || '',
-      urlId,
-      profileId,
-      historyElement
     )
-    pinnedChatsList.prepend(newPinnedChat)
+    if (!pinnedChatsList) {
+      // ChatGPT re-rendered the sidebar and took the board with it
+      await initPinnedChats({ profileId, historyElement })
+      pinnedChatsList = document.querySelector('#chatListContainer')
+    }
+    // Saved either way: the board shows it whenever it is mounted again
+    pinnedChatsList?.prepend(
+      createPinnedChat(chatTitle || '', urlId, profileId, historyElement)
+    )
 
     // Add new chat at the beginning of the array (top of the list)
     savedChats.unshift({ urlId: urlId, title: chatTitle || '' })

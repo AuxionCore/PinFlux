@@ -1,9 +1,11 @@
 import initContentScript from '@/components/pinChats/main'
 import initBookmarks from '@/components/chatBookmarks/main'
+import initBookmarksMenu from '@/components/chatBookmarks/bookmarksMenu'
 import getProfileId from '@/components/utils/getProfileId'
 import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkGroupTimestamp'
 import { tutorialManager } from '@/components/tutorial/tutorialManager'
 import '@/components/tutorial/tutorialAPI' // Load API for debugging
+import ensureThemeStyles from '@/components/utils/themeStyles'
 
 /**
  * URL patterns that the content script should match against
@@ -65,6 +67,8 @@ export default defineContentScript({
   matches: urlPatternStrings,
   async main(ctx) {
     try {
+      ensureThemeStyles()
+
       // Set up message listener for tutorial actions
       browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'start-tutorial') {
@@ -145,6 +149,9 @@ export default defineContentScript({
             } catch (err) {
               console.error('Failed to initialize bookmarks:', err)
             }
+          } else {
+            // Not a conversation (new chat, settings, …): removes the button
+            initBookmarksMenu()
           }
         } catch (err) {
           console.error('Error in locationchange event handler:', err)

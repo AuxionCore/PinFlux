@@ -1,3 +1,4 @@
+import { getSidebarClasses } from "./sidebarTheme";
 import createChatOptionsMenu from "./createChatOptionsMenu";
 import pinChatOptionsButton from "./pinChatOptionsButton.html?raw";
 
@@ -20,7 +21,7 @@ export default function createChatOptionsButton(
   chatOptionsBtn.setAttribute("aria-haspopup", "menu");
   chatOptionsBtn.setAttribute("aria-label", "Open pin conversation options");
 
-  chatOptionsBtn.className = "__menu-item-trailing-btn";
+  chatOptionsBtn.className = getSidebarClasses().trailingButton;
   chatOptionsBtn.innerHTML = pinChatOptionsButton;
 
   const pinnedChatsList = document.querySelector(

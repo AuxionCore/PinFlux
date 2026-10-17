@@ -1,6 +1,8 @@
 import getProfileId from '@/components/utils/getProfileId'
 import getHistoryElement from '@/components/pinChats/core/getHistoryElement'
-import initPinnedChats from '@/components/pinChats/core/initPinnedChats'
+import initPinnedChats, {
+  keepPinnedBoardMounted,
+} from '@/components/pinChats/core/initPinnedChats'
 import createPinButton from './pinButton/PinButton'
 import createUnpinButton from './pinButton/UnpinButton'
 import setupUnpinChatListener from '@/components/pinChats/core/setupUnpinChatListener'
@@ -11,6 +13,7 @@ import pinCurrentConversation from '@/components/pinChats/core/pinCurrentConvers
 import { showTooltipOnce } from '@/components/pinChats/helpers/showTooltipOnce'
 import { showOneTimeNotification } from '@/components/utils/notifications'
 import { tutorialManager } from '@/components/tutorial/tutorialManager'
+import { matchNativeMenuItem } from '@/components/pinChats/helpers/sidebarTheme'
 
 import {
   getPinChatsFromStorage,
@@ -92,7 +95,20 @@ import {
 //   });
 // }
 
-export default async function initContentScript(): Promise<void> {
+let initialization: Promise<void> | null = null
+
+/**
+ * Sets up pinned chats once per page. content.ts calls this again on SPA
+ * navigation whenever the board is missing; running the body twice stacked a
+ * second set of global click listeners (duplicate Pin items in menus). The
+ * board itself is restored by keepPinnedBoardMounted.
+ */
+export default function initContentScript(): Promise<void> {
+  initialization ??= setUpPinnedChats()
+  return initialization
+}
+
+async function setUpPinnedChats(): Promise<void> {
   let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null
 
   try {
@@ -106,6 +122,7 @@ export default async function initContentScript(): Promise<void> {
       profileId,
       historyElement,
     })
+    keepPinnedBoardMounted(profileId)
 
     // Show drag and drop notification for existing users who already have 2+ pinned chats
     setTimeout(async () => {
@@ -174,7 +191,8 @@ export default async function initContentScript(): Promise<void> {
     // Handle click events in the sidebar and projects section
     document.body.addEventListener('click', async (event: MouseEvent) => {
       const target = (event.target as HTMLElement)?.closest(
-        '[data-testid^="history-item-"][data-testid$="-options"], [data-testid="undefined-options"], [data-trailing-button]'
+        // Oct 2026: the row's menu button; 2025: history-item options / trailing button
+        '[data-sidebar-chatgpt-conversation-key] button[aria-haspopup="menu"], [data-testid^="history-item-"][data-testid$="-options"], [data-testid="undefined-options"], [data-trailing-button]'
       )
       
       // Only process if the target is a menu button (has data-trailing-button or is options button)
@@ -182,7 +200,11 @@ export default async function initContentScript(): Promise<void> {
         return
       }
       
-      const chatLink = target?.closest('a') as HTMLAnchorElement | null
+      // 2025 nested the button inside the link; Oct 2026 puts it beside it
+      const chatLink = (target.closest('a') ??
+        target
+          .closest('[data-sidebar-chatgpt-conversation-key]')
+          ?.querySelector('a[href*="/c/"]')) as HTMLAnchorElement | null
       const chatUrl = chatLink?.getAttribute('href') as string
       
       // Extract urlId from both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
@@ -195,7 +217,10 @@ export default async function initContentScript(): Promise<void> {
         }
       }
       
-      const chatTitle = chatLink?.querySelector('span')?.textContent
+      const chatTitle = (
+        chatLink?.querySelector('[data-thread-title]') ??
+        chatLink?.querySelector('span')
+      )?.textContent
       if (target) {
         // Small delay to ensure menu is rendered
         setTimeout(async () => {
@@ -216,10 +241,12 @@ export default async function initContentScript(): Promise<void> {
               const savedPinChats = await getPinChatsFromStorage(profileId)
               if (savedPinChats.some(chat => chat.urlId === urlId)) {
                 const unpinBtn = createUnpinButton()
+                matchNativeMenuItem(unpinBtn, chatOptionsMenu)
                 chatOptionsMenu.prepend(unpinBtn)
                 setupUnpinChatListener(profileId, urlId, unpinBtn, null)
               } else {
                 const pinButton = createPinButton()
+                matchNativeMenuItem(pinButton, chatOptionsMenu)
                 chatOptionsMenu.prepend(pinButton)
                 
                 async function pinChatHandler(event: MouseEvent) {
@@ -273,7 +300,8 @@ export default async function initContentScript(): Promise<void> {
     // This works even when navigating between chats in SPA
     document.body.addEventListener('click', async (event: MouseEvent) => {
       const conversationOptionsButton = (event.target as HTMLElement)?.closest(
-        '[data-testid="conversation-options-button"]'
+        // Oct 2026: the titlebar's menu button ("More"); 2025: options button
+        '[data-app-shell-main-titlebar] button[aria-haspopup="menu"], [data-testid="conversation-options-button"]'
       ) as HTMLButtonElement
       
       if (!conversationOptionsButton) {
@@ -333,10 +361,12 @@ export default async function initContentScript(): Promise<void> {
               const savedPinChats = await getPinChatsFromStorage(profileId)
               if (savedPinChats.some(chat => chat.urlId === urlId)) {
                 const unpinBtn = createUnpinButton()
+                matchNativeMenuItem(unpinBtn, chatOptionsMenu)
                 chatOptionsMenu.prepend(unpinBtn)
                 setupUnpinChatListener(profileId, urlId, unpinBtn, null)
               } else {
                 const pinButton = createPinButton()
+                matchNativeMenuItem(pinButton, chatOptionsMenu)
                 chatOptionsMenu.prepend(pinButton)
                 
                 async function pinChatHandler(event: MouseEvent) {
@@ -364,20 +394,15 @@ export default async function initContentScript(): Promise<void> {
                         const pinnedContainer = document.querySelector(
                           '#pinnedContainer'
                         ) as HTMLElement
-                        if (profileId) {
-                          const savedPinChats = await getPinChatsFromStorage(
-                            profileId
-                          )
-                          savedPinChats.forEach(async chat => {
-                            const pinnedChat = pinnedContainer.querySelector(
-                              `a[href="https://chatgpt.com/c/${chat.urlId}"]`
+                        // Only the deleted conversation — this used to loop
+                        // over every saved pin and remove them all
+                        if (profileId && urlId) {
+                          pinnedContainer
+                            ?.querySelector(
+                              `a[href="https://chatgpt.com/c/${urlId}"]`
                             )
-
-                            if (pinnedChat) {
-                              pinnedChat.remove()
-                            }
-                            await removePinChatFromStorage(profileId, chat.urlId)
-                          })
+                            ?.remove()
+                          await removePinChatFromStorage(profileId, urlId)
                         }
                       }
                     )

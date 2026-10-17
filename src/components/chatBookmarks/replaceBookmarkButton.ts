@@ -1,3 +1,5 @@
+import styleBookmarkButton from './styleBookmarkButton'
+
 export default function replaceBookmarkButton(section: Element, newHtml: string) {
   // Search is done in container (parent element)
   const container = section.parentElement
@@ -13,4 +15,5 @@ export default function replaceBookmarkButton(section: Element, newHtml: string)
   if (newButton && section.id) {
     newButton.setAttribute('data-section-id', section.id)
   }
+  styleBookmarkButton(newButton)
 }

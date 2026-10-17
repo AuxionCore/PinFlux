@@ -22,8 +22,7 @@ export default function handleRenamePinChat(
   buttonWrapper.style.display = "none";
 
   const input = document.createElement("input");
-  input.className =
-    "w-full border border-blue-400 dark:border-blue-500 rounded-sm bg-transparent px-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500";
+  input.className = "pf-inline-input";
   input.type = "text";
   input.value = originalTitle;
   // Match the height of other links

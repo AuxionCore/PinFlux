@@ -1,16 +1,32 @@
 /**
- * Gets the current style scheme (light or dark) from the document's computed styles
- * @returns The current color scheme as a string
+ * CSS selector matching the page while ChatGPT shows its dark theme.
+ * Oct 2026 app shell: <html data-theme="dark">; 2025: <html class="dark">.
+ * Use it in injected CSS rather than `dark:` utilities, which the 2026
+ * stylesheet does not honor.
  */
-function getCurrentStyleScheme(): string {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue("color-scheme")
-    .trim();
-}
+export const DARK_THEME_SELECTOR = ':is(html.dark, html[data-theme="dark"])'
 
 /**
- * Boolean flag indicating whether the current theme is dark mode
+ * Whether ChatGPT is currently showing its dark theme. Read on every call —
+ * the user can switch themes without a reload.
  */
-const isDarkMode: boolean = getCurrentStyleScheme() === "dark";
+export function isDarkMode(): boolean {
+  const root = document.documentElement
 
-export { isDarkMode };
+  // Oct 2026 app shell
+  const theme = root.dataset.theme
+  if (theme === 'dark' || theme === 'light') return theme === 'dark'
+
+  // 2025
+  if (root.classList.contains('dark')) return true
+  if (root.classList.contains('light')) return false
+
+  const colorScheme = getComputedStyle(root)
+    .getPropertyValue('color-scheme')
+    .trim()
+  if (colorScheme === 'dark' || colorScheme === 'light') {
+    return colorScheme === 'dark'
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}

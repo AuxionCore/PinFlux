@@ -27,92 +27,189 @@ async function updateBookmarkIndicator() {
 
     if (!conversationId) {
       icon.setAttribute('fill', 'none')
-      icon.setAttribute('stroke', 'white')
+      icon.setAttribute('stroke', 'currentColor')
       return
     }
 
     const bookmarksData = await getBookmarksData(profileId, conversationId)
     
     if (bookmarksData.length > 0) {
-      // White border with white fill when there are bookmarks
-      icon.setAttribute('stroke', 'white')
-      icon.setAttribute('fill', 'white')
+      // Filled when there are bookmarks
+      icon.setAttribute('stroke', 'currentColor')
+      icon.setAttribute('fill', 'currentColor')
     } else {
-      // White border without fill when empty
-      icon.setAttribute('stroke', 'white')
+      // Outline only when empty
+      icon.setAttribute('stroke', 'currentColor')
       icon.setAttribute('fill', 'none')
     }
   } catch (error) {
     console.error('Error updating bookmark indicator:', error)
-    icon.setAttribute('stroke', 'white')
+    icon.setAttribute('stroke', 'currentColor')
     icon.setAttribute('fill', 'none')
   }
 }
 
-export default async function initBookmarksMenu() {
-  // Check if the button already exists on the page
-  const existingButton = document.querySelector('[data-bookmarks-menu-button]')
-  if (existingButton) {
-    return
-  }
-  
-  
-  const header = document.getElementById('page-header')
-  if (!header) {
-    console.warn('Page header not found')
-    return
-  }
+// Oct 2026 app shell: the right-hand group of the conversation titlebar, the
+// one holding Share and More
+const HEADER_ACTIONS_SELECTOR_2026 =
+  '[data-app-shell-main-titlebar] [data-app-shell-header-obstacle]'
+// 2025 and earlier, most specific first
+const LEGACY_HEADER_ACTIONS_SELECTORS = [
+  '#conversation-header-actions',
+  '[data-testid="conversation-header-actions"]',
+  '.conversation-header-actions',
+  '[role="toolbar"]',
+  'header nav',
+  'header [role="navigation"]',
+]
 
-  // Look for the actions buttons area
-  const actionsDiv = document.getElementById('conversation-header-actions')
-  if (!actionsDiv) {
-    console.warn('Conversation header actions not found, trying alternative selectors...')
-    
-    // Try to find an alternative element
-    const alternatives = [
-      '[data-testid="conversation-header-actions"]',
-      '.conversation-header-actions',
-      '[role="toolbar"]',
-      'header nav',
-      'header [role="navigation"]'
-    ]
-    
-    let foundElement = null
-    for (const selector of alternatives) {
-      foundElement = document.querySelector(selector)
-      if (foundElement) {
-        break
+function mountBookmarksMenuButton(): boolean {
+  const container = document.createElement('div')
+  container.setAttribute('data-pinflux-bookmarks-menu', '')
+  container.innerHTML = bookmarksMenuButtonHtml
+
+  const actions2026 = document.querySelector(HEADER_ACTIONS_SELECTOR_2026)
+  if (actions2026) {
+    // Every level of the new header is pointer-events-none
+    container.className = 'pointer-events-auto flex shrink-0 items-center'
+
+    // Borrow the native toolbar button's look. Its classes are hashed per
+    // ChatGPT build, so read them off the live button rather than hardcoding.
+    const nativeButton = actions2026.querySelector('button')
+    const ourButton = container.querySelector('button')
+    if (nativeButton && ourButton) {
+      ourButton.className = nativeButton.className
+      for (const attr of ['data-color', 'data-variant', 'data-size']) {
+        const value = nativeButton.getAttribute(attr)
+        if (value !== null) ourButton.setAttribute(attr, value)
       }
     }
+
+    actions2026.prepend(container)
+    return true
+  }
+
+  for (const selector of LEGACY_HEADER_ACTIONS_SELECTORS) {
+    const actions = document.querySelector(selector)
+    if (actions) {
+      actions.prepend(container)
+      return true
+    }
+  }
+  return false
+}
+
+const MENU_BUTTON_SELECTOR = '[data-bookmarks-menu-button]'
+
+// Bookmarks belong to a conversation. The new-chat page has the same header
+// but nothing to bookmark yet; it becomes /c/<id> once the first message is
+// sent, and the button mounts then.
+function isConversationPage(): boolean {
+  return /\/c\/[\w-]+/.test(window.location.pathname)
+}
+
+function removeBookmarksMenu(): void {
+  document.querySelector('[data-pinflux-bookmarks-menu]')?.remove()
+  document.querySelector('#bookmarks-dropdown')?.classList.add('hidden')
+}
+
+function getMenuButton(): HTMLElement | null {
+  return document.querySelector<HTMLElement>(MENU_BUTTON_SELECTOR)
+}
+
+/**
+ * Listeners that must exist once per page. The dropdown and popup live on
+ * <body> for the whole session, while the header button is re-created every
+ * time ChatGPT re-renders the header — so these look the button up on each
+ * event instead of capturing one. Attaching them per mount stacked a copy on
+ * every navigation (one "remove" click ran the handler several times).
+ */
+function setUpMenuListenersOnce(dropdown: Element) {
+  if (isMenuInitialized) return
+  isMenuInitialized = true
+
+  // Listen for bookmarks changes to update indicator
+  document.addEventListener('bookmarksChanged', () => {
+    updateBookmarkIndicator()
+  })
+
+  // Listen for menu closing when clicking outside
+  document.addEventListener('click', (e: Event) => {
+    const menuButton = getMenuButton()
+    if (
+      !menuButton?.contains(e.target as Node) &&
+      !dropdown.contains(e.target as Node)
+    ) {
+      dropdown.classList.add('hidden')
+    }
+  })
+
+  // Listen for ESC key to close dropdown
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && !dropdown.classList.contains('hidden')) {
+      dropdown.classList.add('hidden')
+    }
+  })
+
+  // Update dropdown position on scroll and resize
+  const updateDropdownPosition = () => {
+    const menuButton = getMenuButton()
+    if (menuButton && !dropdown.classList.contains('hidden')) {
+      positionDropdown(dropdown as HTMLElement, menuButton)
+    }
+  }
+  window.addEventListener('scroll', updateDropdownPosition, true)
+  window.addEventListener('resize', updateDropdownPosition)
+
+  // Menu event listeners
+  dropdown.addEventListener('click', async (e: Event) => {
+    const target = e.target as HTMLElement
     
-    if (!foundElement) {
-      console.warn('No suitable container found for bookmarks menu')
+    // Handle bookmark link click - only this will close the menu
+    const bookmarkLink = target.closest('[data-bookmark-link]')
+    if (bookmarkLink) {
+      dropdown.classList.add('hidden')
       return
     }
-    
-    // Use the found element
-    const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
 
-    foundElement.appendChild(bookmarksContainer)
-    
-    // Append dropdown to body to prevent layout issues
-    if (!document.getElementById('bookmarks-dropdown')) {
-      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
+    // Handle bookmark removal
+    const removeButton = target.closest('[data-remove-bookmark]')
+    if (removeButton) {
+      e.preventDefault()
+      e.stopPropagation()
+      await handleRemoveBookmark(removeButton as HTMLElement, dropdown)
+      return
     }
-  } else {
-    
-    // Create container for bookmarks menu button
-    const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
 
-    // Add to the beginning of the actions area
-    actionsDiv.insertBefore(bookmarksContainer, actionsDiv.firstChild)
-    
-    // Append dropdown to body to prevent layout issues
-    if (!document.getElementById('bookmarks-dropdown')) {
-      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
+    // Handle bookmark name editing
+    const editButton = target.closest('[data-edit-bookmark]')
+    if (editButton) {
+      e.preventDefault()
+      e.stopPropagation()
+      await handleEditBookmark(editButton as HTMLElement, dropdown)
+      return
     }
+
+    // Prevent menu closing for any other click inside it
+    e.stopPropagation()
+  })
+}
+
+/**
+ * Mounts the bookmarks button into the conversation header if it isn't there.
+ * Safe to call repeatedly. Returns false when the header isn't rendered yet.
+ */
+export default function initBookmarksMenu(): boolean {
+  if (!isConversationPage()) {
+    removeBookmarksMenu()
+    return false
+  }
+  if (getMenuButton()) return true
+  if (!mountBookmarksMenuButton()) return false
+
+  // Append dropdown to body to prevent layout issues
+  if (!document.getElementById('bookmarks-dropdown')) {
+    document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
   }
 
   // Add the name change popup
@@ -120,91 +217,42 @@ export default async function initBookmarksMenu() {
     document.body.insertAdjacentHTML('beforeend', bookmarkNamePopupHtml)
   }
 
-  // Find the created button and dropdown (with timeout)
-  setTimeout(() => {
-    const menuButton = document.querySelector('[data-bookmarks-menu-button]')
-    const dropdown = document.querySelector('#bookmarks-dropdown')
+  const menuButton = getMenuButton()
+  const dropdown = document.querySelector('#bookmarks-dropdown')
+  if (!menuButton || !dropdown) return false
 
-    if (!menuButton || !dropdown) {
-      console.error('Menu button or dropdown not found after timeout', {
-        menuButton: !!menuButton,
-        dropdown: !!dropdown
-      })
-      return
-    }
+  setUpMenuListenersOnce(dropdown)
 
+  // The button is a new element on every mount, so this never stacks
+  menuButton.addEventListener('click', async (e: Event) => {
+    e.stopPropagation()
+    await toggleBookmarksMenu(dropdown, menuButton)
+  })
 
-    // Update indicator on initialization
-    updateBookmarkIndicator()
+  // Update indicator on initialization
+  updateBookmarkIndicator()
+  return true
+}
 
-    // Listen for bookmarks changes to update indicator
-    document.addEventListener('bookmarksChanged', () => {
-      updateBookmarkIndicator()
-    })
-
-    // Listen to button clicks
-    menuButton.addEventListener('click', async (e: Event) => {
-      e.stopPropagation()
-      await toggleBookmarksMenu(dropdown, menuButton as HTMLElement)
-    })
-
-    // Listen for menu closing when clicking outside
-    document.addEventListener('click', (e: Event) => {
-      if (!menuButton.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
-        dropdown.classList.add('hidden')
-      }
-    })
-
-    // Listen for ESC key to close dropdown
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !dropdown.classList.contains('hidden')) {
-        dropdown.classList.add('hidden')
-      }
-    })
-
-    // Update dropdown position on scroll and resize
-    const updateDropdownPosition = () => {
-      if (!dropdown.classList.contains('hidden')) {
-        positionDropdown(dropdown as HTMLElement, menuButton as HTMLElement)
-      }
-    }
-    window.addEventListener('scroll', updateDropdownPosition, true)
-    window.addEventListener('resize', updateDropdownPosition)
-
-    // Menu event listeners
-    dropdown.addEventListener('click', async (e: Event) => {
-      const target = e.target as HTMLElement
-      
-      // Handle bookmark link click - only this will close the menu
-      const bookmarkLink = target.closest('[data-bookmark-link]')
-      if (bookmarkLink) {
-        dropdown.classList.add('hidden')
-        return
-      }
-
-      // Handle bookmark removal
-      const removeButton = target.closest('[data-remove-bookmark]')
-      if (removeButton) {
-        e.preventDefault()
-        e.stopPropagation()
-        await handleRemoveBookmark(removeButton as HTMLElement, dropdown)
-        return
-      }
-
-      // Handle bookmark name editing
-      const editButton = target.closest('[data-edit-bookmark]')
-      if (editButton) {
-        e.preventDefault()
-        e.stopPropagation()
-        await handleEditBookmark(editButton as HTMLElement, dropdown)
-        return
-      }
-
-      // Prevent menu closing for any other click inside it
-      e.stopPropagation()
-    })
-
-  }, 100)
+/**
+ * Waits for the conversation header, which can render well after the
+ * conversation URL changes, then mounts the button. Warns once if it never
+ * shows up; later header re-renders are handled by the bookmarks observer.
+ */
+export async function waitForBookmarksMenu(
+  timeoutMs = 15000,
+  intervalMs = 300
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (initBookmarksMenu()) return
+    // Left the conversation before the header showed up: nothing to wait for
+    if (!isConversationPage()) return
+    await new Promise(resolve => setTimeout(resolve, intervalMs))
+  }
+  console.warn(
+    `[PinFlux] No suitable container found for bookmarks menu after ${timeoutMs / 1000}s`
+  )
 }
 
 function positionDropdown(dropdown: HTMLElement, button: HTMLElement) {

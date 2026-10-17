@@ -3,44 +3,102 @@ import addBookmarkButtonHtml from './add-bookmark-button.html?raw'
 import handleBookmarkButtonClick from './bookmarkHandler'
 import getConversationBookmarksIds from './getConversationBookmarksIds'
 import removeBookmarkButtonHtml from './remove-bookmark-button.html?raw'
-import initBookmarksMenu from './bookmarksMenu'
+import initBookmarksMenu, { waitForBookmarksMenu } from './bookmarksMenu'
+import migrateBookmarkId from './migrateBookmarkId'
+import styleBookmarkButton from './styleBookmarkButton'
 
 /**
- * ChatGPT redesigned its conversation DOM. Responses are no longer wrapped in
- * <article> elements - each turn is now a
- * <section data-testid="conversation-turn-..."> containing a
- * [data-message-author-role="assistant"] block with the `.markdown.prose`
- * content inside. We keep <article> as a fallback for older versions.
+ * Turn containers, newest ChatGPT first:
+ * - Oct 2026 app shell: <div data-turn-key="…">, assistant content in
+ *   [data-markdown-text-style="assistant-message"]
+ * - 2025: <section data-testid="conversation-turn-…"> with
+ *   [data-message-author-role="assistant"] .markdown.prose inside
+ * - older: <article>
  */
 const TURN_CONTAINER_SELECTOR =
-  'section[data-testid^="conversation-turn-"], article'
+  '[data-turn-key], section[data-testid^="conversation-turn-"], article'
+// Oct 2026: one turn can hold several assistant blocks, each its own message
+const ASSISTANT_MARKDOWN_SELECTOR_2026 =
+  '[data-markdown-text-style="assistant-message"]'
+// 2025
 const ASSISTANT_MARKDOWN_SELECTOR =
   '[data-message-author-role="assistant"] .markdown.prose'
+const MESSAGE_ID_SELECTOR = '[data-chatgpt-selection-message-id]'
 
-function getAssistantMarkdown(turn: HTMLElement): HTMLElement | null {
+function getAssistantMarkdowns(turn: HTMLElement): HTMLElement[] {
+  const blocks = turn.querySelectorAll<HTMLElement>(
+    ASSISTANT_MARKDOWN_SELECTOR_2026
+  )
+  if (blocks.length) return Array.from(blocks)
+
   // Prefer the assistant-scoped match so we don't wrap user turns. Fall back to
   // the bare selector: ChatGPT renames these attributes, and losing bookmarks
   // entirely is worse than an occasional extra wrapper.
-  return (
+  const legacy =
     turn.querySelector<HTMLElement>(ASSISTANT_MARKDOWN_SELECTOR) ??
     turn.querySelector<HTMLElement>('.markdown.prose')
-  )
+  return legacy ? [legacy] : []
 }
 
 function getTurnContainers(): HTMLElement[] {
   return Array.from(
     document.querySelectorAll<HTMLElement>(TURN_CONTAINER_SELECTOR)
-  ).filter(el => getAssistantMarkdown(el))
+  ).filter(el => getAssistantMarkdowns(el).length)
 }
 
 function isTurnStreaming(turn: HTMLElement): boolean {
-  return !!turn.querySelector('.result-streaming, .result-thinking')
+  return (
+    // Oct 2026: the state sits on an element inside the turn
+    !!turn.querySelector('[data-talvt-turn-state="in_progress"]') ||
+    !!turn.querySelector('.result-streaming, .result-thinking')
+  )
 }
 
 function isAnyTurnStreaming(): boolean {
   return !!document.querySelector(
-    'button[data-testid="stop-response-button"], button[aria-label="Stop streaming"], [data-testid="composer-stop-button"]'
+    '[data-talvt-turn-state="in_progress"], button[data-testid="stop-response-button"], button[aria-label="Stop streaming"], [data-testid="composer-stop-button"]'
   )
+}
+
+/**
+ * Stable ID prefix for the sections of one assistant block. Oct 2026 exposes
+ * the server-side message UUID, which survives re-renders and redesigns; older
+ * DOMs only had the turn's position, so they keep the conversation-turn-N form
+ * existing bookmarks were saved under.
+ */
+function getSectionIdPrefix(
+  markdown: HTMLElement,
+  turnContainer: HTMLElement
+): string {
+  const messageId = markdown.closest<HTMLElement>(MESSAGE_ID_SELECTOR)?.dataset
+    .chatgptSelectionMessageId
+  if (messageId) return `msg-${messageId}`
+
+  return (
+    markdown.closest<HTMLElement>('[data-testid^="conversation-turn-"]')
+      ?.dataset.testid ||
+    turnContainer.dataset.testid ||
+    ''
+  )
+}
+
+/**
+ * The `conversation-turn-N` a 2026 turn would have had in the 2025 DOM, so
+ * bookmarks saved under that ID can be found and migrated.
+ *
+ * 2025 numbered every message from 1, so replies were the even turns (first
+ * reply = conversation-turn-2). The 2026 shell numbers question+reply pairs
+ * from 0 as `fallback-turn-N` on [data-content-search-turn-key]. Verified
+ * against real saved bookmarks (all even N) and a live turn listing (#22).
+ * Anything that isn't exactly `fallback-turn-<n>` is left alone.
+ */
+function getLegacyTurnTestId(turnContainer: HTMLElement): string | null {
+  const key = turnContainer.querySelector<HTMLElement>(
+    '[data-content-search-turn-key]'
+  )?.dataset.contentSearchTurnKey
+  const pairIndex = key?.match(/^fallback-turn-(\d+)$/)?.[1]
+  if (pairIndex === undefined) return null
+  return `conversation-turn-${2 * Number(pairIndex) + 2}`
 }
 
 async function waitForTurnContainers(
@@ -52,7 +110,9 @@ async function waitForTurnContainers(
     if (turns.length > 0) return turns
     await new Promise(resolve => setTimeout(resolve, delayMs))
   }
-  console.warn('waitForTurnContainers: Reached max retries, no turn containers found.')
+  console.warn(
+    '[PinFlux] No conversation turns yet; bookmarks will be added as they render.'
+  )
   return null
 }
 
@@ -74,8 +134,8 @@ export default async function initBookmarks({
   }
 
 
-  // Initialize bookmarks menu - this will happen on every new page
-  await initBookmarksMenu()
+  // The header may not be rendered yet; don't hold up the section buttons
+  waitForBookmarksMenu()
 
   const bookmarkIds: string[] = await getConversationBookmarksIds(
     profileId,
@@ -92,9 +152,19 @@ export default async function initBookmarks({
         return
       }
 
-      const markdown = getAssistantMarkdown(turnContainer)
-      if (!markdown) return
+      for (const markdown of getAssistantMarkdowns(turnContainer)) {
+        addButtonsToMarkdown(markdown, turnContainer)
+      }
+    } catch (error) {
+      console.error('Error in addButtonsToSections:', error)
+    }
+  }
 
+  const addButtonsToMarkdown = (
+    markdown: HTMLElement,
+    turnContainer: HTMLElement
+  ) => {
+    try {
       // Don't process the same turn twice. Also handles ChatGPT's virtualized
       // list, which can re-create DOM nodes when scrolling.
       if (
@@ -130,12 +200,31 @@ export default async function initBookmarks({
         for (const el of elements) wrapper.appendChild(el)
         container.appendChild(wrapper)
 
-        // Unique section identifier: prefer the closest conversation turn
-        const turnTestId =
-          markdown.closest<HTMLElement>('[data-testid^="conversation-turn-"]')
-            ?.dataset.testid || turnContainer.dataset.testid || ''
-        const sectionId = `${turnTestId}-${index}`
+        const sectionId = `${getSectionIdPrefix(markdown, turnContainer)}-${index}`
         wrapper.id = sectionId
+
+        // A bookmark saved before Oct 2026 is keyed by the turn's old position.
+        // Show it as bookmarked now and re-key it in the background.
+        // 2025 turns held a single reply block, so only the first one maps
+        const legacyTurnId =
+          sectionId.startsWith('msg-') &&
+          getAssistantMarkdowns(turnContainer)[0] === markdown
+            ? getLegacyTurnTestId(turnContainer)
+            : null
+        const legacyId = legacyTurnId && `${legacyTurnId}-${index}`
+        if (
+          legacyId &&
+          !bookmarkIds.includes(sectionId) &&
+          bookmarkIds.includes(legacyId)
+        ) {
+          bookmarkIds[bookmarkIds.indexOf(legacyId)] = sectionId
+          migrateBookmarkId({
+            fromId: legacyId,
+            toId: sectionId,
+            profileId,
+            conversationId,
+          })
+        }
 
         const isBookmarked = bookmarkIds.includes(sectionId)
         const buttonHtml = isBookmarked
@@ -151,6 +240,7 @@ export default async function initBookmarks({
         if (button) {
           button.dataset.sectionId = sectionId
           button.dataset.sectionIndex = String(index)
+          styleBookmarkButton(button)
         }
       }
 
@@ -167,8 +257,7 @@ export default async function initBookmarks({
       // The last section
       createSection(currentSection, sectionIndex)
     } catch (error) {
-      console.error('Error in addButtonsToSections:', error)
-      return
+      console.error('Error in addButtonsToMarkdown:', error)
     }
   }
 
@@ -210,6 +299,10 @@ export default async function initBookmarks({
     // Throttle the observer - only check every 500ms
     if (observerTimeout) clearTimeout(observerTimeout)
     observerTimeout = setTimeout(() => {
+      // ChatGPT re-renders the header (and drops our button) on its own
+      // schedule; put it back. No-op while it's there or the header isn't.
+      initBookmarksMenu()
+
       // Don't process while a response is still streaming
       if (isAnyTurnStreaming()) return
 
@@ -221,10 +314,9 @@ export default async function initBookmarks({
       if ((speechButton || speechButtonContainer) && !speechReady) return
 
       // Only process when there are new, unprocessed turns
-      const hasUnprocessed = getTurnContainers().some(turn => {
-        const md = getAssistantMarkdown(turn)
-        return !!md && !md.dataset.bookmarkProcessed
-      })
+      const hasUnprocessed = getTurnContainers().some(turn =>
+        getAssistantMarkdowns(turn).some(md => !md.dataset.bookmarkProcessed)
+      )
       if (!hasUnprocessed) return
 
       // Set flag to prevent recursive calls
@@ -246,6 +338,6 @@ export default async function initBookmarks({
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['disabled', 'data-state', 'class'],
+    attributeFilter: ['disabled', 'data-state', 'class', 'data-talvt-turn-state'],
   })
 }

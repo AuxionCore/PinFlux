@@ -1,3 +1,4 @@
+import { getSidebarClasses, setChatActive } from "@/components/pinChats/helpers/sidebarTheme";
 import createChatOptionsButton from "@/components/pinChats/helpers/createChatOptionsButton";
 import clearActiveChatStyles from "@/components/pinChats/helpers/clearActiveChatStyles";
 import styleActiveChat from "@/components/pinChats/helpers/styleActiveChat";
@@ -10,6 +11,7 @@ export default function createPinnedChat(
   profileId: string,
   historyElement: HTMLElement
 ): HTMLAnchorElement {
+  const classes = getSidebarClasses();
   const anchor: HTMLAnchorElement = document.createElement("a");
   const titleDiv1: HTMLDivElement = document.createElement("div");
   const titleDiv2: HTMLDivElement = document.createElement("div");
@@ -25,7 +27,7 @@ export default function createPinnedChat(
   anchor.setAttribute("data-pinflux-pinned-chat", "true"); // Add tutorial identifier
   // Note: draggable attribute is handled by setupPinnedChatsDragAndDrop
   anchor.href = `https://chatgpt.com/c/${urlId}`;
-  anchor.className = "group __menu-item hoverable";
+  anchor.className = classes.row;
 
   anchor.addEventListener("click", (event) => {
     event.preventDefault();
@@ -34,20 +36,19 @@ export default function createPinnedChat(
     window.dispatchEvent(new Event("popstate"));
   });
 
-  chatOptionsBtnRaper1.className =
-    "text-token-text-tertiary flex items-center self-stretch";
-  chatOptionsBtnRaper2.className = "trailing highlight";
+  chatOptionsBtnRaper1.className = classes.rowTrailingOuter;
+  chatOptionsBtnRaper2.className = classes.rowTrailing;
 
   titleSpan.textContent = title;
   titleSpan.setAttribute("dir", "auto");
-  titleDiv1.className = "flex min-w-0 grow items-center gap-2.5";
-  titleDiv2.className = "truncate";
+  titleDiv1.className = classes.rowTitleOuter;
+  titleDiv2.className = classes.rowTitleInner;
 
   const chatOptionsButton = createChatOptionsButton(
     anchor,
     chatOptionsBtnRaper2,
     historyElement,
-    isDarkMode,
+    isDarkMode(),
     profileId
   );
 
@@ -63,12 +64,8 @@ export default function createPinnedChat(
   const currentPath = window.location.pathname;
   const isActive = currentPath.includes(`/c/${urlId}`);
   
-  if (isActive) {
-    clearActiveChatStyles();
-    anchor.setAttribute("data-active", "");
-  } else {
-    anchor.removeAttribute("data-active");
-  }
+  if (isActive) clearActiveChatStyles();
+  setChatActive(anchor, isActive);
 
   // Add hover effect for the list item
   anchor.addEventListener("mouseover", () => {
@@ -76,7 +73,7 @@ export default function createPinnedChat(
     const isActive = currentPath.includes(`/c/${urlId}`);
     if (isActive) {
       clearActiveChatStyles();
-      anchor.setAttribute("data-active", "");
+      setChatActive(anchor, true);
     }
   });
   anchor.addEventListener("mouseout", () => {
@@ -92,7 +89,7 @@ export default function createPinnedChat(
     // }
     if (`https://chatgpt.com/c/${urlId}` === window.location.href) {
       clearActiveChatStyles();
-      anchor.setAttribute("data-active", "");
+      setChatActive(anchor, true);
     }
   });
 
