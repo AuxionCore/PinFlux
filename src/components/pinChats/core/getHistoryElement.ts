@@ -8,6 +8,14 @@ const HISTORY_SELECTORS = [
 
 const WARN_AFTER_MS = 10000
 
+export function findHistoryElement(): HTMLDivElement | null {
+  for (const selector of HISTORY_SELECTORS) {
+    const historyElement = document.querySelector<HTMLDivElement>(selector)
+    if (historyElement) return historyElement
+  }
+  return null
+}
+
 export default async function getHistoryElement() {
   return new Promise<HTMLDivElement>(resolve => {
     const startedAt = Date.now()
@@ -15,13 +23,11 @@ export default async function getHistoryElement() {
 
     // Poll the DOM every 100ms until the history element is found
     const interval = setInterval(() => {
-      for (const selector of HISTORY_SELECTORS) {
-        const historyElement = document.querySelector<HTMLDivElement>(selector)
-        if (historyElement) {
-          clearInterval(interval)
-          resolve(historyElement)
-          return
-        }
+      const historyElement = findHistoryElement()
+      if (historyElement) {
+        clearInterval(interval)
+        resolve(historyElement)
+        return
       }
 
       if (!warned && Date.now() - startedAt >= WARN_AFTER_MS) {

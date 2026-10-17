@@ -5,6 +5,7 @@ import getConversationBookmarksIds from './getConversationBookmarksIds'
 import removeBookmarkButtonHtml from './remove-bookmark-button.html?raw'
 import initBookmarksMenu from './bookmarksMenu'
 import migrateBookmarkId from './migrateBookmarkId'
+import styleBookmarkButton from './styleBookmarkButton'
 
 /**
  * Turn containers, newest ChatGPT first:
@@ -228,6 +229,7 @@ export default async function initBookmarks({
         if (button) {
           button.dataset.sectionId = sectionId
           button.dataset.sectionIndex = String(index)
+          styleBookmarkButton(button)
         }
       }
 

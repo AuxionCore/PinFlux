@@ -94,31 +94,33 @@ function showFloatingBookmarkInput(
   `
 
   const inputContainer = document.createElement('div')
-  inputContainer.className = 'bookmark-name-input-container bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-4 w-80 max-w-sm mx-4 border-2 border-gray-200 dark:border-gray-600'
+  // Theme-aware classes from themeStyles.ts: `dark:` utilities don't apply in
+  // the Oct 2026 app shell
+  inputContainer.className = 'bookmark-name-input-container pf-dialog'
 
   inputContainer.innerHTML = `
-    <div class="mb-4">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Add Bookmark</h3>
-      <label class="block text-sm text-gray-700 dark:text-gray-300 mb-2">
+    <div>
+      <h3 class="pf-dialog-title">Add Bookmark</h3>
+      <label class="pf-dialog-label">
         Bookmark name (optional)
       </label>
       <input
         type="text"
-        class="bookmark-name-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        class="bookmark-name-input pf-input"
         placeholder="Enter bookmark name"
         maxlength="100"
       />
     </div>
-    <div class="flex justify-end gap-3">
+    <div class="pf-dialog-actions">
       <button
         type="button"
-        class="bookmark-name-cancel px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+        class="bookmark-name-cancel pf-btn"
       >
         Cancel
       </button>
       <button
         type="button"
-        class="bookmark-name-save px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+        class="bookmark-name-save pf-btn pf-btn-primary"
       >
         Save
       </button>

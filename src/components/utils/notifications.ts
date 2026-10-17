@@ -1,3 +1,4 @@
+import { DARK_THEME_SELECTOR } from './styleScheme'
 interface NotificationConfig {
   id: string
   title: string
@@ -320,7 +321,8 @@ function addNotificationStyles(): void {
       padding: 0 16px 16px 20px;
     }
     
-    @media (prefers-color-scheme: dark) {
+    /* ChatGPT's theme, not the OS one - they can differ */
+    ${DARK_THEME_SELECTOR} {
       .pinflux-notification {
         background: rgba(31, 41, 55, 0.95);
         color: #f9fafb;

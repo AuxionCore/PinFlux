@@ -1,5 +1,5 @@
 import { getSidebarClasses } from "./sidebarTheme";
-import { isDarkMode } from "@/components/utils/styleScheme";
+import { DARK_THEME_SELECTOR, isDarkMode } from "@/components/utils/styleScheme";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
 
 // Function to create the container for pinned chats
@@ -164,15 +164,10 @@ export default function createPinnedContainerElement(): HTMLElement {
           display: none;
         }
 
-        ${
-          isDarkMode &&
-          `
-          #chatListContainer {
-            --scroll-thumb: #303030;
-            --scroll-thumb-hover: #505050;
-            --scroll-thumb-active: #707070;
-          }
-        `
+        ${DARK_THEME_SELECTOR} #chatListContainer {
+          --scroll-thumb: #303030;
+          --scroll-thumb-hover: #505050;
+          --scroll-thumb-active: #707070;
         }
 
         /* Show scrollbar on hover only when scrollable */
@@ -206,7 +201,9 @@ export default function createPinnedContainerElement(): HTMLElement {
         }
       
     `;
-  document.head.appendChild(style);
+  // The board is rebuilt whenever ChatGPT re-renders it away; add the sheet once
+  style.id = "pinflux-board-styles";
+  if (!document.getElementById(style.id)) document.head.appendChild(style);
 
   // Function to check if scrolling is needed
   function checkScrollNeed(): void {
@@ -259,10 +256,10 @@ export default function createPinnedContainerElement(): HTMLElement {
       draggableDisplay.style.border = '2px dashed #dedede';
       draggableDisplay.style.borderRadius = '8px';
       draggableDisplay.style.zIndex = '1000';
-      draggableDisplay.style.backgroundColor = isDarkMode
+      draggableDisplay.style.backgroundColor = isDarkMode()
         ? 'rgba(40, 40, 40, 95)'
         : 'rgba(230, 230, 230, 95)';
-      draggableDisplay.style.color = isDarkMode ? '#dedede' : '#000000';
+      draggableDisplay.style.color = isDarkMode() ? '#dedede' : '#000000';
       draggableDisplay.style.display = 'flex';
       draggableDisplay.style.flexDirection = 'column';
       draggableDisplay.style.alignItems = 'center';

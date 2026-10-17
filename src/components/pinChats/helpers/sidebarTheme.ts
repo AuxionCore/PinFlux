@@ -111,3 +111,15 @@ export function matchNativeMenuItem(item: HTMLElement, menu: Element): void {
     item.removeAttribute('data-highlighted')
   )
 }
+
+/**
+ * Closes a ChatGPT (Radix) menu the way a user would. Removing the node
+ * ourselves pulls it out from under React, which can crash ChatGPT's next
+ * render; Radix listens for Escape on the document and closes cleanly.
+ */
+export function closeNativeMenu(menu: Element | null | undefined): void {
+  if (!menu?.isConnected) return
+  document.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+  )
+}

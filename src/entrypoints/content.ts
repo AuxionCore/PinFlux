@@ -4,6 +4,7 @@ import getProfileId from '@/components/utils/getProfileId'
 import bumpBookmarkGroupTimestamp from '@/components/chatBookmarks/bumpBookmarkGroupTimestamp'
 import { tutorialManager } from '@/components/tutorial/tutorialManager'
 import '@/components/tutorial/tutorialAPI' // Load API for debugging
+import ensureThemeStyles from '@/components/utils/themeStyles'
 
 /**
  * URL patterns that the content script should match against
@@ -65,6 +66,8 @@ export default defineContentScript({
   matches: urlPatternStrings,
   async main(ctx) {
     try {
+      ensureThemeStyles()
+
       // Set up message listener for tutorial actions
       browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'start-tutorial') {

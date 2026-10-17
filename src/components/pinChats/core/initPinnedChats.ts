@@ -2,6 +2,7 @@ import createPinnedContainerElement from '@/components/pinChats/helpers/createPi
 import createPinnedChat from '@/components/pinChats/core/createPinnedChat'
 import { getPinChatsFromStorage } from '@/components/utils/storage'
 import setupPinnedChatsDragAndDrop from '@/components/pinChats/dragAndDrop/setupPinnedChatsDragAndDrop_SIMPLE'
+import { findHistoryElement } from '@/components/pinChats/core/getHistoryElement'
 
 /**
  * Oct 2026 app shell: the sidebar sections are siblings marked with
@@ -129,4 +130,46 @@ export default async function initPinnedChats({
   if (pinnedChats) {
     setupPinnedChatsDragAndDrop(pinnedChats, profileId)
   }
+}
+
+let boardObserver: MutationObserver | null = null
+
+/**
+ * The Oct 2026 sidebar is re-rendered by React often (navigation, collapsing
+ * sections, ChatGPT's own pins changing), and each re-render can drop our
+ * board. Put it back whenever it goes missing. Idempotent; one observer.
+ */
+export function keepPinnedBoardMounted(profileId: string): void {
+  if (boardObserver) return
+
+  let board = document.querySelector('[data-pinflux-section="true"]')
+  let pending = false
+  let lastAttempt = 0
+
+  boardObserver = new MutationObserver(() => {
+    // Cheap enough to run on every mutation batch, including while streaming
+    if (board?.isConnected || pending) return
+    board = document.querySelector('[data-pinflux-section="true"]')
+    if (board) return
+
+    pending = true
+    setTimeout(async () => {
+      pending = false
+      if (document.querySelector('[data-pinflux-section="true"]')) return
+      // Don't spin if the sidebar keeps rejecting the board
+      if (Date.now() - lastAttempt < 1000) return
+      // No sidebar right now (collapsed / mobile): wait for the next mutation
+      const historyElement = findHistoryElement()
+      if (!historyElement) return
+
+      lastAttempt = Date.now()
+      try {
+        await initPinnedChats({ profileId, historyElement })
+        board = document.querySelector('[data-pinflux-section="true"]')
+      } catch (error) {
+        console.error('[PinFlux] Failed to restore the pinned board:', error)
+      }
+    }, 200)
+  })
+  boardObserver.observe(document.body, { childList: true, subtree: true })
 }

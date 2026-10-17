@@ -13,10 +13,10 @@ export default function createDraggableDisplay(text: string): HTMLDivElement {
   draggableDisplay.style.border = '2px dashed #dedede'
   draggableDisplay.style.borderRadius = '8px'
   draggableDisplay.style.zIndex = '1000'
-  draggableDisplay.style.backgroundColor = isDarkMode
+  draggableDisplay.style.backgroundColor = isDarkMode()
     ? 'rgba(40, 40, 40, 95)'
     : 'rgba(230, 230, 230, 95)'
-  draggableDisplay.style.color = isDarkMode ? '#dedede' : '#000000'
+  draggableDisplay.style.color = isDarkMode() ? '#dedede' : '#000000'
   draggableDisplay.style.display = 'flex'
   draggableDisplay.style.flexDirection = 'column'
   draggableDisplay.style.alignItems = 'center'

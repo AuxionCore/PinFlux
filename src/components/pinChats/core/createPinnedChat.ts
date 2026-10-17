@@ -48,7 +48,7 @@ export default function createPinnedChat(
     anchor,
     chatOptionsBtnRaper2,
     historyElement,
-    isDarkMode,
+    isDarkMode(),
     profileId
   );
 

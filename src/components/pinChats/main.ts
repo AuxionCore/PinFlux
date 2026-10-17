@@ -1,6 +1,8 @@
 import getProfileId from '@/components/utils/getProfileId'
 import getHistoryElement from '@/components/pinChats/core/getHistoryElement'
-import initPinnedChats from '@/components/pinChats/core/initPinnedChats'
+import initPinnedChats, {
+  keepPinnedBoardMounted,
+} from '@/components/pinChats/core/initPinnedChats'
 import createPinButton from './pinButton/PinButton'
 import createUnpinButton from './pinButton/UnpinButton'
 import setupUnpinChatListener from '@/components/pinChats/core/setupUnpinChatListener'
@@ -107,6 +109,7 @@ export default async function initContentScript(): Promise<void> {
       profileId,
       historyElement,
     })
+    keepPinnedBoardMounted(profileId)
 
     // Show drag and drop notification for existing users who already have 2+ pinned chats
     setTimeout(async () => {
