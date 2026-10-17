@@ -191,8 +191,9 @@ at a commit that isn't in the released history.
 6. On the merged `main`: `git tag -a vX.Y.Z` and `git push origin vX.Y.Z`.
 7. `npm run zip && npm run zip:firefox`, then publish a GitHub Release on the tag and attach
    `pinflux-X.Y.Z-chrome.zip`, `-firefox.zip` and `-sources.zip`.
-8. `npm run submit` to push to the Chrome Web Store — **this auto-publishes**, so only run it when
-   you mean it. Needs `.env.submit` (gitignored); see [CHROME_STORE_SETUP.md](CHROME_STORE_SETUP.md).
+8. `npm run submit -- --dry-run` to confirm the Web Store credentials still work, then
+   `npm run submit` to push — **this auto-publishes**, so only run it when you mean it. Needs
+   `.env.submit` (gitignored); see [CHROME_STORE_SETUP.md](CHROME_STORE_SETUP.md).
    Firefox is uploaded manually to AMO with the firefox + sources zips.
 
 ## Things that will bite you

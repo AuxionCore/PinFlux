@@ -30,3 +30,5 @@ web-ext.config.ts
 
 # Dev tools
 .prettierrc
+
+.claude
