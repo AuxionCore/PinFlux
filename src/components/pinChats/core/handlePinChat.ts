@@ -12,7 +12,7 @@ async function checkAndShowDragDropNotification(
   try {
     const storage = await browser.storage.sync.get([`${profileId}`])
     const savedChats: { urlId: string; title: string }[] =
-      storage[`${profileId}`] || []
+      (storage[`${profileId}`] as { urlId: string; title: string }[]) ?? []
 
     if (savedChats.length >= 2) {
       showOneTimeNotification({
@@ -50,7 +50,7 @@ export default async function handlePinChat(
 
   const storage = await browser.storage.sync.get([`${profileId}`])
   const savedChats: { urlId: string; title: string }[] =
-    storage[`${profileId}`] || []
+    (storage[`${profileId}`] as { urlId: string; title: string }[]) ?? []
 
   // Check if the chat is already pinned
   if (urlId && !savedChats.some(chat => chat.urlId === urlId)) {

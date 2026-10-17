@@ -200,7 +200,7 @@ async function setUpPinnedChats(): Promise<void> {
         const urlSegments = chatUrl.split('/').filter(Boolean)
         const cIndex = urlSegments.indexOf('c')
         if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
-          urlId = urlSegments[cIndex + 1]
+          urlId = urlSegments[cIndex + 1] ?? ''
         }
       }
       
@@ -310,7 +310,7 @@ async function setUpPinnedChats(): Promise<void> {
           // Support both regular chats (/c/{id}) and project chats (/g/g-p-{projectId}/c/{id})
           const cIndex = urlSegments.indexOf('c')
           if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
-            urlId = urlSegments[cIndex + 1]
+            urlId = urlSegments[cIndex + 1] ?? ''
           }
 
             // Get chat title - try to find in sidebar first for accuracy
@@ -330,9 +330,9 @@ async function setUpPinnedChats(): Promise<void> {
               const documentTitle = document.querySelector('title')?.textContent || ''
               if (documentTitle) {
                 // Remove " | ChatGPT" suffix and split by " - " to get just the chat name
-                const titleParts = documentTitle.split('|')[0].trim().split(' - ')
+                const titleParts = (documentTitle.split('|')[0] ?? '').trim().split(' - ')
                 // Take the first part (chat name) without project name
-                chatTitle = titleParts[0].trim() || 'Untitled'
+                chatTitle = titleParts[0]?.trim() || 'Untitled'
               }
             }
 

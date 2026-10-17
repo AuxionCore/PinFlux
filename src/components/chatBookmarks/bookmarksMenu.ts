@@ -22,7 +22,7 @@ async function updateBookmarkIndicator() {
     let conversationId = ''
     const match = path.match(/\/c\/([\w-]+)/)
     if (match) {
-      conversationId = match[1]
+      conversationId = match[1] ?? ''
     }
 
     if (!conversationId) {
@@ -324,7 +324,7 @@ async function updateBookmarksList(dropdown: Element) {
     let conversationId = ''
     const match = path.match(/\/c\/([\w-]+)/)
     if (match) {
-      conversationId = match[1]
+      conversationId = match[1] ?? ''
     }
 
     if (!conversationId) {
@@ -452,7 +452,7 @@ async function handleRemoveBookmark(removeButton: HTMLElement, dropdown: Element
     let conversationId = ''
     const match = path.match(/\/c\/([\w-]+)/)
     if (match) {
-      conversationId = match[1]
+      conversationId = match[1] ?? ''
     }
 
     if (!conversationId) return
@@ -511,7 +511,7 @@ async function handleEditBookmark(editButton: HTMLElement, dropdown: Element) {
       let conversationId = ''
       const match = path.match(/\/c\/([\w-]+)/)
       if (match) {
-        conversationId = match[1]
+        conversationId = match[1] ?? ''
       }
 
       if (!conversationId) return

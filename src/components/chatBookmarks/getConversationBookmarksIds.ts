@@ -10,7 +10,7 @@ export default async function getConversationBookmarksIds(
     const all = await browser.storage.sync.get(null)
     for (const key of Object.keys(all)) {
       if (key.startsWith(keyPrefix)) {
-        const bookmarks: any[] = all[key] || []
+        const bookmarks: any[] = (all[key] as any[]) ?? []
         allBookmarks = allBookmarks.concat(bookmarks)
       }
     }

@@ -1,4 +1,5 @@
-import { TutorialStep, TutorialFeature, getTutorialFeatures, getAvailableSteps } from './tutorialFeatures'
+import type { TutorialStep, TutorialFeature } from './tutorialFeatures'
+import { getTutorialFeatures, getAvailableSteps } from './tutorialFeatures'
 
 interface TutorialState {
   isActive: boolean
@@ -121,7 +122,7 @@ export class TutorialManager {
       if (!nextFeature) {
         // If user initiated and no uncompleted features, start with first feature
         if (userInitiated && getTutorialFeatures().length > 0) {
-          this.state.currentFeature = getTutorialFeatures()[0]
+          this.state.currentFeature = getTutorialFeatures()[0]!
         } else {
           return
         }
@@ -156,7 +157,7 @@ export class TutorialManager {
       // Try to find next step with met prerequisite in current feature
       let foundValidStep = false
       for (let i = this.state.currentStepIndex + 1; i < this.state.currentFeature.steps.length; i++) {
-        const nextStep = this.state.currentFeature.steps[i]
+        const nextStep = this.state.currentFeature.steps[i]!
         if (!nextStep.prerequisite || nextStep.prerequisite()) {
           this.state.currentStepIndex = i - 1 // Will be incremented by nextStep()
           foundValidStep = true
@@ -940,7 +941,7 @@ export class TutorialManager {
       // Find the next step that belongs to a different sub-feature
       let nextStepIndex = this.state.currentStepIndex + 1
       while (nextStepIndex < this.state.currentFeature.steps.length) {
-        const nextStep = this.state.currentFeature.steps[nextStepIndex]
+        const nextStep = this.state.currentFeature.steps[nextStepIndex]!
         if (nextStep.subFeature !== currentSubFeature) {
           // Found a different sub-feature - move to it
           this.cleanup()
@@ -1132,7 +1133,9 @@ export class TutorialManager {
     try {
       const result = await browser.storage.local.get(['tutorialProgress'])
       if (result.tutorialProgress) {
-        this.state.completedFeatures = result.tutorialProgress.completedFeatures || []
+        this.state.completedFeatures =
+          (result.tutorialProgress as { completedFeatures?: string[] })
+            .completedFeatures ?? []
       }
     } catch (error) {
       console.error('Failed to load tutorial progress:', error)

@@ -196,7 +196,7 @@ export default async function initBookmarks({
         const wrapper = document.createElement('div')
         wrapper.classList.add('bookmark-section', 'flex-1', 'min-w-0')
 
-        elements[0].before(container)
+        elements[0]!.before(container)
         for (const el of elements) wrapper.appendChild(el)
         container.appendChild(wrapper)
 

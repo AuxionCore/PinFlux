@@ -31,7 +31,7 @@ export default async function handleBookmarkButtonClick(event: MouseEvent) {
     let conversationId = ''
     const match = path.match(/\/c\/([\w-]+)/)
     if (match) {
-      conversationId = match[1]
+      conversationId = match[1] ?? ''
     }
     if (!conversationId) {
       console.warn(

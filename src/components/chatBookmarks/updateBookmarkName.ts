@@ -15,7 +15,7 @@ export default async function updateBookmarkName({
     const dateStr = getCompactDateString()
     const key = `bm_${profileId}_${conversationId}_lastAccess_${dateStr}`
     const result = await browser.storage.sync.get(key)
-    const bookmarks: any[] = result[key] || []
+    const bookmarks: any[] = (result[key] as any[]) ?? []
 
     // Find the bookmark and update the name
     const bookmarkIndex = bookmarks.findIndex(b => b.articleId === articleId)
