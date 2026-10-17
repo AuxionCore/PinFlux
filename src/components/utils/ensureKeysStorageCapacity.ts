@@ -5,7 +5,7 @@ let DELETE_BATCH_SIZE = 5
 function getDateFromBookmarkKey(key: string): number | null {
   const match = key.match(/_lastAccess_(\d{8})$/)
   if (!match) return null
-  return parseInt(match[1], 10)
+  return parseInt(match[1]!, 10)
 }
 
 /**
@@ -17,7 +17,7 @@ function extractConversationIdFromBookmarkKey(key: string): string | null {
   // Format: bm_${profileId}_${conversationId}_lastAccess_${dateStr}
   const match = key.match(/^bm_(.+?)_(.+?)_lastAccess_(\d{8})$/)
   if (!match) return null
-  return match[2] // conversationId is the second capture group
+  return match[2]! // conversationId is the second capture group
 }
 
 /**
@@ -29,7 +29,7 @@ function extractProfileIdFromBookmarkKey(key: string): string | null {
   // Format: bm_${profileId}_${conversationId}_lastAccess_${dateStr}
   const match = key.match(/^bm_(.+?)_(.+?)_lastAccess_(\d{8})$/)
   if (!match) return null
-  return match[1] // profileId is the first capture group
+  return match[1]! // profileId is the first capture group
 }
 
 /**
@@ -41,7 +41,8 @@ function extractProfileIdFromBookmarkKey(key: string): string | null {
 async function isConversationPinned(profileId: string, conversationId: string): Promise<boolean> {
   try {
     const storage = await browser.storage.sync.get([profileId])
-    const savedPinChats: { urlId: string; title: string }[] = storage[profileId] || []
+    const savedPinChats: { urlId: string; title: string }[] =
+      (storage[profileId] as { urlId: string; title: string }[]) ?? []
     return savedPinChats.some(chat => chat.urlId === conversationId)
   } catch (error) {
     console.error('Error checking if conversation is pinned:', error)

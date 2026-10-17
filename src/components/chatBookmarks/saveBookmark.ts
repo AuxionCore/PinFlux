@@ -23,7 +23,7 @@ export default async function saveBookmark({
     const result = await browser.storage.sync.get(key)
 
     if (key in result) {
-      const bookmarks: any[] = result[key] || []
+      const bookmarks: any[] = (result[key] as any[]) ?? []
 
       const alreadyExists = bookmarks.some(b => b['articleId'] === articleId)
       if (alreadyExists) {

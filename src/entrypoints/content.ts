@@ -39,7 +39,7 @@ async function waitForProfileAndConversationId(
     
     if (segments.length >= 2 && segments[segments.length - 2] === 'c') {
       // Regular chat or project chat - conversationId is always after 'c'
-      conversationId = segments[segments.length - 1]
+      conversationId = segments[segments.length - 1] ?? ''
     }
 
     // Validate conversationId: for example, must be a 32+ char hex string (adjust as needed)

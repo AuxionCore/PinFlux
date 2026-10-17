@@ -998,7 +998,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
                     const pinnedChats = document.querySelectorAll('[data-pinflux-pinned-chat]')
                     
                     for (let i = 0; i < pinnedChats.length; i++) {
-                      const pinnedChat = pinnedChats[i]
+                      const pinnedChat = pinnedChats[i]!
                       
                       // Try multiple selectors to find the link
                       let pinnedLink: HTMLAnchorElement | null = null

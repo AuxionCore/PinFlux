@@ -330,7 +330,7 @@ export default function createPinnedContainerElement(): HTMLElement {
       const urlSegments = chatHref.split('/').filter(Boolean);
       const cIndex = urlSegments.indexOf('c');
       if (cIndex !== -1 && cIndex < urlSegments.length - 1) {
-        urlId = urlSegments[cIndex + 1];
+        urlId = urlSegments[cIndex + 1] ?? '';
       }
     }
     

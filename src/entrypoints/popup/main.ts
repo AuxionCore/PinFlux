@@ -146,7 +146,9 @@ async function popupScript() {
         elements.errorToastMessage
       )!
       const storageData = await browser.storage.sync.get('errorToastMessage')
-      const errorToastMessageText = storageData.errorToastMessage
+      const errorToastMessageText = storageData.errorToastMessage as
+        | string
+        | null
 
       errorToastTitle.textContent =
         browser.i18n.getMessage('errorToastTitle') || 'Error Alert'

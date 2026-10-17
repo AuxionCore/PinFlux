@@ -19,7 +19,7 @@ export default async function deleteBookmark({
 
   try {
     const result = await browser.storage.sync.get(key)
-    const existing: Bookmark[] = result[key] || []
+    const existing: Bookmark[] = (result[key] as Bookmark[]) ?? []
 
     const updated = existing.filter(b => b.articleId !== articleId)
 

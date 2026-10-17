@@ -14,7 +14,7 @@ async function getStorageData(profileId: string): Promise<{
 
     const storage = await browser.storage.sync.get([`${profileId}`])
     const savedPinChats: { urlId: string; title: string }[] =
-      storage[`${profileId}`] || []
+      (storage[`${profileId}`] as { urlId: string; title: string }[]) ?? []
     // const savedBookmarks: { urlId: string; title: string }[] =
     //   storage[`${profileId}`] || [];
     return {
@@ -120,7 +120,7 @@ export async function renamePinChatInStorage(
     // Find the chat and update its title
     const chatIndex = savedPinChats.findIndex(chat => chat.urlId === urlId)
     if (chatIndex !== -1) {
-      savedPinChats[chatIndex].title = newTitle
+      savedPinChats[chatIndex]!.title = newTitle
       browser.storage.sync.set({ [`${profileId}`]: savedPinChats })
     }
   } catch (error) {

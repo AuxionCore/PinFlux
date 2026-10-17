@@ -15,7 +15,7 @@ export default async function getBookmarksData(
     const dateStr = getCompactDateString()
     const key = `bm_${profileId}_${conversationId}_lastAccess_${dateStr}`
     const result = await browser.storage.sync.get(key)
-    const bookmarks: any[] = result[key] || []
+    const bookmarks: any[] = (result[key] as any[]) ?? []
 
     const bookmarksData: BookmarkData[] = []
 
