@@ -27,26 +27,75 @@ async function updateBookmarkIndicator() {
 
     if (!conversationId) {
       icon.setAttribute('fill', 'none')
-      icon.setAttribute('stroke', 'white')
+      icon.setAttribute('stroke', 'currentColor')
       return
     }
 
     const bookmarksData = await getBookmarksData(profileId, conversationId)
     
     if (bookmarksData.length > 0) {
-      // White border with white fill when there are bookmarks
-      icon.setAttribute('stroke', 'white')
-      icon.setAttribute('fill', 'white')
+      // Filled when there are bookmarks
+      icon.setAttribute('stroke', 'currentColor')
+      icon.setAttribute('fill', 'currentColor')
     } else {
-      // White border without fill when empty
-      icon.setAttribute('stroke', 'white')
+      // Outline only when empty
+      icon.setAttribute('stroke', 'currentColor')
       icon.setAttribute('fill', 'none')
     }
   } catch (error) {
     console.error('Error updating bookmark indicator:', error)
-    icon.setAttribute('stroke', 'white')
+    icon.setAttribute('stroke', 'currentColor')
     icon.setAttribute('fill', 'none')
   }
+}
+
+// Oct 2026 app shell: the right-hand group of the conversation titlebar, the
+// one holding Share and More
+const HEADER_ACTIONS_SELECTOR_2026 =
+  '[data-app-shell-main-titlebar] [data-app-shell-header-obstacle]'
+// 2025 and earlier, most specific first
+const LEGACY_HEADER_ACTIONS_SELECTORS = [
+  '#conversation-header-actions',
+  '[data-testid="conversation-header-actions"]',
+  '.conversation-header-actions',
+  '[role="toolbar"]',
+  'header nav',
+  'header [role="navigation"]',
+]
+
+function mountBookmarksMenuButton(): boolean {
+  const container = document.createElement('div')
+  container.innerHTML = bookmarksMenuButtonHtml
+
+  const actions2026 = document.querySelector(HEADER_ACTIONS_SELECTOR_2026)
+  if (actions2026) {
+    // Every level of the new header is pointer-events-none
+    container.className = 'pointer-events-auto flex shrink-0 items-center'
+
+    // Borrow the native toolbar button's look. Its classes are hashed per
+    // ChatGPT build, so read them off the live button rather than hardcoding.
+    const nativeButton = actions2026.querySelector('button')
+    const ourButton = container.querySelector('button')
+    if (nativeButton && ourButton) {
+      ourButton.className = nativeButton.className
+      for (const attr of ['data-color', 'data-variant', 'data-size']) {
+        const value = nativeButton.getAttribute(attr)
+        if (value !== null) ourButton.setAttribute(attr, value)
+      }
+    }
+
+    actions2026.prepend(container)
+    return true
+  }
+
+  for (const selector of LEGACY_HEADER_ACTIONS_SELECTORS) {
+    const actions = document.querySelector(selector)
+    if (actions) {
+      actions.prepend(container)
+      return true
+    }
+  }
+  return false
 }
 
 export default async function initBookmarksMenu() {
@@ -57,62 +106,14 @@ export default async function initBookmarksMenu() {
   }
   
   
-  const header = document.getElementById('page-header')
-  if (!header) {
-    console.warn('Page header not found')
+  if (!mountBookmarksMenuButton()) {
+    console.warn('No suitable container found for bookmarks menu')
     return
   }
 
-  // Look for the actions buttons area
-  const actionsDiv = document.getElementById('conversation-header-actions')
-  if (!actionsDiv) {
-    console.warn('Conversation header actions not found, trying alternative selectors...')
-    
-    // Try to find an alternative element
-    const alternatives = [
-      '[data-testid="conversation-header-actions"]',
-      '.conversation-header-actions',
-      '[role="toolbar"]',
-      'header nav',
-      'header [role="navigation"]'
-    ]
-    
-    let foundElement = null
-    for (const selector of alternatives) {
-      foundElement = document.querySelector(selector)
-      if (foundElement) {
-        break
-      }
-    }
-    
-    if (!foundElement) {
-      console.warn('No suitable container found for bookmarks menu')
-      return
-    }
-    
-    // Use the found element
-    const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
-
-    foundElement.appendChild(bookmarksContainer)
-    
-    // Append dropdown to body to prevent layout issues
-    if (!document.getElementById('bookmarks-dropdown')) {
-      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
-    }
-  } else {
-    
-    // Create container for bookmarks menu button
-    const bookmarksContainer = document.createElement('div')
-    bookmarksContainer.innerHTML = bookmarksMenuButtonHtml
-
-    // Add to the beginning of the actions area
-    actionsDiv.insertBefore(bookmarksContainer, actionsDiv.firstChild)
-    
-    // Append dropdown to body to prevent layout issues
-    if (!document.getElementById('bookmarks-dropdown')) {
-      document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
-    }
+  // Append dropdown to body to prevent layout issues
+  if (!document.getElementById('bookmarks-dropdown')) {
+    document.body.insertAdjacentHTML('beforeend', bookmarksDropdownHtml)
   }
 
   // Add the name change popup

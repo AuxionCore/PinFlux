@@ -1,3 +1,4 @@
+import { getSidebarClasses } from "./sidebarTheme";
 import handleUnpinChatBottomClick from "../pinButton/handleUnpinChatBottomClick";
 import handleSearchOriginalChatButtonClick from "./handleSearchOriginalChat";
 import handleRenamePinChat from "./handleRenamePinChat";
@@ -22,6 +23,13 @@ export default function createChatOptionsMenu(
     `;
 
   chatOptionsMenu.innerHTML = pinChatOptionsMenu;
+
+  // The markup carries the 2025 classes; swap in the current set
+  const classes = getSidebarClasses();
+  chatOptionsMenu.querySelector("[role='menu']")?.setAttribute("class", classes.menu);
+  chatOptionsMenu.querySelectorAll("[role='menuitem']").forEach((item) =>
+    item.setAttribute("class", classes.menuItem)
+  );
 
   // Add event listeners to the menu items
   chatOptionsMenu.querySelectorAll("[role='menuitem']").forEach((item) => {

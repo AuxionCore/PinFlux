@@ -1,3 +1,13 @@
+// Sidebar chat rows. Oct 2026 app shell: rows in the Recents section, with the
+// menu button beside the link inside the row. 2025: links inside #history.
+const CHATS_SECTION_ROW =
+  '[data-sidebar-project-container-id="chats"] [data-sidebar-chatgpt-conversation-key]'
+const FIRST_HISTORY_CHAT =
+  '#history a[href*="/c/"]:first-of-type, #history [data-testid^="history-item"]:first-child, ' +
+  CHATS_SECTION_ROW
+const HISTORY_CHAT_LINKS =
+  '#history a[href*="/c/"], [data-sidebar-project-container-id="chats"] a[data-interactive-row-link]'
+
 // Add CSS for tutorial animations
 const addTutorialStyles = () => {
   if (!document.getElementById('tutorial-pin-styles')) {
@@ -296,7 +306,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         id: 'pin_step_1',
         titleKey: 'tutorialPinStep1Title',
         messageKey: 'tutorialPinStep1Message',
-        targetSelector: '#history a[href*="/c/"]:first-of-type, #history [data-testid^="history-item"]:first-child',
+        targetSelector: FIRST_HISTORY_CHAT,
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to click menu - no Next button
@@ -314,7 +324,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
           const setupMenuDetection = () => {
             let menuAdvanced = false
             
-            const chatElement = document.querySelector('#history a[href*="/c/"]:first-of-type, #history [data-testid^="history-item"]:first-child') as HTMLElement
+            const chatElement = document.querySelector(FIRST_HISTORY_CHAT) as HTMLElement
             if (!chatElement) {
               return
             }
@@ -324,7 +334,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
             const checkForOptionsButton = () => {
               if (optionsListenerAdded) return // Don't add multiple listeners
               
-              const optionsButton = chatElement.querySelector('[data-testid*="options"]') as HTMLElement
+              const optionsButton = chatElement.querySelector('[data-testid*="options"], button[aria-haspopup="menu"]') as HTMLElement
               if (optionsButton && optionsButton.offsetParent !== null) {
                 const handleOptionsClick = async () => {
                   
@@ -501,7 +511,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         id: 'pin_drag_demo_step',
         titleKey: 'tutorialDragToPinTitle',
         messageKey: 'tutorialDragToPinMessage',
-        targetSelector: '#history a[href*="/c/"]:nth-of-type(2), #history [data-testid^="history-item"]:nth-child(2)',
+        targetSelector: '#history a[href*="/c/"]:nth-of-type(2), #history [data-testid^="history-item"]:nth-child(2), ' + CHATS_SECTION_ROW,
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to drag - no Next button
@@ -510,7 +520,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         action: async () => {
           
           // Find the second unpinned chat in history (skip the first one since it might have been used in the PIN tutorial)
-          const historyChats = document.querySelectorAll('#history a[href*="/c/"]')
+          const historyChats = document.querySelectorAll(HISTORY_CHAT_LINKS)
           let targetChat: HTMLElement | null = null
           let unpinnedCount = 0
           
@@ -675,7 +685,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         id: 'pin_shortcut_demo_step',
         titleKey: 'tutorialShortcutDemoTitle',
         messageKey: 'tutorialShortcutDemoMessage',
-        targetSelector: '#history a[href*="/c/"]:nth-of-type(3), #history [data-testid^="history-item"]:nth-child(3)',
+        targetSelector: '#history a[href*="/c/"]:nth-of-type(3), #history [data-testid^="history-item"]:nth-child(3), ' + CHATS_SECTION_ROW,
         position: 'right',
         highlightElement: true,
         waitForUserAction: true, // Wait for user to click chat
@@ -684,7 +694,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
         action: async () => {
           
           // Find the third unpinned chat in history
-          const historyChats = document.querySelectorAll('#history a[href*="/c/"]')
+          const historyChats = document.querySelectorAll(HISTORY_CHAT_LINKS)
           let targetChat: HTMLElement | null = null
           let unpinnedCount = 0
           
@@ -1033,7 +1043,7 @@ export const TUTORIAL_FEATURES: TutorialFeature[] = [
           } else {
             
             // Find an unpinned chat to suggest
-            const historyChats = document.querySelectorAll('#history a[href*="/c/"]')
+            const historyChats = document.querySelectorAll(HISTORY_CHAT_LINKS)
             let targetChat: HTMLElement | null = null
             
             for (const chat of historyChats) {

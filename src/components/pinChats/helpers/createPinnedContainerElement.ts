@@ -1,8 +1,11 @@
+import { getSidebarClasses } from "./sidebarTheme";
 import { isDarkMode } from "@/components/utils/styleScheme";
 import handlePinChat from "@/components/pinChats/core/handlePinChat";
 
 // Function to create the container for pinned chats
 export default function createPinnedContainerElement(): HTMLElement {
+  const classes = getSidebarClasses();
+
   // Load saved expanded state (default: true)
   let isExpanded = true;
   try {
@@ -16,27 +19,27 @@ export default function createPinnedContainerElement(): HTMLElement {
 
   // Create the main wrapper with the expandable section structure
   const sectionWrapper: HTMLDivElement = document.createElement("div");
-  sectionWrapper.className = isExpanded 
-    ? "group/sidebar-expando-section mb-[var(--sidebar-expanded-section-margin-bottom)]" 
-    : "group/sidebar-expando-section mb-[var(--sidebar-collapsed-section-margin-bottom)]";
+  sectionWrapper.className = isExpanded
+    ? classes.sectionExpanded
+    : classes.sectionCollapsed;
   sectionWrapper.setAttribute("data-pinflux-section", "true"); // Marker for re-init detection
   
   // Create the header with title (similar to "Chats" section)
   const headerButton: HTMLDivElement = document.createElement("div");
   headerButton.setAttribute("tabindex", "0");
   headerButton.setAttribute("data-fill", "");
-  headerButton.className = "group __menu-item hoverable";
+  headerButton.className = classes.headerButton;
   headerButton.setAttribute("aria-expanded", isExpanded.toString());
   headerButton.setAttribute("aria-label", isExpanded ? "Collapse PinFlux Board section" : "Expand PinFlux Board section");
   headerButton.setAttribute("data-no-hover-bg", "true");
   headerButton.setAttribute("data-no-contents-gap", "true");
   
   const headerContent: HTMLDivElement = document.createElement("div");
-  headerContent.className = "text-token-text-tertiary flex w-full items-center justify-start gap-0.5";
+  headerContent.className = classes.headerContent;
   
   const pinnedContainerTitle: HTMLHeadingElement = document.createElement("h2");
   pinnedContainerTitle.textContent = "PinFlux Board";
-  pinnedContainerTitle.className = "__menu-label";
+  pinnedContainerTitle.className = classes.headerTitle;
   pinnedContainerTitle.setAttribute("data-no-spacing", "true");
   
   // Create the SVG arrow
@@ -84,9 +87,9 @@ export default function createPinnedContainerElement(): HTMLElement {
     arrowSvg.style.opacity = isExpanded ? "0" : "1";
     
     // Update section wrapper class
-    sectionWrapper.className = isExpanded 
-      ? "group/sidebar-expando-section mb-[var(--sidebar-expanded-section-margin-bottom)]" 
-      : "group/sidebar-expando-section mb-[var(--sidebar-collapsed-section-margin-bottom)]";
+    sectionWrapper.className = isExpanded
+      ? classes.sectionExpanded
+      : classes.sectionCollapsed;
     
     // Save state to localStorage
     try {

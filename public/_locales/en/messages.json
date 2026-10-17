@@ -384,5 +384,13 @@
   "tutorialNoPinnedChatsMessage": {
     "message": "You skipped all pinning methods, so there are no pinned chats to demonstrate management features. We recommend pinning a chat first to see these features in action. You can restart the tutorial anytime from the extension popup!",
     "description": "Message when skipping manage section due to no pinned chats"
+  },
+  "pinToPinFlux": {
+    "message": "Pin to PinFlux",
+    "description": "Menu item that pins a chat to the PinFlux Board"
+  },
+  "unpinFromPinFlux": {
+    "message": "Unpin from PinFlux",
+    "description": "Menu item that removes a chat from the PinFlux Board"
   }
 }

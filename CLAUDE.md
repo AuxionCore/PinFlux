@@ -96,17 +96,27 @@ fix for exactly this bug (a bookmark named `/apps/<domain>` broke the dropdown m
 ## The thing that breaks this project
 
 Every feature is anchored to ChatGPT's private DOM, which changes without warning. Two of the last
-three releases were recoveries from a ChatGPT redesign. The selectors we depend on:
+three releases were recoveries from a ChatGPT redesign, and in Oct 2026 ChatGPT replaced its whole
+app shell (#22) — every anchor below changed at once. The selectors we depend on, current first;
+the 2025 ones are kept as fallbacks:
 
-| Selector | Used by |
-|---|---|
-| `section[data-testid^="conversation-turn-"]`, `article` | bookmark turn discovery |
-| `.markdown.prose` | bookmark section splitting |
-| `[data-message-author-role="assistant"]` | scoping bookmarks to replies |
-| `[data-testid="conversation-header-actions"]` | bookmarks menu mount point |
-| `[data-testid="composer-speech-button"]`, `stop-response-button` | "is the response finished?" |
-| `nav[aria-label="Chat history"]`, `#history` | pinned-chats container mount point |
-| `[data-testid="conversation-options-button"]`, `delete-chat-menu-item` | pin/unpin menu items |
+| Oct 2026 app shell | 2025 (fallback) | Used by |
+|---|---|---|
+| `precise_location_identity`, `codex.browser.appThemes.v1`, `/api/auth/session` | `cache/user-*` localStorage key | `getProfileId` |
+| `[data-turn-key]` | `section[data-testid^="conversation-turn-"]`, `article` | bookmark turn discovery |
+| `[data-markdown-text-style="assistant-message"]` | `[data-message-author-role="assistant"] .markdown.prose` | bookmark section splitting, scoped to replies |
+| `[data-chatgpt-selection-message-id]` | turn `data-testid` | bookmark IDs (`msg-<id>-<i>` vs `conversation-turn-N-<i>`) |
+| `[data-talvt-turn-state="in_progress"]` | `composer-speech-button`, `stop-response-button` | "is the response finished?" |
+| `[data-app-shell-main-titlebar] [data-app-shell-header-obstacle]` | `conversation-header-actions` | bookmarks menu mount point |
+| `[data-app-action-sidebar-scroll]`, `[data-sidebar-project-container-id]` | `#history` | pinned-chats container mount point |
+| `[data-sidebar-chatgpt-conversation-key] button[aria-haspopup="menu"]`, `[data-app-shell-main-titlebar] button[aria-haspopup="menu"]` | `history-item-*-options`, `conversation-options-button` | pin/unpin menu items |
+| none found | `delete-chat-menu-item` | dropping a pin when its chat is deleted |
+
+The 2026 shell has almost no `data-testid`s and hashes its component class names per build
+(`MarkdownRoot-rZKhxa`). Anchor on `data-*` attributes; never on hashed classes or `aria-label`
+text (it's localized). Where we need ChatGPT's look, either copy classes off a live native element
+at runtime (`matchNativeMenuItem`) or use class strings ChatGPT itself uses
+([`sidebarTheme.ts`](src/components/pinChats/helpers/sidebarTheme.ts)).
 
 Rules when you touch any of these:
 
@@ -162,10 +172,7 @@ old string and will be orphaned otherwise.
 All user-facing strings go through `browser.i18n.getMessage()` and live in
 `public/_locales/{en,ja,ko}/messages.json`. Add the key to **all three** files, not just `en`.
 
-Current state: `en` has 91 keys, `ja` and `ko` have 86 — five tutorial keys
-(`tutorialPinMethodTopMenu`, `tutorialPinTopMenuTitle`, `tutorialPinTopMenuMessage`,
-`tutorialNoPinnedChatsTitle`, `tutorialNoPinnedChatsMessage`) were never translated. Don't widen
-that gap.
+Current state: all three locales have the same 93 keys. Keep it that way.
 
 ## Release checklist
 
