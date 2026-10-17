@@ -84,15 +84,21 @@ function getSectionIdPrefix(
 
 /**
  * The `conversation-turn-N` a 2026 turn would have had in the 2025 DOM, so
- * bookmarks saved under that ID can be found and migrated. The new DOM numbers
- * turns as `fallback-turn-N` on [data-content-search-turn-key].
+ * bookmarks saved under that ID can be found and migrated.
  *
- * Returns null until the N -> old-N mapping has been verified against real
- * saved bookmarks: migrating with a wrong mapping would attach bookmarks to the
- * wrong sections. See #22.
+ * 2025 numbered every message from 1, so replies were the even turns (first
+ * reply = conversation-turn-2). The 2026 shell numbers question+reply pairs
+ * from 0 as `fallback-turn-N` on [data-content-search-turn-key]. Verified
+ * against real saved bookmarks (all even N) and a live turn listing (#22).
+ * Anything that isn't exactly `fallback-turn-<n>` is left alone.
  */
-function getLegacyTurnTestId(_turnContainer: HTMLElement): string | null {
-  return null
+function getLegacyTurnTestId(turnContainer: HTMLElement): string | null {
+  const key = turnContainer.querySelector<HTMLElement>(
+    '[data-content-search-turn-key]'
+  )?.dataset.contentSearchTurnKey
+  const pairIndex = key?.match(/^fallback-turn-(\d+)$/)?.[1]
+  if (pairIndex === undefined) return null
+  return `conversation-turn-${2 * Number(pairIndex) + 2}`
 }
 
 async function waitForTurnContainers(
@@ -199,9 +205,12 @@ export default async function initBookmarks({
 
         // A bookmark saved before Oct 2026 is keyed by the turn's old position.
         // Show it as bookmarked now and re-key it in the background.
-        const legacyTurnId = sectionId.startsWith('msg-')
-          ? getLegacyTurnTestId(turnContainer)
-          : null
+        // 2025 turns held a single reply block, so only the first one maps
+        const legacyTurnId =
+          sectionId.startsWith('msg-') &&
+          getAssistantMarkdowns(turnContainer)[0] === markdown
+            ? getLegacyTurnTestId(turnContainer)
+            : null
         const legacyId = legacyTurnId && `${legacyTurnId}-${index}`
         if (
           legacyId &&
