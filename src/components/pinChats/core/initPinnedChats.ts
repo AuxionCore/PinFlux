@@ -31,6 +31,31 @@ function insertIntoAppShell2026(section: HTMLElement): boolean {
   return false;
 }
 
+/**
+ * Fills the board from storage. Reads storage *before* touching the list and
+ * swaps the contents in one synchronous step: callers overlap (the board
+ * observer, SPA navigation, pinning), and the old clear -> await -> append
+ * order let two renders both append, showing every chat twice.
+ */
+async function renderPinnedChats(
+  pinnedChats: HTMLElement,
+  profileId: string,
+  historyElement: HTMLElement
+): Promise<void> {
+  if (!profileId) {
+    console.error('Profile ID not found. Pinned chats will not be displayed.')
+    return
+  }
+  const savedPinChats = await getPinChatsFromStorage(profileId)
+  pinnedChats.replaceChildren(
+    ...savedPinChats.map(chat =>
+      createPinnedChat(chat.title, chat.urlId, profileId, historyElement)
+    )
+  )
+  // Enable drag & drop for pinned chats (after all elements are in DOM)
+  setupPinnedChatsDragAndDrop(pinnedChats as HTMLDivElement, profileId)
+}
+
 export default async function initPinnedChats({
   profileId,
   historyElement,
@@ -44,27 +69,7 @@ export default async function initPinnedChats({
     // Just update the pinned chats content if needed
     const pinnedChats = existingSection.querySelector('#chatListContainer') as HTMLDivElement;
     if (pinnedChats) {
-      // Clear existing chats
-      pinnedChats.innerHTML = '';
-      
-      // Reload pinned chats from storage
-      if (!profileId) {
-        console.error('Profile ID not found. Pinned chats will not be displayed.');
-        return;
-      }
-      const savedPinChats = await getPinChatsFromStorage(profileId);
-      savedPinChats.forEach(chat => {
-        const pinnedChat = createPinnedChat(
-          chat.title,
-          chat.urlId,
-          profileId,
-          historyElement
-        );
-        pinnedChats.appendChild(pinnedChat);
-      });
-      
-      // Re-enable drag & drop
-      setupPinnedChatsDragAndDrop(pinnedChats, profileId);
+      await renderPinnedChats(pinnedChats, profileId, historyElement);
     }
     return;
   }
@@ -110,25 +115,8 @@ export default async function initPinnedChats({
     '#chatListContainer'
   ) as HTMLDivElement
 
-  // Load pinned chats from storage
-  if (!profileId) {
-    console.error('Profile ID not found. Pinned chats will not be displayed.')
-    return
-  }
-  const savedPinChats = await getPinChatsFromStorage(profileId)
-  savedPinChats.forEach(chat => {
-    const pinnedChat = createPinnedChat(
-      chat.title,
-      chat.urlId,
-      profileId,
-      historyElement
-    )
-    pinnedChats.appendChild(pinnedChat) // Use appendChild to maintain order
-  })
-
-  // Enable drag & drop for pinned chats (after all elements are in DOM)
   if (pinnedChats) {
-    setupPinnedChatsDragAndDrop(pinnedChats, profileId)
+    await renderPinnedChats(pinnedChats, profileId, historyElement)
   }
 }
 

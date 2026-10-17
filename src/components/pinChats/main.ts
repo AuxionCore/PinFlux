@@ -95,7 +95,20 @@ import {
 //   });
 // }
 
-export default async function initContentScript(): Promise<void> {
+let initialization: Promise<void> | null = null
+
+/**
+ * Sets up pinned chats once per page. content.ts calls this again on SPA
+ * navigation whenever the board is missing; running the body twice stacked a
+ * second set of global click listeners (duplicate Pin items in menus). The
+ * board itself is restored by keepPinnedBoardMounted.
+ */
+export default function initContentScript(): Promise<void> {
+  initialization ??= setUpPinnedChats()
+  return initialization
+}
+
+async function setUpPinnedChats(): Promise<void> {
   let unpinChatHandler: ((event: MouseEvent) => Promise<void>) | null = null
 
   try {

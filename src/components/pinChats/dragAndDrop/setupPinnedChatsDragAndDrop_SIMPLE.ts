@@ -1,3 +1,4 @@
+import { closeNativeMenu } from '@/components/pinChats/helpers/sidebarTheme'
 // פונקציה פשוטה לגרירה של שיחות מוצמדות
 import { updatePinChatsOrder } from '@/components/utils/storage'
 
@@ -47,22 +48,11 @@ export default function setupPinnedChatsDragAndDrop(
     document.head.appendChild(style)
   } else {
   }  function closeAllOptionsMenus() {
-    // חפש ותסגור כל תפריטי אפשרויות פתוחים
-    const openMenus = document.querySelectorAll('[data-testid="conversation-turn-action-menu"], .options-menu, #chatOptionsMenu')
-    openMenus.forEach(menu => {
-      if (menu instanceof HTMLElement) {
-        menu.remove()
-      }
-    })
-    
-    // גם הסר כל overlay או backdrop שעלול להיות פתוח
-    const overlays = document.querySelectorAll('.overlay, .backdrop, [role="menu"]')
-    overlays.forEach(overlay => {
-      if (overlay instanceof HTMLElement && overlay.style.display !== 'none') {
-        overlay.style.display = 'none'
-      }
-    })
-    
+    // Only our own menu. This used to remove every [role="menu"] and hide
+    // every .overlay/.backdrop on the page — ChatGPT's own React-managed menus
+    // included, on every Escape keypress. Native menus close themselves on
+    // Escape (see closeNativeMenu).
+    document.querySelectorAll('#chatOptionsMenu').forEach(menu => menu.remove())
   }
 
   // הוסף מאזין גלובלי למקש ESC לסגירת תפריטים
@@ -118,6 +108,7 @@ export default function setupPinnedChatsDragAndDrop(
       
       // סגור כל תפריטי אפשרויות פתוחים
       closeAllOptionsMenus()
+      closeNativeMenu(document.querySelector('[data-radix-menu-content]'))
       
       draggedElement = element
       element.classList.add('being-dragged')
